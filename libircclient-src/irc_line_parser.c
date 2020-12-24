@@ -100,43 +100,6 @@ static int on_error(irc_parser *parser, const char *at, size_t len) {
     return 0;
 }
 
-static inline void print_parser_result(irc_parser_result_t *result) {    
-    unsigned int i = 0;
-    if (result->nick != NULL)
-        logprintf(LOG_INFO, ", nick = %s", result->nick);
-    
-    if (result->name != NULL)
-        logprintf(LOG_INFO, ", name = %s", result->name);
-    
-    if (result->host != NULL)
-        logprintf(LOG_INFO, ", host = %s", result->host);
-    
-    logprintf(LOG_INFO, " command='%s'", result->command);
-    
-    for (i = 0; i < result->num_params; i++) {
-        logprintf(LOG_INFO, " param[%u]=%s, ", i, result->params[i]);
-    }
-}
-
-static inline sds create_prefix_from_result(irc_parser_result_t *result) {
-    /* *  <prefix>   ::= <servername> | <nick> [ '!' <user> ] [ '@' <host> ]*/
-    sds prefix = sdsempty();
-    
-    if (result->nick != NULL) {
-        prefix = sdscatprintf(prefix, "%s", result->nick);
-        
-        if (result->name != NULL) {
-            prefix = sdscatprintf(prefix, "!%s", result->name);
-            
-            if (result->host != NULL) {
-                prefix = sdscatprintf(prefix, "@%s", result->host);
-            }
-        }
-    }
-    
-    return prefix;
-}
-
 static inline bool is_numeric_command(char *command) {
     return strlen(command) == 3 && isdigit((int) command[0]) && isdigit((int) command[1]) && isdigit((int) command[2]);
 }
