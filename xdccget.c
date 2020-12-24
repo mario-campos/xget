@@ -418,9 +418,9 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
     sdsrange(lastCharOfTargetDir, -1, -1);
     sds absolutePath = sdsempty();
 
-    if (!str_equals(lastCharOfTargetDir, getPathSeperator())) {
+    if (!str_equals(lastCharOfTargetDir, "/")) {
         DBG_OK("last char of dir was: %s", lastCharOfTargetDir);
-        absolutePath = sdscatprintf(absolutePath, "%s%s", cfg.targetDir, getPathSeperator());
+        absolutePath = sdscatprintf(absolutePath, "%s%s", cfg.targetDir, "/");
     }
     else {
         absolutePath = sdscatprintf(absolutePath, "%s", cfg.targetDir);
@@ -535,7 +535,7 @@ int main (int argc, char **argv)
     cfg.port = 6667;
 
     const char *homeDir = getHomeDir();
-    sds targetDir = sdscatprintf(sdsempty(), "%s%s%s", homeDir, getPathSeperator(), "Downloads");
+    sds targetDir = sdscatprintf(sdsempty(), "%s%s%s", homeDir, "/", "Downloads");
 
 #ifdef WINDOWS_BUILD
     free((void*)homeDir);

@@ -71,7 +71,7 @@ static void parseLogLevel(struct xdccGetConfig *config, sds logLevel) {
 }
 
 static sds getDefaultConfigContent() {
-    sds downloadDir = sdscatprintf(sdsempty(), "%s%s%s", getHomeDir(), getPathSeperator(), "Downloads");
+    sds downloadDir = sdscatprintf(sdsempty(), "%s%s%s", getHomeDir(), "/", "Downloads");
     sds content = sdsempty();
 
     content = sdscatprintf(content, "# default directory where to store the downloads\n");

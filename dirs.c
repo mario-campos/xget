@@ -5,10 +5,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-const char* getPathSeperator() {
-	return "/";
-}
-
 const char* getHomeDir() {
 	struct passwd *pw = getpwuid(getuid());
 	const char *homedir = pw->pw_dir;
