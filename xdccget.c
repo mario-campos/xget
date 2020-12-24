@@ -237,24 +237,6 @@ static void send_xdcc_requests(irc_session_t *session) {
     }
 }
 
-static inline bool isPasswordAccepted(const char *message) {
-    const char *password_sequences[] = {
-        "Password accepted",
-        "You are now identified",
-        "I recognize you"
-    };
-
-    size_t num_sequences = sizeof(password_sequences) / sizeof(const char*);
-    for (size_t i = 0; i < num_sequences; i++) {
-        char *t = strstr(message, password_sequences[i]);
-        if (t != NULL) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void event_notice(irc_session_t * session, const char * event, irc_parser_result_t *result) {
     dump_event(session, event, result);
     checkMD5ChecksumNotice(event, result);

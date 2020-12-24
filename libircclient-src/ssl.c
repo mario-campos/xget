@@ -31,21 +31,6 @@ static SSL_CTX * ssl_context = NULL;
 // This array will store all of the mutexes available to OpenSSL
 static pthread_mutex_t * mutex_buf = 0;
 
-// OpenSSL callback to utilize static locks
-
-static void cb_openssl_locking_function(int mode, int n, const char * file, int line) {
-    if (mode & CRYPTO_LOCK)
-        pthread_mutex_lock(&mutex_buf[n]);
-    else
-        pthread_mutex_unlock(&mutex_buf[n]);
-}
-
-// OpenSSL callback to get the thread ID
-
-static unsigned long cb_openssl_id_function() {
-    return ((unsigned long) pthread_self());
-}
-
 static int alloc_mutexes(unsigned int total) {
     unsigned int i;
 
