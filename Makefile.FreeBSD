@@ -1,3 +1,0 @@
-include Makefile.common
-CFLAGS += -DHAVE_SELECT -I /usr/local/include -L /usr/local/lib
-LIBS += -largp
