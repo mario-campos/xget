@@ -1,10 +1,6 @@
 #ifndef STRINGS_H
 #define	STRINGS_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 #include <string.h>
 #include <strings.h>
 #include <stdbool.h>
@@ -17,10 +13,6 @@ static inline bool str_equals(const char *str1, const char *str2) {
 static inline bool strn_equals(const char *str1, const char *str2, size_t n) {
     return strncmp(str1, str2, n) == 0;
 }
-
-#ifdef	__cplusplus
-}
-#endif
 
 #endif	/* STRINGS_H */
 

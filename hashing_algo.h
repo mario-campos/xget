@@ -8,10 +8,6 @@
 #ifndef HASHING_ALGO_H
 #define	HASHING_ALGO_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 #include "hash_types.h"
 
     enum HashTypes {
@@ -45,10 +41,6 @@ extern "C" {
     void getHashFromString(HashAlgorithm *algo, char *string, uchar *hash);
     void getHashFromStringIter(HashAlgorithm *algo, char *string, uchar *hash, int numIterations);
     uchar* convertHashStringToBinary(HashAlgorithm *algo, char *hashString);
-
-#ifdef	__cplusplus
-}
-#endif
 
 #endif	/* HASHING_ALGO_H */
 

@@ -60,10 +60,6 @@
 
 #include <stdint.h>
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 /*! \brief A libircclient IRC session.
  *
  * This structure describes an IRC session. Its members are internal to 
@@ -1493,9 +1489,5 @@ char * irc_color_convert_from_mirc (const char * message);
  * \ingroup colors
  */
 char * irc_color_convert_to_mirc (const char * message);
-
-#ifdef	__cplusplus
-}
-#endif
 
 #endif /* INCLUDE_LIBIRC_H */
