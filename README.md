@@ -1,12 +1,12 @@
 # xdccget
 This is a project that allows you to download files from IRC with XDCC with an easy and simple to use command line tool
-like wget or curl. It supports at the moment Linux, Windows (with cygwin) and BSD-variants. Also OSX with some installed
+like wget or curl. It supports at the moment Linux and BSD-variants. Also OSX with some installed
 ports works.
 
 ## Quick facts
 * it is free software licenced under the GPL
 * minimal usage of cpu and memory
-* runs under Linux, BSDs, MacOSX and Windows (see notes for compiling below)
+* runs under Linux, BSDs, MacOSX
 * support for IPv4 and IPv6 connections
 * can be configured with configuration-file
 * supports connection with and without SSL/TLS
@@ -88,11 +88,6 @@ sudo pkg install gcc argp-standalone openssl
 ```
 
 On OSX and other BSD variants you have to use an alternative way to install the packages.
-
-### Windows
-For windows you first need to install cygwin. Please make sure that you install gcc-core, libargp and openssl-devel with
-cygwin. If you have installed all depedent libraries then you can compile xdccget with cygwin by using the Makefile.cygwin.
-Please rename Makefile.cygwin to Makefile and then run make from the cygwin terminal.
 
 ## Configure xdccget
 You can configure some options with the config file. It is placed in the folder .xdccget in your home directory of your operating system. The following options are currently supported:
