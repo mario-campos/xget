@@ -1,3 +1,0 @@
-include Makefile.common
-CFLAGS += -DWINDOWS_BUILD -DHAVE_POLL
-LIBS += -largp
