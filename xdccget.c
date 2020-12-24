@@ -537,10 +537,6 @@ int main (int argc, char **argv)
     const char *homeDir = getHomeDir();
     sds targetDir = sdscatprintf(sdsempty(), "%s%s%s", homeDir, "/", "Downloads");
 
-#ifdef WINDOWS_BUILD
-    free((void*)homeDir);
-#endif
-
     cfg.targetDir = targetDir;
 
     parseConfigFile(&cfg);
