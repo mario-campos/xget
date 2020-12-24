@@ -11,7 +11,7 @@ const char *argp_program_bug_address ="<nobody@nobody.org>";
 
 /* Program documentation. */
 static char doc[] =
-"xdccgget -- download from cmd with xdcc";
+"xdccget -- download from cmd with xdcc";
 
 /* A description of the arguments we accept. */
 static char args_doc[] = "<server> <channel(s)> <bot cmds>";
