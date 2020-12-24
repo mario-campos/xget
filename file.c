@@ -14,9 +14,9 @@ file_io_t *Open(const char *pathname, char *mode) {
 #ifdef FILE_API
     fd->fd = NULL;
     if (str_equals(mode, "w")) {
-        fd->fd = fopen(pathname, "wb");
+        fopen_s(&fd->fd, pathname, "wb");
     } else if (str_equals(mode, "a")) {
-        fd->fd = fopen(pathname, "ab");
+        fopen_s(&fd->fd, pathname, "ab");
     } else if (str_equals(mode, "r")) {
         fd->fd = fopen(pathname, "rb");
     }

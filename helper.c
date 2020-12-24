@@ -68,9 +68,7 @@ void logprintf(int logLevel, char *formatString, ...) {
             }
             break;
         case LOG_ERR:
-            if (cfg->logLevel >= LOG_ERR) {
-                logprintf_line(stderr, KRED, "Error", formatString, va_alist);
-            }
+            logprintf_line(stderr, KRED, "Error", formatString, va_alist);
             break;
         default:
             DBG_WARN("logprintf called with unknown log-level. using normal logging.");
