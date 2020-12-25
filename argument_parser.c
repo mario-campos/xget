@@ -24,7 +24,6 @@ static char args_doc[] = "<server> <channel(s)> <bot cmds>";
 static struct argp_option options[] = {
 {"verbose",  'v', 0,      0,  "Produce verbose output", 0 },
 {"quiet",    'q', 0,      0,  "Don't produce any output", 0 },
-{"information",    'i', 0,      0,  "Produce information output.", 0 },
 {"ipv4",   '4', 0,      0,  "Use ipv4 to connect to irc server.", 0 },
 #ifdef ENABLE_IPV6
 {"ipv6",   '6', 0,      0,  "Use ipv6 to connect to irc server.", 0 },
@@ -48,6 +47,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     /* Get the input argument from argp_parse, which we
       know is a pointer to our arguments structure. */
     struct xdccGetConfig *cfg = state->input;
+    cfg->logLevel = LOG_INFO;
 
     switch (key) {
     case 'q':
@@ -58,11 +58,6 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     case 'v':
         DBG_OK("setting log-level as warn.");
         cfg->logLevel = LOG_WARN;
-        break;
-
-    case 'i':
-        DBG_OK("setting log-level as info.");
-        cfg->logLevel = LOG_INFO;
         break;
 
     case 'd':
