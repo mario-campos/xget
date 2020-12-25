@@ -370,10 +370,8 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
 
         finishedDownloads++;
 
-        if (!(cfg_get_bit(&cfg, VERIFY_CHECKSUM_FLAG))) {
-            if (finishedDownloads == numActiveDownloads) {
-                irc_cmd_quit(cfg.session, "Goodbye!");
-            }
+        if (finishedDownloads == numActiveDownloads) {
+            irc_cmd_quit(cfg.session, "Goodbye!");
         }
     }
 }
