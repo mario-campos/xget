@@ -7,7 +7,6 @@ SRCS = xdccget.c \
        argument_parser.c \
        libircclient-src/libircclient.c \
        sds.c \
-       dirs.c \
        file.c \
        hashing_algo.c \
        sph_md5.c

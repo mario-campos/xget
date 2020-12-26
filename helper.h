@@ -17,7 +17,6 @@
 #include "libircclient.h"
 #include "hashmap.h"
 #include "argument_parser.h"
-#include "dirs.h"
 
 #define LOG_ERR   0
 #define LOG_QUIET 1

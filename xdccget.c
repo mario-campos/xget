@@ -2,6 +2,7 @@
 	xdccget -- download files from xdcc via cmd line
  */
 
+#include <pwd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -9,6 +10,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include <inttypes.h>
+#include <sys/types.h>
 
 #include "helper.h"
 #include "file.h"
@@ -518,6 +520,12 @@ void init_signal(int signum, void (*handler) (int)) {
         logprintf(LOG_ERR, "could not set up signal %d", signum);
         exitPgm(EXIT_FAILURE);
     }
+}
+
+const char* getHomeDir(void) {
+    struct passwd *pw = getpwuid(getuid());
+    const char *homedir = pw->pw_dir;
+    return homedir;
 }
 
 int main (int argc, char **argv)
