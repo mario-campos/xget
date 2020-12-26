@@ -157,11 +157,6 @@ static inline void* Calloc(size_t numElements, size_t sizeOfElement) {
     return t;
 }
 
-static inline sds getConfigDirectory() {
-    sds configDir = sdscatprintf(sdsempty(), "%s%s%s%s", getHomeDir(), "/", ".xdccget", "/");
-    return configDir;
-}
-
 /* inits the rand-function */
 void initRand();
 
