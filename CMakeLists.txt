@@ -44,7 +44,6 @@ include_directories(libircclient-include)
 set(SOURCE_FILES
     libircclient-src/libircclient.c
     argument_parser.c
-    config.c
     dirs.c
     dirs.h
     file.c

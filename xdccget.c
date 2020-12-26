@@ -13,7 +13,6 @@
 #include "helper.h"
 #include "file.h"
 #include "hashing_algo.h"
-#include "config.h"
 
 #define NICKLEN 20
 
@@ -536,8 +535,6 @@ int main (int argc, char **argv)
     sds targetDir = sdscatprintf(sdsempty(), "%s%s%s", homeDir, "/", "Downloads");
 
     cfg.targetDir = targetDir;
-
-    parseConfigFile(&cfg);
 
     parseArguments(argc, argv, &cfg);
 

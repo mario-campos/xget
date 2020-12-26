@@ -8,7 +8,6 @@ ports works.
 * minimal usage of cpu and memory
 * runs under Linux, BSDs, MacOSX
 * support for IPv4 and IPv6 connections
-* can be configured with configuration-file
 * supports connection with and without SSL/TLS
 * bots with support for ssend-command are supported
 
@@ -58,8 +57,6 @@ xdccget "irc.sampel.net" "#best-channel, #best-chat-channel" "super-duper-bot xd
 ``` 
 
 This is the basic usage of xdccget. You can call xdccget --help to understand all currently supported arguments.
-xdccget also uses a config file, which will be placed at your homefolder in .xdccget/config. You can modify
-the default parameters to your matters quickly.
 
 ## Compiling xdccget
 Compiling xdccget is just running make from the root folder of the repository. Please make sure, that you have installed
@@ -78,12 +75,3 @@ You need to make sure, that you have the openssl-development packages for you fa
 
 ### OSX and BSD
 For osx and bsd systems you need to also install the development files for openssl.
-
-## Configure xdccget
-You can configure some options with the config file. It is placed in the folder .xdccget in your home directory of your operating system. The following options are currently supported:
-
-``` 
-downloadDir     - this defines the default directory used to store the downloaded files
-logLevel        - this defines the default logging level. valid options are info, warn and error
-allowAllCerts   - this options will allow silently all self signed certificates if set to true
-```
