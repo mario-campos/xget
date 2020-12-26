@@ -56,7 +56,7 @@ You can also join multiple channels, so if you also have to join #best-chat-chan
 xdccget "irc.sampel.net" "#best-channel, #best-chat-channel" "super-duper-bot xdcc send #34"
 ``` 
 
-This is the basic usage of xdccget. You can call xdccget --help to understand all currently supported arguments.
+This is the basic usage of xdccget. You can call xdccget -h to understand all currently supported arguments.
 
 ## Compiling xdccget
 Compiling xdccget is just running make from the root folder of the repository. Please make sure, that you have installed
