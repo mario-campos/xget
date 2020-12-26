@@ -63,7 +63,7 @@ the default parameters to your matters quickly.
 
 ## Compiling xdccget
 Compiling xdccget is just running make from the root folder of the repository. Please make sure, that you have installed
-the depended libraries (OpenSSL and for some systems argp-library) and use the correct Makefile for your system.
+the depended libraries (OpenSSL) and use the correct Makefile for your system.
 
 ### Ubuntu and derivants
 To compile xdccget under Ubuntu and other distros like Linux Mint you have to install the package libssl-dev with apt-get.
@@ -77,17 +77,7 @@ sudo apt-get install libssl-dev build-essential
 You need to make sure, that you have the openssl-development packages for you favorite distribution installed.
 
 ### OSX and BSD
-For osx and bsd systems you need to also install the development files for openssl. You need to install
-the library argp, which is used to parse command line arguments. Please make sure, that you rename the Makefile.FreeBSD
-for example to Makefile if you want to compile for FreeBSD.
-
-If you use pkg on FreeBSD for package-management you can issue the following command to install the required libs:
-
-```
-sudo pkg install gcc argp-standalone openssl
-```
-
-On OSX and other BSD variants you have to use an alternative way to install the packages.
+For osx and bsd systems you need to also install the development files for openssl.
 
 ## Configure xdccget
 You can configure some options with the config file. It is placed in the folder .xdccget in your home directory of your operating system. The following options are currently supported:
