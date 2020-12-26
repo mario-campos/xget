@@ -14,7 +14,7 @@ void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
 
     cfg->logLevel = LOG_INFO;
 
-    while ((opt = getopt(argc, argv, "hqvd:n:l:p:aD46"))) {
+    while ((opt = getopt(argc, argv, "hqvkd:n:l:p:aD46"))) {
         switch (opt) {
         case 'h':
             logprintf(LOG_ERR, "%s\n", usage);
@@ -28,6 +28,10 @@ void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
         case 'v':
             DBG_OK("setting log-level as warn.");
             cfg->logLevel = LOG_WARN;
+            break;
+
+        case 'k':
+            cfg_set_bit(cfg, ALLOW_ALL_CERTS_FLAG);
             break;
     
         case 'd':
@@ -53,9 +57,11 @@ void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
         case 'a':
             cfg_set_bit(cfg, ACCEPT_ALL_NICKS_FLAG);
             break;
+
         case 'D':
     	    cfg_set_bit(cfg, DONT_CONFIRM_OFFSETS_FLAG);
     	    break;
+
         case '4':
             cfg_set_bit(cfg, USE_IPV4_FLAG);
             break;
