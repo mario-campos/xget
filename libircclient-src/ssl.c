@@ -15,7 +15,6 @@
 
 #if defined (ENABLE_SSL)
 
-#include <pthread.h>
 #include <openssl/ssl.h>
 #include <openssl/x509.h>
 
@@ -29,70 +28,35 @@
 static SSL_CTX * ssl_context = NULL;
 
 // This array will store all of the mutexes available to OpenSSL
-static pthread_mutex_t * mutex_buf = 0;
+// OpenSSL callback to utilize static locks
+// OpenSSL callback to get the thread ID
+// Enable thread safety in OpenSSL
+// REMOVED, as OpenSSL 1.1.x is using pthreads API
+// https://www.openssl.org/docs/man1.1.0/man3/CRYPTO_THREAD_lock_free.html
 
-static int alloc_mutexes(unsigned int total) {
-    unsigned int i;
-
-    // Enable thread safety in OpenSSL
-    mutex_buf = (pthread_mutex_t*) malloc(total * sizeof (pthread_mutex_t));
-
-    if (!mutex_buf)
-        return -1;
-
-    for (i = 0; i < total; i++)
-        pthread_mutex_init(&(mutex_buf[i]), 0);
-
-    return 0;
-}
-
-#endif
-
-#ifdef ENABLE_SSL
 int isSslIntitialized() {
     return ssl_context != NULL;
 }
 
 int initSslContext(irc_session_t *session) {
-    // better settings, but some bots dont support those all...
-    //const char* const PREFERRED_CIPHERS = "HIGH:!aNULL:!kRSA:!PSK:!SRP:!MD5:!RC4";
-    //const long flags = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_COMPRESSION;
-
-    const char * PREFERRED_CIPHERS = "ALL:!RC4:!PSK:!SRP:!ADH:!LOW:!EXP:!MD5:!aNULL@STRENGTH";
-    long flags = SSL_OP_NO_SSLv2;
-
-#ifdef DISABLE_SSL_V3
-    flags |= SSL_OP_NO_SSLv3;
-#endif
 
     // Load the strings and init the library
-    SSL_load_error_strings();
-
+    // REMOVED, as SSL_load_error_strings() deprecated in OpenSSL 1.1.x
+    // https://www.openssl.org/docs/man1.1.0/man3/SSL_load_error_strings.html
     // Enable thread safety in OpenSSL
-    if (alloc_mutexes(CRYPTO_num_locks()))
-        return LIBIRC_ERR_NOMEM;
-
     // Register our callbacks
-    CRYPTO_set_id_callback(cb_openssl_id_function);
-    CRYPTO_set_locking_callback(cb_openssl_locking_function);
+    // REMOVED, as OpenSSL 1.1.x is using pthreads API
 
-    if (!SSL_library_init())
+    if (OPENSSL_init_ssl(0, NULL) == 0)
         return LIBIRC_ERR_SSL_INIT_FAILED;
 
     if (RAND_status () != 1)
         return LIBIRC_ERR_SSL_INIT_FAILED;
 
     // Create an SSL context; currently a single context is used for all connections
-    // hint: SSLv23_method means: TLS 1.0, 1.1 and 1.2. we disabled sslv2 and sslv3 with the flags above...
-    ssl_context = SSL_CTX_new(SSLv23_method());
+    ssl_context = SSL_CTX_new(TLS_client_method());
 
     if (!ssl_context)
-        return LIBIRC_ERR_SSL_INIT_FAILED;
-
-    if ((SSL_CTX_set_options(ssl_context, flags) & flags) == 0)
-        return LIBIRC_ERR_SSL_INIT_FAILED;
-
-    if (SSL_CTX_set_cipher_list(ssl_context, PREFERRED_CIPHERS) != 1)
         return LIBIRC_ERR_SSL_INIT_FAILED;
 
     // Disable session caching
