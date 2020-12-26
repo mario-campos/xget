@@ -71,13 +71,7 @@ void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
         }
     }
 
-    if (optind >= argc) {
-        logprintf(LOG_ERR, "%s\n", usage);
-        exit(EXIT_FAILURE);
-    }
-
-    if ((argc - optind) >= 3) {
-        /* Too many arguments. */
+    if (optind >= argc || (argc - optind) > 3) {
         logprintf(LOG_ERR, "%s\n", usage);
         exit(EXIT_FAILURE);
     }
