@@ -8,8 +8,7 @@ SRCS = xdccget.c \
        libircclient-src/libircclient.c \
        sds.c \
        file.c \
-       hashing_algo.c \
-       sph_md5.c
+       hashing_algo.c
 
 all: build
 

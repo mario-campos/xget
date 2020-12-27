@@ -8,24 +8,24 @@
 #ifndef HASHING_ALGO_H
 #define	HASHING_ALGO_H
 
+#include <openssl/md5.h>
 #include "hash_types.h"
 
     enum HashTypes {
-        MD5
+        HashType_MD5
     };
 
     typedef char* (*hash_toString_fct)(unsigned char* hash);
     typedef int (*hash_equals_fct)(unsigned char hash1[], unsigned char hash2[]);
-    typedef void (*hash_init_fct)(void *ctx);
-    typedef void (*hash_update_fct)(void *ctx, uchar data[], uint len);
-    typedef void (*hash_final_fct)(void *ctx, uchar hash[]);
+    typedef int (*hash_init_fct)(MD5_CTX *ctx);
+    typedef int (*hash_update_fct)(MD5_CTX *ctx, const void *data, size_t len);
+    typedef int (*hash_final_fct)(unsigned char *md, MD5_CTX *ctx);
     typedef int (*hash_len)(void *ctx);
 
     struct HashAlgorithm {
         enum HashTypes hashType;
-        void *ctx;
+        MD5_CTX *ctx;
         unsigned int hashSize;
-        hash_toString_fct toString;
         hash_equals_fct equals;
         hash_init_fct init;
         hash_update_fct update;
