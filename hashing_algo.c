@@ -6,7 +6,7 @@
 #include "hashing_algo.h"
 #include "file.h"
 
-int md5_equal(uchar hash1[], uchar hash2[]) {
+int md5_equal(unsigned char hash1[], unsigned char hash2[]) {
 	return memcmp(hash1, hash2, MD5_DIGEST_LENGTH) == 0;
 }
 
@@ -42,13 +42,13 @@ static void updateHash(void *buffer, unsigned int bytesRead, void *ctx) {
     algo->update(algo->ctx, buffer, bytesRead);
 }
 
-void getHashFromFile(HashAlgorithm *algo, char *filename, uchar *hash) {
+void getHashFromFile(HashAlgorithm *algo, char *filename, unsigned char *hash) {
     algo->init(algo->ctx);
     readFile(filename, updateHash, algo);
     algo->final(hash, algo->ctx);
 }
 
-void getHashFromStringIter(HashAlgorithm *algo, char *string, uchar *hash, int numIterations) {
+void getHashFromStringIter(HashAlgorithm *algo, char *string, unsigned char *hash, int numIterations) {
     int i = 0;
     algo->init(algo->ctx);
     for (i = 0; i < numIterations; i++) {
@@ -57,11 +57,11 @@ void getHashFromStringIter(HashAlgorithm *algo, char *string, uchar *hash, int n
     algo->final(hash, algo->ctx);
 }
 
-void getHashFromString(HashAlgorithm *algo, char *string, uchar *hash) {
+void getHashFromString(HashAlgorithm *algo, char *string, unsigned char *hash) {
     getHashFromStringIter(algo, string, hash, 1);
 }
 
-static uchar hexCharToBin(char c) {
+static unsigned char hexCharToBin(char c) {
     if (c >= '0' && c <= '9') {
         return c - '0';
     } else if (c >= 'a' && c <= 'f') {
@@ -73,16 +73,16 @@ static uchar hexCharToBin(char c) {
     }
 }
 
-static uchar hexToBin(char c1, char c2) {
-    uchar temp = 0;
+static unsigned char hexToBin(char c1, char c2) {
+    unsigned char temp = 0;
     temp = hexCharToBin(c2);
     temp |= hexCharToBin(c1) << 4;
     return temp;
 }
 
-uchar* convertHashStringToBinary(HashAlgorithm *algo, char *hashString) {
+unsigned char* convertHashStringToBinary(HashAlgorithm *algo, char *hashString) {
    unsigned int i, j;
-    uchar *hashBinary = (uchar*) malloc(sizeof (uchar) * algo->hashSize);
+    unsigned char *hashBinary = (unsigned char*) malloc(sizeof (unsigned char) * algo->hashSize);
     for (i = 0, j = 0; i < algo->hashSize; i++, j += 2) {
         hashBinary[i] = hexToBin(hashString[j], hashString[j + 1]);
     }

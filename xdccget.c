@@ -119,10 +119,10 @@ void* checksum_verification_thread(void *args) {
     logprintf(LOG_INFO, "Verifying md5-checksum '%s'!", md5ChecksumString);
 
     HashAlgorithm *md5algo = createHashAlgorithm("MD5");
-    uchar hashFromFile[md5algo->hashSize];
+    unsigned char hashFromFile[md5algo->hashSize];
 
     getHashFromFile(md5algo, data->completePath , hashFromFile);
-    uchar *expectedHash = convertHashStringToBinary(md5algo, md5ChecksumString);
+    unsigned char *expectedHash = convertHashStringToBinary(md5algo, md5ChecksumString);
 
     if (md5algo->equals(expectedHash, hashFromFile)) {
         logprintf(LOG_INFO, "Checksum-Verification succeeded!");

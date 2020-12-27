@@ -9,7 +9,6 @@
 #define	HASHING_ALGO_H
 
 #include <openssl/md5.h>
-#include "hash_types.h"
 
     enum HashTypes {
         HashType_MD5
@@ -37,10 +36,10 @@
     HashAlgorithm* createHashAlgorithm(char *hashAlgorithm);
     void freeHashAlgo(HashAlgorithm *algo);
 
-    void getHashFromFile(HashAlgorithm *algo, char *filename, uchar *hash);
-    void getHashFromString(HashAlgorithm *algo, char *string, uchar *hash);
-    void getHashFromStringIter(HashAlgorithm *algo, char *string, uchar *hash, int numIterations);
-    uchar* convertHashStringToBinary(HashAlgorithm *algo, char *hashString);
+    void getHashFromFile(HashAlgorithm *algo, char *filename, unsigned char *hash);
+    void getHashFromString(HashAlgorithm *algo, char *string, unsigned char *hash);
+    void getHashFromStringIter(HashAlgorithm *algo, char *string, unsigned char *hash, int numIterations);
+    unsigned char* convertHashStringToBinary(HashAlgorithm *algo, char *hashString);
 
 #endif	/* HASHING_ALGO_H */
 
