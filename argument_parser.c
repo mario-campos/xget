@@ -2,6 +2,7 @@
 #include <strings.h>
 #include <stdlib.h>
 #include "helper.h"
+#include "libircclient.h"
 
 #include "argument_parser.h"
 
@@ -14,8 +15,15 @@ void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
 
     cfg->logLevel = LOG_INFO;
 
-    while ((opt = getopt(argc, argv, "hqvkd:n:l:p:aD46"))) {
+    while ((opt = getopt(argc, argv, "Vhqvkd:n:l:p:aD46"))) {
         switch (opt) {
+        case 'V': {
+            unsigned int major, minor;
+            irc_get_version(&major, &minor);
+            puts("xdccget-0.0.0");
+            printf("libircclient-%d.%02d\n", major, minor);
+            exit(0);
+        }
         case 'h':
             logprintf(LOG_ERR, "%s\n", usage);
             exit(EXIT_FAILURE);
