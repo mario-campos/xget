@@ -425,12 +425,9 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
         absolutePath = sdscatprintf(absolutePath, "%s", cfg.targetDir);
     }
 
-    if (!dir_exists(absolutePath)) {
-        logprintf(LOG_INFO, "Creating following folder to store downloads: %s", absolutePath);
-        if (mkdir(absolutePath, 0755) == -1) {
-            DBG_WARN("cant create dir %s", absolutePath);
-            perror("mkdir");
-        }
+    if (mkdir(absolutePath, 0755) && errno != EEXIST) {
+        DBG_WARN("cant create dir %s", absolutePath);
+        perror("mkdir");
     }
 
     sds completePath = sdsempty();
@@ -449,10 +446,17 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
 
     DBG_OK("nick at recvFileReq is %s\n", nick);
 
-    if( file_exists (completePath) ) {
+    if (access(completePath, F_OK) == 0) {
+        struct stat st;
+
+        if (stat(filename, &st) != 0) {
+            logprintf(LOG_ERR, "Cant stat the file %s. Exiting now.", filename);
+            exitPgm(EXIT_FAILURE);
+        }
+
         context->fd = Open(completePath, "a");
 
-        off_t fileSize = get_file_size(completePath);
+        off_t fileSize = st.st_size;
 
         if (size == (irc_dcc_size_t) fileSize) {
             logprintf(LOG_ERR, "file %s is already downloaded, exit pgm now.", completePath);

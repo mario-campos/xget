@@ -22,42 +22,6 @@ struct file_io_t {
 typedef struct file_io_t file_io_t;
 typedef void (*FileReader) (void *buffer, unsigned int bytesRead, void *ctx);
 
-static inline bool file_exists(char *file) {
-    int ret = access( file, F_OK );
-    return ret == 0;
-}
-
-static inline bool dir_exists(char *dir) {
-    struct stat s;
-    int err = stat(dir, &s);
-    
-    if (err == -1) {
-        if (errno == ENOENT) {
-            return false;
-        }
-        
-        perror("stat");
-        return false;
-    }
-    
-    if(S_ISDIR(s.st_mode)) {
-        return true;
-    }
-    
-    return false;
-}
-
-static inline off_t get_file_size(char *filename){
-    struct stat st;
-    
-    if (stat(filename, &st) != 0) {
-        logprintf(LOG_ERR, "Cant stat the file %s. Exiting now.", filename);
-        exitPgm(EXIT_FAILURE);
-    }
-    
-    return st.st_size;
-}
-
 #ifdef FILE_API
 static inline size_t Read (file_io_t *fd, void *buf, size_t count) {
 #else
