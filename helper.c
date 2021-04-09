@@ -1,16 +1,13 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
-#include <strings.h>
 #include <stdio.h>
 #include <time.h>
 #include <sys/ioctl.h>
 #include <inttypes.h>
-#include <ctype.h>
 #include <openssl/x509v3.h>
 
 #include "helper.h"
-#include "file.h"
 
 struct terminalDimension terminal_dimension;
 
@@ -88,26 +85,6 @@ void initRand() {
     }
 	
     srand((unsigned int) t);
-}
-
-struct TextReaderContext {
-    sds content;
-};
-
-static void TextReaderCallback (void *buffer, unsigned int bytesRead, void *ctx) {
-    char *buf = buffer;
-    struct TextReaderContext *context = ctx;
-    buf[bytesRead] = (char) 0;
-    context->content =  sdscatprintf(context->content, "%s", buf);
-}
-
-sds readTextFile(char *filePath) {
-    struct TextReaderContext context;
-    context.content = sdsnew("");
-
-    readFile(filePath, TextReaderCallback, &context);
-
-    return context.content;
 }
 
 int rand_range(int low, int high) {
