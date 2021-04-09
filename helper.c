@@ -12,7 +12,7 @@
 #include "helper.h"
 #include "file.h"
 
-struct terminalDimension td;
+struct terminalDimension terminal_dimension;
 
 static inline void clear_bit(bitset_t *x, int bitNum) {
     *x &= ~(1L << bitNum);
@@ -137,9 +137,9 @@ struct terminalDimension *getTerminalDimension() {
     struct winsize w;
     ioctl(0, TIOCGWINSZ, &w);
 
-    td.rows = w.ws_row;
-    td.cols = w.ws_col;
-    return &td;
+    terminal_dimension.rows = w.ws_row;
+    terminal_dimension.cols = w.ws_col;
+    return &terminal_dimension;
 }
 
 void printProgressBar(const int numBars, const double percentRdy) {
