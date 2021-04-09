@@ -8,9 +8,9 @@ file_io_t *Open(const char *pathname, char *mode) {
 
     fd->fd = NULL;
     if (str_equals(mode, "w")) {
-        fopen_s(&fd->fd, pathname, "wb");
+        fd->fd = fopen(pathname, "wb");
     } else if (str_equals(mode, "a")) {
-        fopen_s(&fd->fd, pathname, "ab");
+        fd->fd = fopen(pathname, "ab");
     } else if (str_equals(mode, "r")) {
         fd->fd = fopen(pathname, "rb");
     }
