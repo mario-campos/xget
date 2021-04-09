@@ -219,7 +219,6 @@ void outputProgress(struct dccDownloadProgress *progress) {
 
     irc_dcc_size_t temp = (progress->completeFileSize == 0) ? 0 : progress->sizeRcvd * 1000000L / progress->completeFileSize;
     double curProcess = (double) temp / 1000000;
-    //double curProcess = (tdp->completeFileSize == 0) ? 0 : ((double)tdp->sizeRcvd / (double) tdp->completeFileSize);
     irc_dcc_size_t curSpeed = progress->sizeNow - progress->sizeLast;
 
     int printedChars = progBarLen + 2;
@@ -233,7 +232,6 @@ void outputProgress(struct dccDownloadProgress *progress) {
     printedChars += printf("/");
     /* 14 chars --> '1001.132 MByte' */
     printedChars += printSize(progress->completeFileSize);
-    /*printf (" , Downloading %s", tdp->fileName);*/
     /* 1 char */
     printedChars += printf("|");
     /* 14 chars --> '1001.132 MByte' */
