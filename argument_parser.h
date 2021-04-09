@@ -17,8 +17,6 @@ struct dccDownloadProgress {
     sds completePath;
 };
 
-void parseArguments(int argc, char **argv, struct xdccGetConfig *args);
-
 struct dccDownload* newDccDownload(char *botNick, char *xdccCmd);
 
 void freeDccDownload(struct dccDownload *t);
