@@ -1,7 +1,6 @@
 #include "session.h"
 #include "irc_line_parser.h"
 
-#include "../helper.h"
 #include "irc_parser.h"
 
 /*
@@ -27,8 +26,8 @@ do {\
 } while(0)
 
 void free_line_parser(irc_parser *parser) {
-    FREE(parser->data);
-    FREE(parser);
+    free(parser->data);
+    free(parser);
 }
 
 void free_parser_result (irc_parser *parser) {
@@ -52,7 +51,7 @@ void free_parser_result (irc_parser *parser) {
 }
 
 static inline char* calloc_and_copy_string(const char *string, size_t len) {
-    char *result = Calloc(len+1, sizeof(char));
+    char *result = calloc(len+1, sizeof(char));
     strncpy(result, string, len);
     return result;
 }
@@ -140,9 +139,9 @@ static int handle_parser_result (irc_parser *parser, const char *at, size_t len)
 }
 
 irc_parser* create_line_parser() {
-    irc_parser *parser = Calloc(1, sizeof(irc_parser));
+    irc_parser *parser = calloc(1, sizeof(irc_parser));
     irc_parser_settings parser_settings;
-    irc_parser_result_t *parser_result = Calloc(1, sizeof(irc_parser_result_t));
+    irc_parser_result_t *parser_result = calloc(1, sizeof(irc_parser_result_t));
     
     memset(&parser_settings, 0, sizeof (parser_settings));
     

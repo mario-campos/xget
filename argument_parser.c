@@ -5,7 +5,7 @@
 #include "libircclient.h"
 
 struct dccDownload* newDccDownload(sds botNick, sds xdccCmd) {
-    struct dccDownload *t = (struct dccDownload*) Malloc(sizeof (struct dccDownload));
+    struct dccDownload *t = (struct dccDownload*)malloc(sizeof (struct dccDownload));
     t->botNick = botNick;
     t->xdccCmd = xdccCmd;
     return t;
@@ -14,11 +14,11 @@ struct dccDownload* newDccDownload(sds botNick, sds xdccCmd) {
 void freeDccDownload(struct dccDownload *t) {
     sdsfree(t->botNick);
     sdsfree(t->xdccCmd);
-    FREE(t);
+    free(t);
 }
 
 struct dccDownloadProgress* newDccProgress(char *completePath, irc_dcc_size_t complFileSize) {
-    struct dccDownloadProgress *t = (struct dccDownloadProgress*) Malloc(sizeof (struct dccDownloadProgress));
+    struct dccDownloadProgress *t = (struct dccDownloadProgress*)malloc(sizeof (struct dccDownloadProgress));
     t->completeFileSize = complFileSize;
     t->sizeRcvd = 0;
     t->sizeNow = 0;
@@ -30,7 +30,7 @@ struct dccDownloadProgress* newDccProgress(char *completePath, irc_dcc_size_t co
 
 void freeDccProgress(struct dccDownloadProgress *progress) {
     sdsfree(progress->completePath);
-    FREE(progress);
+    free(progress);
 }
 
 void parseDccDownload(char *dccDownloadString, sds *nick, sds *xdccCmd) {
@@ -90,7 +90,7 @@ struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *nu
         DBG_ERR("splittedString = NULL, cant continue from here.");
     }
 
-    struct dccDownload **dccDownloadArray = (struct dccDownload**) Calloc(numFound + 1, sizeof (struct dccDownload*));
+    struct dccDownload **dccDownloadArray = (struct dccDownload**)calloc(numFound + 1, sizeof (struct dccDownload*));
 
     *numDownloads = numFound;
 
@@ -115,6 +115,6 @@ struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *nu
         sdsfree(splittedString[i]);
     }
 
-    FREE(splittedString);
+    free(splittedString);
     return dccDownloadArray;
 }

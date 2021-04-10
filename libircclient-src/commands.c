@@ -203,7 +203,7 @@ static void irc_notice_command(irc_session_t *session, const char *command, irc_
         ctcp_buf[msglen] = '\0';
 
         for (i = 0; i < result->num_params; i++) {
-            FREE(result->params[i]);
+            free(result->params[i]);
         }
         
         params[0] = ctcp_buf;

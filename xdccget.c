@@ -58,15 +58,15 @@ void doCleanUp() {
             freeDccProgress(current_context->progress);
         }
 
-        FREE(downloadContext[i]);
+        free(downloadContext[i]);
     }
 
     sdsfree(cfg.targetDir);
     sdsfree(cfg.nick);
     sdsfree(cfg.login_command);
-    FREE(cfg.dccDownloadArray);
-    FREE(cfg.channelsToJoin);
-    FREE(downloadContext);
+    free(cfg.dccDownloadArray);
+    free(cfg.channelsToJoin);
+    free(downloadContext);
 }
 
 void exitPgm(int retCode) {
@@ -131,17 +131,17 @@ void* checksum_verification_thread(void *args) {
         logprintf(LOG_WARN, "Checksum-Verification failed!");
     }
 
-    FREE(expectedHash);
+    free(expectedHash);
     freeHashAlgo(md5algo);
     sdsfree(data->expectedHash);
     sdsfree(data->completePath);
-    FREE(data);
+    free(data);
 
     return NULL;
 }
 
 void startChecksumThread(sds md5ChecksumSDS, sds completePath) {
-    struct checksumThreadData *threadData = Malloc(sizeof(struct checksumThreadData));
+    struct checksumThreadData *threadData = malloc(sizeof(struct checksumThreadData));
     threadData->completePath = completePath;
     threadData->expectedHash = md5ChecksumSDS;
 
@@ -420,7 +420,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
     struct dccDownloadProgress *progress = newDccProgress(completePath, size);
     curDownload = progress;
 
-    struct dccDownloadContext *context = Malloc(sizeof(struct dccDownloadContext));
+    struct dccDownloadContext *context = malloc(sizeof(struct dccDownloadContext));
     downloadContext[numActiveDownloads] = context;
     numActiveDownloads++;
     context->progress = progress;
@@ -625,7 +625,7 @@ int main (int argc, char **argv)
     cfg.channelsToJoin = parseChannels(cfg.args[1], &cfg.numChannels);
     cfg.dccDownloadArray = parseDccDownloads(cfg.args[2], &cfg.numDownloads);
 
-    downloadContext = Calloc(cfg.numDownloads, sizeof(struct downloadContext*));
+    downloadContext = calloc(cfg.numDownloads, sizeof(struct downloadContext*));
 
     init_signal(SIGINT, interrupt_handler);
     init_signal(SIGALRM, output_handler);

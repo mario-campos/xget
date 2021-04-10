@@ -66,15 +66,6 @@
 
 /* define macro for free that checks if ptr is null and sets ptr after free to null. */
 
-#define FREE(X) \
-do {\
-	if ( (X != NULL) ) {\
-		DBG_OK("freeing %p now", X);\
-		free(( X ));\
-		X = NULL;\
-	}\
-} while(0)
-
 #define bitset_t uint64_t
 
 struct xdccGetConfig {
@@ -124,29 +115,6 @@ void cfg_set_bit(struct xdccGetConfig *config, int bitNum);
 int cfg_get_bit(struct xdccGetConfig *config, int bitNum);
 
 void logprintf(int logLevel, char *formatString, ...);
-/* Wrapper for malloc. Checks if malloc fails and exits pgm if it does. */
-static inline void* Malloc(size_t size) {
-    void *t = malloc(size);
-    if (unlikely(t == NULL))
-    {
-        logprintf(LOG_ERR, "malloc failed. exiting now.\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    return t;
-}
-
-/* wraps calloc call. */
-static inline void* Calloc(size_t numElements, size_t sizeOfElement) {
-    void *t = calloc(numElements, sizeOfElement);
-    if (unlikely(t == NULL))
-    {
-        logprintf(LOG_ERR, "calloc failed. exiting now.\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    return t;
-}
 
 /* inits the rand-function */
 void initRand();
