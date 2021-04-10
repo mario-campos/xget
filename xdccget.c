@@ -311,25 +311,6 @@ void event_connect (irc_session_t *session, const char * event, irc_parser_resul
     }
 }
 
-
-void event_privmsg (irc_session_t * session, const char * event, irc_parser_result_t *result)
-{
-
-    dump_event (session, event, result);
-
-    printf ("'%s' said me (%s): %s\n", 
-            result->nick ? result->nick  : "someone",
-            result->params[0], result->params[1] );
-}
-
-void event_numeric (irc_session_t * session, unsigned int event, irc_parser_result_t *result)
-{
-    char buf[24];
-    snprintf (buf, sizeof(buf), "%d", event);
-
-    dump_event (session, buf, result);
-}
-
 // This callback is used when we receive a file from the remote party
 
 void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, irc_dcc_size_t length) {

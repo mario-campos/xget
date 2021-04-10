@@ -30,10 +30,6 @@
 #define KRED  "\x1B[31m"
 #define KGRN  "\x1B[32m"
 #define KYEL  "\x1B[33m"
-#define KBLU  "\x1B[34m"
-#define KMAG  "\x1B[35m"
-#define KCYN  "\x1B[36m"
-#define KWHT  "\x1B[37m"
 
 /* define DBG-macros for debugging purposes if DEBUG is defined...*/
 
@@ -139,12 +135,7 @@ static inline void* Malloc(size_t size) {
     
     return t;
 }
-/* Mallocs and then nulls the reserved memory.  */
-static inline void* Safe_Malloc(size_t size) {
-    void *t = Malloc(size);
-    memset(t, 0, size);
-    return t;
-}
+
 /* wraps calloc call. */
 static inline void* Calloc(size_t numElements, size_t sizeOfElement) {
     void *t = calloc(numElements, sizeOfElement);
@@ -159,9 +150,6 @@ static inline void* Calloc(size_t numElements, size_t sizeOfElement) {
 
 /* inits the rand-function */
 void initRand();
-
-/* reads in the complete content of an text file and returns sds string. string need to be freed with sdsfree*/
-sds readTextFile (char *filePath);
 
 /* range-based rand. the returned number will be at least low, but lower than high. */
 int rand_range(int low, int high);

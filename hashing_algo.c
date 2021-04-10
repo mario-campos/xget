@@ -66,19 +66,6 @@ void getHashFromFile(HashAlgorithm *algo, char *filename, unsigned char *hash) {
     algo->final(hash, algo->ctx);
 }
 
-void getHashFromStringIter(HashAlgorithm *algo, char *string, unsigned char *hash, int numIterations) {
-    int i = 0;
-    algo->init(algo->ctx);
-    for (i = 0; i < numIterations; i++) {
-        algo->update(algo->ctx, (const void**)&string, strlen(string));
-    }
-    algo->final(hash, algo->ctx);
-}
-
-void getHashFromString(HashAlgorithm *algo, char *string, unsigned char *hash) {
-    getHashFromStringIter(algo, string, hash, 1);
-}
-
 static unsigned char hexCharToBin(char c) {
     if (c >= '0' && c <= '9') {
         return c - '0';

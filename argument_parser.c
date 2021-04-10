@@ -4,8 +4,6 @@
 #include "helper.h"
 #include "libircclient.h"
 
-#include "argument_parser.h"
-
 struct dccDownload* newDccDownload(sds botNick, sds xdccCmd) {
     struct dccDownload *t = (struct dccDownload*) Malloc(sizeof (struct dccDownload));
     t->botNick = botNick;

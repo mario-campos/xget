@@ -37,9 +37,8 @@
     void freeHashAlgo(HashAlgorithm *algo);
 
     void getHashFromFile(HashAlgorithm *algo, char *filename, unsigned char *hash);
-    void getHashFromString(HashAlgorithm *algo, char *string, unsigned char *hash);
-    void getHashFromStringIter(HashAlgorithm *algo, char *string, unsigned char *hash, int numIterations);
-    unsigned char* convertHashStringToBinary(HashAlgorithm *algo, char *hashString);
+
+unsigned char* convertHashStringToBinary(HashAlgorithm *algo, char *hashString);
 
 #endif	/* HASHING_ALGO_H */
 
