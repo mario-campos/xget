@@ -120,7 +120,7 @@ struct checksumThreadData {
 
 struct dccDownloadContext {
     struct dccDownloadProgress *progress;
-    struct file_io_t *fd;
+    FILE *fd;
 };
 
 void cfg_clear_bit(struct xdccGetConfig *config, int bitNum);

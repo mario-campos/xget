@@ -1,10 +1,13 @@
 #include <strings.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <openssl/md5.h>
 
 #include "hashing_algo.h"
-#include "file.h"
+
+#define FILE_READ_BUFFER_SIZE BUFSIZ
+typedef void (*FileReader) (void *buffer, unsigned int bytesRead, void *ctx);
 
 int md5_equal(unsigned char hash1[], unsigned char hash2[]) {
 	return memcmp(hash1, hash2, MD5_DIGEST_LENGTH) == 0;
@@ -40,6 +43,21 @@ HashAlgorithm* createHashAlgorithm(char *hashAlgorithm) {
 static void updateHash(void *buffer, unsigned int bytesRead, void *ctx) {
     HashAlgorithm *algo = (HashAlgorithm*) ctx;
     algo->update(algo->ctx, buffer, bytesRead);
+}
+
+void readFile(char *filename, FileReader callback, void *ctx) {
+    char buffer[FILE_READ_BUFFER_SIZE + 1];
+    size_t bytesRead;
+    FILE *file;
+
+    file = fopen(filename, "rb");
+
+    do {
+        bytesRead = fread(buffer, 1, FILE_READ_BUFFER_SIZE, file);
+        callback(buffer, bytesRead, ctx);
+    } while (bytesRead == FILE_READ_BUFFER_SIZE);
+
+    fclose(file);
 }
 
 void getHashFromFile(HashAlgorithm *algo, char *filename, unsigned char *hash) {

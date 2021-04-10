@@ -3,6 +3,7 @@
  */
 
 #include <pwd.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -10,9 +11,9 @@
 #include <signal.h>
 #include <pthread.h>
 #include <inttypes.h>
+#include <sys/stat.h>
 
 #include "helper.h"
-#include "file.h"
 #include "hashing_algo.h"
 
 #define NICKLEN 20
@@ -50,7 +51,7 @@ void doCleanUp() {
             bool finishedDownloading = current_progress->sizeRcvd == current_progress->completeFileSize;
 
             if (!finishedDownloading) {
-                Close(current_context->fd);
+                fclose(current_context->fd);
                 current_context->fd = NULL;
             }
 
@@ -356,7 +357,7 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
     struct dccDownloadProgress *progress = context->progress;
 
     progress->sizeRcvd += length;
-    Write(context->fd, data, length);
+    fwrite(data, 1, length, context->fd);
 
     if (unlikely(progress->sizeRcvd == progress->completeFileSize)) {
         alarm(0);
@@ -365,7 +366,7 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
         printf("\nDownload completed!\n");
         fflush(NULL);
 
-        Close(context->fd);
+        fclose(context->fd);
         context->fd = NULL;
 
         finishedDownloads++;
@@ -380,7 +381,7 @@ void callback_dcc_resume_file (irc_session_t * session, irc_dcc_t dccid, int sta
     struct dccDownloadContext *context = (struct dccDownloadContext*) ctx;
 
     DBG_OK("got to callback_dcc_resume_file\n");
-    Seek(context->fd, length, SEEK_SET);
+    fseek(context->fd, length, SEEK_SET);
     DBG_OK("before irc_dcc_accept!\n");
 
     struct dccDownloadProgress *tdp = context->progress;
@@ -453,7 +454,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
             exitPgm(EXIT_FAILURE);
         }
 
-        context->fd = Open(completePath, "a");
+        context->fd = fopen(completePath, "ab");
 
         off_t fileSize = st.st_size;
 
@@ -472,7 +473,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
     }
     else {
         int ret;
-        context->fd = Open(completePath, "w");
+        context->fd = fopen(completePath, "wb");
         logprintf(LOG_INFO, "file %s does not exist. creating file and downloading it now.", completePath);
 accept_flag:
         ret = irc_dcc_accept(session, dccid, context, callback_dcc_recv_file);
