@@ -12,9 +12,9 @@
 #include <pthread.h>
 #include <inttypes.h>
 #include <sys/stat.h>
+#include <openssl/md5.h>
 
 #include "helper.h"
-#include "hashing_algo.h"
 
 #define NICKLEN 20
 
@@ -112,19 +112,67 @@ void output_handler (int signum) {
     cfg_set_bit(getCfg(), OUTPUT_FLAG);
 }
 
+static unsigned char hexCharToBin(char c) {
+    if (c >= '0' && c <= '9') {
+        return c - '0';
+    } else if (c >= 'a' && c <= 'f') {
+        return c - 'a' + 10;
+    } else if (c >= 'A' && c <= 'F') {
+        return c - 'A' + 10;
+    } else {
+        return 0;
+    }
+}
+
+static unsigned char hexToBin(char c1, char c2) {
+    unsigned char temp = 0;
+    temp = hexCharToBin(c2);
+    temp |= hexCharToBin(c1) << 4;
+    return temp;
+}
+
+static unsigned char* convertHashStringToBinary(char *hashString) {
+    unsigned int i, j;
+    unsigned char *hashBinary = (unsigned char*) malloc(sizeof (unsigned char) * MD5_DIGEST_LENGTH);
+    for (i = 0, j = 0; i < MD5_DIGEST_LENGTH; i++, j += 2) {
+        hashBinary[i] = hexToBin(hashString[j], hashString[j + 1]);
+    }
+    return hashBinary;
+}
+
+static void getHashFromFile(char *filename, unsigned char *hash) {
+    MD5_CTX *ctx = malloc(sizeof(MD5_CTX));
+    MD5_Init(ctx);
+
+    char buffer[BUFSIZ + 1];
+    size_t bytesRead;
+    FILE *file;
+
+    file = fopen(filename, "rb");
+
+    do {
+        bytesRead = fread(buffer, 1, BUFSIZ, file);
+        MD5_Update(ctx, buffer, bytesRead);
+    } while (bytesRead == BUFSIZ);
+
+    fclose(file);
+
+    MD5_Final(hash, ctx);
+    free(ctx);
+}
+
 void* checksum_verification_thread(void *args) {
     struct checksumThreadData *data = args;
     sds md5ChecksumString = data->expectedHash;
 
     logprintf(LOG_INFO, "Verifying md5-checksum '%s'!", md5ChecksumString);
 
-    HashAlgorithm *md5algo = createHashAlgorithm("MD5");
-    unsigned char hashFromFile[md5algo->hashSize];
+    unsigned char hashFromFile[MD5_DIGEST_LENGTH];
+    getHashFromFile(data->completePath , hashFromFile);
 
-    getHashFromFile(md5algo, data->completePath , hashFromFile);
-    unsigned char *expectedHash = convertHashStringToBinary(md5algo, md5ChecksumString);
+    unsigned char *expectedHash = convertHashStringToBinary(md5ChecksumString);
 
-    if (md5algo->equals(expectedHash, hashFromFile)) {
+    if (memcmp(expectedHash, hashFromFile, MD5_DIGEST_LENGTH) == 0) {
         logprintf(LOG_INFO, "Checksum-Verification succeeded!");
     }
     else {
@@ -132,7 +180,6 @@ void* checksum_verification_thread(void *args) {
     }
 
     free(expectedHash);
-    freeHashAlgo(md5algo);
     sdsfree(data->expectedHash);
     sdsfree(data->completePath);
     free(data);
