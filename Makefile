@@ -11,7 +11,7 @@ SRCS = xdccget.c \
 all: build
 
 build: $(SRCS)
-	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(OBJ_FILES) $(LIBS)
+	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)
 
 install:
 	cp ./$(PROG) /usr/bin/
