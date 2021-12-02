@@ -25,17 +25,27 @@ jobs:
       env:
         PKG_CONFIG_PATH: /usr/local/Cellar/openssl@1.1/1.1.1l_1/lib/pkgconfig
   
-  bsd:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ openbsd-latest, freebsd-latest ]
+  openbsd:
     runs-on: macos-10.15
     steps:
-    - name: Bootstrap ${{ matrix.os }}
+    - name: Bootstrap OpenBSD
       uses: mario-campos/emulate@v1
       with:
-        operating-system: ${{ matrix.os }}
+        operating-system: openbsd-latest
+    - name: Checkout repository
+      run: git clone --depth 1 https://github.com/mario-campos/xdccget.git
+    - name: build
+      run: cd xdccget; make
+
+  freebsd:
+    runs-on: macos-10.15
+    steps:
+    - name: Bootstrap FreeBSD
+      uses: mario-campos/emulate@v1
+      with:
+        operating-system: freebsd-latest
+    - name: Install dependencies
+      run: pkg install -y pkgconf openssl
     - name: Checkout repository
       run: git clone --depth 1 https://github.com/mario-campos/xdccget.git
     - name: build
