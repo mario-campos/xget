@@ -75,3 +75,7 @@ You need to make sure, that you have the openssl-development packages for you fa
 
 ### OSX and BSD
 For osx and bsd systems you need to also install the development files for openssl.
+
+---
+
+[![C/C++ CI](https://github.com/mario-campos/xdccget/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mario-campos/xdccget/actions/workflows/c-cpp.yml)
