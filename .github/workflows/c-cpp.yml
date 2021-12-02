@@ -18,12 +18,12 @@ jobs:
   bsd:
     strategy:
       matrix:
-        operating-system: [ openbsd-latest, freebsd-latest ]
+        os: [ openbsd-latest, freebsd-latest ]
     runs-on: macos-10.15
     steps:
     - uses: mario-campos/emulate@v1
       with:
-        os: ${{ matrix.os }}
+        operating-system: ${{ matrix.os }}
     - name: Checkout repository
       run: git clone --depth 1 https://github.com/mario-campos/xdccget.git
     - name: build
