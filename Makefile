@@ -1,5 +1,5 @@
-CFLAGS =-std=gnu99 -D_FILE_OFFSET_BITS=64 -DENABLE_SSL -DENABLE_IPV6 -DHAVE_POLL -Wall -Wfatal-errors -Os -fstack-protector -I libircclient-include/ $(shell pkg-config --cflags openssl)
-LIBS = -lpthread $(shell pkg-config --libs openssl)
+CFLAGS =-std=gnu99 -D_FILE_OFFSET_BITS=64 -DENABLE_SSL -DENABLE_IPV6 -DHAVE_POLL -Wall -Wfatal-errors -Os -fstack-protector -I libircclient-include/ `pkg-config --cflags openssl`
+LIBS = -lpthread `pkg-config --libs openssl`
 PROG = xdccget
 
 SRCS = xdccget.c \
