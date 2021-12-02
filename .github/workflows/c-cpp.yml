@@ -27,6 +27,7 @@ jobs:
   
   bsd:
     strategy:
+      fail-fast: false
       matrix:
         os: [ openbsd-latest, freebsd-latest ]
     runs-on: macos-10.15
