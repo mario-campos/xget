@@ -7,10 +7,24 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  ubuntu:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - run: make
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: build
+      run: make
+
+  bsd:
+    strategy:
+      matrix:
+        os: [ openbsd-latest, freebsd-latest ]
+    runs-on: macos-10.15
+    steps:
+    - uses: mario-campos/emulate@v1
+      with:
+        os: ${{ matrix.os }}
+    - name: Checkout repository
+      run: git clone --depth 1 https://github.com/mario-campos/xdccget.git
+    - name: build
+      run: cd xdccget; make
