@@ -20,10 +20,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Install OpenSSL dependency
-      run: brew install openssl@3
     - name: build
       run: make
+      env:
+        PKG_CONFIG_PATH: /usr/local/Cellar/openssl@1.1/1.1.1l_1/lib/pkgconfig
   
   bsd:
     strategy:
