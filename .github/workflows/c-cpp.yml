@@ -7,17 +7,24 @@ on:
     branches: [ master ]
 
 jobs:
-  non-bsd:
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, macos-latest ]
-    runs-on: ${{ matrix.os }}
+  ubuntu:
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: build
       run: make
-
+  
+  macOS:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Install OpenSSL dependency
+      run: brew install openssl@3
+    - name: build
+      run: make
+  
   bsd:
     strategy:
       matrix:
