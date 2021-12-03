@@ -3,7 +3,11 @@ name: C/C++ CI
 on:
   push:
     branches: [ master ]
-    paths-ignore: [ README.md, LICENSE, .github/workflows/codeql-analysis.yml ]
+    paths-ignore:
+    - README.md
+    - LICENSE
+    - .gitignore
+    - .github/workflows/codeql-analysis.yml
   pull_request:
     branches: [ master ]
 
