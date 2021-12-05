@@ -569,7 +569,7 @@ void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
 
     cfg->logLevel = LOG_INFO;
 
-    while ((opt = getopt(argc, argv, "Vhqvkd:n:l:p:aD46"))) {
+    while ((opt = getopt(argc, argv, "Vhqvkd:n:l:p:aD46")) != -1) {
         switch (opt) {
             case 'V': {
                 unsigned int major, minor;
