@@ -644,7 +644,7 @@ void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; (i + optind) <= argc; i++) {
+    for (int i = 0; (i + optind) < argc; i++) {
         cfg->args[i] = argv[i + optind];
     }
 }
