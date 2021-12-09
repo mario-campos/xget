@@ -555,10 +555,10 @@ static char* usage = "usage: xdccget [-46aDqv] [-n <nickname>] [-p <port number>
                      "[-l <login-command>] [-d <download-directory>]\n"
                      "<server> <channel(s)> <bot cmds>";
 
-void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
+void parseArguments(int argc, char **argv) {
     int opt;
 
-    cfg->logLevel = LOG_INFO;
+    cfg.logLevel = LOG_INFO;
 
     while ((opt = getopt(argc, argv, "Vhqvkd:n:l:p:aD46")) != -1) {
         switch (opt) {
@@ -575,53 +575,53 @@ void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
 
             case 'q':
                 DBG_OK("setting log-level as quiet.");
-                cfg->logLevel = LOG_QUIET;
+                cfg.logLevel = LOG_QUIET;
                 break;
 
             case 'v':
                 DBG_OK("setting log-level as warn.");
-                cfg->logLevel = LOG_WARN;
+                cfg.logLevel = LOG_WARN;
                 break;
 
             case 'k':
-                cfg_set_bit(cfg, ALLOW_ALL_CERTS_FLAG);
+                cfg_set_bit(&cfg, ALLOW_ALL_CERTS_FLAG);
                 break;
 
             case 'd':
                 DBG_OK("setting target dir as %s", optarg);
-                cfg->targetDir = strdup(optarg);
+                cfg.targetDir = strdup(optarg);
                 break;
 
             case 'n':
                 DBG_OK("setting nickname as %s", optarg);
-                cfg->nick = strdup(optarg);
+                cfg.nick = strdup(optarg);
                 break;
 
             case 'l':
                 DBG_OK("setting login-command as %s", optarg);
-                cfg->login_command = strdup(optarg);
+                cfg.login_command = strdup(optarg);
                 break;
 
             case 'p':
-                cfg->port = (unsigned short) strtoul(optarg, NULL, 0);
-                DBG_OK("setting port as %u", cfg->port);
+                cfg.port = (unsigned short) strtoul(optarg, NULL, 0);
+                DBG_OK("setting port as %u", cfg.port);
                 break;
 
             case 'a':
-                cfg_set_bit(cfg, ACCEPT_ALL_NICKS_FLAG);
+                cfg_set_bit(&cfg, ACCEPT_ALL_NICKS_FLAG);
                 break;
 
             case 'D':
-                cfg_set_bit(cfg, DONT_CONFIRM_OFFSETS_FLAG);
+                cfg_set_bit(&cfg, DONT_CONFIRM_OFFSETS_FLAG);
                 break;
 
             case '4':
-                cfg_set_bit(cfg, USE_IPV4_FLAG);
+                cfg_set_bit(&cfg, USE_IPV4_FLAG);
                 break;
 
 #ifdef ENABLE_IPV6
             case '6':
-                cfg_set_bit(cfg, USE_IPV6_FLAG);
+                cfg_set_bit(&cfg, USE_IPV6_FLAG);
                 break;
 #endif
             case '?':
@@ -636,7 +636,7 @@ void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
     }
 
     for (int i = 0; (i + optind) < argc; i++) {
-        cfg->args[i] = argv[i + optind];
+        cfg.args[i] = argv[i + optind];
     }
 }
 
@@ -657,7 +657,7 @@ int main (int argc, char **argv)
 
     cfg.targetDir = targetDir;
 
-    parseArguments(argc, argv, &cfg);
+    parseArguments(argc, argv);
 
     cfg.ircServer = cfg.args[0];
 
@@ -677,11 +677,6 @@ int main (int argc, char **argv)
         logprintf(LOG_ERR, "Could not create session\n");
         exitPgm(EXIT_FAILURE);
     }
-
-    logprintf(LOG_INFO, "test message for info");
-    logprintf(LOG_QUIET, "test message for quiet");
-    logprintf(LOG_WARN, "test message for warn");
-    logprintf(LOG_ERR, "test message for error");
 
     if (cfg.nick == NULL) {
         cfg.nick = malloc(NICKLEN);

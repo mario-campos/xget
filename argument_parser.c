@@ -89,7 +89,6 @@ char **split(char *s, int *count) {
 
 char** parseChannels(char *channelString, uint32_t *numChannels) {
     int numFound = 0;
-    char *seperator = ",";
     char **splittedString = split(channelString, &numFound);
     if (splittedString == NULL) {
         DBG_ERR("splittedString = NULL, cant continue from here.");
@@ -111,7 +110,6 @@ char** parseChannels(char *channelString, uint32_t *numChannels) {
 struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *numDownloads) {
     int numFound = 1;
     int i = 0, j = 0;
-    char *seperator = ",";
 
     struct dccDownload **dccDownloadArray = (struct dccDownload**)calloc(numFound + 1, sizeof (struct dccDownload*));
 
