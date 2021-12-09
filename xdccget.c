@@ -248,10 +248,10 @@ void dump_event (irc_session_t * session, const char * event, irc_parser_result_
 
     for (cnt = 0; cnt < result->num_params; cnt++) {
         if (cnt)
-            strlcat(param_string, "|", 1024);
+            strncat(param_string, "|", 1024 - strlen(param_string) - 1);
 
         char *message_without_color_codes = irc_color_strip_from_mirc(result->params[cnt]);
-        strlcat(param_string, message_without_color_codes, 1024);
+        strncat(param_string, message_without_color_codes, 1024 - strlen(param_string) - 1);
         free(message_without_color_codes);
     }
 
