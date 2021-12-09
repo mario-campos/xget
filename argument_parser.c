@@ -120,9 +120,9 @@ struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *nu
     for (i = 0; i < numFound; i++) {
         char *nick = NULL;
         char *xdccCmd = NULL;
-        DBG_OK("%d: '%s'\n", i, dccDownloadString);
+        DBG_OK("%d: '%s'", i, dccDownloadString);
         parseDccDownload(dccDownloadString, &nick, &xdccCmd);
-        DBG_OK("%d: '%s' '%s'\n", i, nick, xdccCmd);
+        DBG_OK("%d: '%s' '%s'", i, nick, xdccCmd);
         if (nick != NULL && xdccCmd != NULL) {
             dccDownloadArray[j] = newDccDownload(nick, xdccCmd);
             j++;
