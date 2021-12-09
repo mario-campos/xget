@@ -1,12 +1,11 @@
 #ifndef ARGUMENT_PARSER_H
 #define ARGUMENT_PARSER_H
 
-#include "sds.h"
 #include "helper.h"
 
 struct dccDownload {
-    sds botNick;
-    sds xdccCmd;
+    char *botNick;
+    char *xdccCmd;
 };
 
 struct dccDownloadProgress {
@@ -14,7 +13,7 @@ struct dccDownloadProgress {
     irc_dcc_size_t sizeRcvd;
     irc_dcc_size_t sizeNow;
     irc_dcc_size_t sizeLast;
-    sds completePath;
+    char *completePath;
 };
 
 struct dccDownload* newDccDownload(char *botNick, char *xdccCmd);
@@ -27,7 +26,7 @@ void freeDccProgress(struct dccDownloadProgress *progress);
 
 void parseDccDownload (char *dccDownloadString, char **nick, char **xdccCmd);
 
-sds* parseChannels(char *channelString, uint32_t *numChannels);
+char** parseChannels(char *channelString, uint32_t *numChannels);
 
 struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *numDownloads);
 

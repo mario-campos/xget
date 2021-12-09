@@ -36,7 +36,7 @@ void doCleanUp() {
         irc_destroy_session(cfg.session);
 
     for (i = 0; i < cfg.numChannels; i++) {
-        sdsfree(cfg.channelsToJoin[i]);
+        free(cfg.channelsToJoin[i]);
     }
 
     for (i = 0; cfg.dccDownloadArray[i]; i++) {
@@ -61,9 +61,9 @@ void doCleanUp() {
         free(downloadContext[i]);
     }
 
-    sdsfree(cfg.targetDir);
-    sdsfree(cfg.nick);
-    sdsfree(cfg.login_command);
+    free(cfg.targetDir);
+    free(cfg.nick);
+    free(cfg.login_command);
     free(cfg.dccDownloadArray);
     free(cfg.channelsToJoin);
     free(downloadContext);
@@ -163,7 +163,7 @@ static void getHashFromFile(char *filename, unsigned char *hash) {
 
 void* checksum_verification_thread(void *args) {
     struct checksumThreadData *data = args;
-    sds md5ChecksumString = data->expectedHash;
+    char * md5ChecksumString = data->expectedHash;
 
     logprintf(LOG_INFO, "Verifying md5-checksum '%s'!", md5ChecksumString);
 
@@ -180,14 +180,14 @@ void* checksum_verification_thread(void *args) {
     }
 
     free(expectedHash);
-    sdsfree(data->expectedHash);
-    sdsfree(data->completePath);
+    free(data->expectedHash);
+    free(data->completePath);
     free(data);
 
     return NULL;
 }
 
-void startChecksumThread(sds md5ChecksumSDS, sds completePath) {
+void startChecksumThread(char *md5ChecksumSDS, char * completePath) {
     struct checksumThreadData *threadData = malloc(sizeof(struct checksumThreadData));
     threadData->completePath = completePath;
     threadData->expectedHash = md5ChecksumSDS;
@@ -197,7 +197,7 @@ void startChecksumThread(sds md5ChecksumSDS, sds completePath) {
     pthread_create(&threadID, NULL, checksum_verification_thread, threadData);
 }
 
-static sds extractMD5 (const char *string) {
+static char * extractMD5 (const char *string) {
     const unsigned int MD5_STR_SIZE = 32;
     char md5ChecksumString[MD5_STR_SIZE+1];
     md5ChecksumString[MD5_STR_SIZE] = (char) 0;
@@ -206,14 +206,14 @@ static sds extractMD5 (const char *string) {
 
     if (md5sum != NULL) {
         strncpy(md5ChecksumString, md5sum+8, MD5_STR_SIZE);
-        return sdsnew(md5ChecksumString);
+        return strdup(md5ChecksumString);
     }
 
     md5sum = strstr(string, "MD5");
 
     if (md5sum != NULL) {
         strncpy(md5ChecksumString, md5sum+4, MD5_STR_SIZE);
-        return sdsnew(md5ChecksumString);
+        return strdup(md5ChecksumString);
     }
 
     return NULL;
@@ -232,31 +232,31 @@ static void checkMD5ChecksumNotice(const char * event, irc_parser_result_t *resu
         return;
     }
 
-    sds md5ChecksumSDS = extractMD5(result->params[1]);
+    char* md5ChecksumSDS = extractMD5(result->params[1]);
 
     if (md5ChecksumSDS == NULL) {
         return;
     }
 
-    startChecksumThread(md5ChecksumSDS, sdsdup(lastDownload->completePath));
+    startChecksumThread(md5ChecksumSDS, strdup(lastDownload->completePath));
 }
 
 void dump_event (irc_session_t * session, const char * event, irc_parser_result_t *result)
 {
-    sds param_string = sdsempty();
+    char *param_string = calloc(1024, sizeof(char));
     unsigned int cnt;
 
     for (cnt = 0; cnt < result->num_params; cnt++) {
         if (cnt)
-            param_string = sdscat(param_string, "|");
+            strlcat(param_string, "|", 1024);
 
         char *message_without_color_codes = irc_color_strip_from_mirc(result->params[cnt]);
-        param_string = sdscat(param_string, message_without_color_codes);
+        strlcat(param_string, message_without_color_codes, 1024);
         free(message_without_color_codes);
     }
 
     logprintf(LOG_INFO, "Event \"%s\", origin: \"%s\", params: %d [%s]", event, result->nick ? result->nick : "NULL", cnt, param_string);
-    sdsfree(param_string);
+    free(param_string);
 }
 
 static void join_channels(irc_session_t *session) {
@@ -318,13 +318,10 @@ void event_join (irc_session_t * session, const char * event, irc_parser_result_
 }
 
 static void send_login_command(irc_session_t *session) {
-    cfg.login_command = sdstrim(cfg.login_command, " \t");
-
-    if (sdslen(cfg.login_command) >= 9) {
-        sds user = sdsdup(cfg.login_command);
-        sds auth_command = sdsdup(cfg.login_command);
-        sdsrange(user, 0, 8);
-        sdsrange(auth_command, 9, sdslen(auth_command));
+    if (strlen(cfg.login_command) >= 9) {
+        char *user = strdup(cfg.login_command);
+        char *auth_command = strdup(&cfg.login_command[9]);
+        user[9] = '\0';
 
         logprintf(LOG_INFO, "sending login-command: %s", cfg.login_command);
 
@@ -334,8 +331,8 @@ static void send_login_command(irc_session_t *session) {
             logprintf(LOG_ERR, "Cannot send command to authenticate!");
         }
 
-        sdsfree(user);
-        sdsfree(auth_command);
+        free(user);
+        free(auth_command);
     } else {
         logprintf(LOG_ERR, "the login-command is too short. cant send this login-command.");
     }
@@ -429,28 +426,23 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
 {
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)\n", dccid, nick, addr, filename, size);
 
-    sds fileName = sdsnew(filename);
+    char *fileName = strdup(filename);
 
     /* chars / and \ are not permitted to appear in a valid filename. if someone wants to send us such a file 
        then something is definately wrong. so just exit pgm then and print error msg to user.*/
-    char *illegalFilenameChars = "/\\";
-
-    if (sdscontains(fileName, illegalFilenameChars, strlen(illegalFilenameChars))) {
+    if (strchr(fileName, '/') || strchr(fileName, '\\')) {
         /* filename contained bad chars. print msg and exit...*/
         logprintf(LOG_ERR, "Someone wants to send us a file that contains / or \\. This is not permitted.\nFilename was: %s", fileName);
         exitPgm(EXIT_FAILURE);
     }
 
-    sds lastCharOfTargetDir = sdsdup(cfg.targetDir);
-    sdsrange(lastCharOfTargetDir, -1, -1);
-    sds absolutePath = sdsempty();
+    char * absolutePath;
 
-    if (!str_equals(lastCharOfTargetDir, "/")) {
-        DBG_OK("last char of dir was: %s", lastCharOfTargetDir);
-        absolutePath = sdscatprintf(absolutePath, "%s%s", cfg.targetDir, "/");
+    if (cfg.targetDir[strlen(cfg.targetDir)-1] != '/') {
+        asprintf(&absolutePath, "%s/", cfg.targetDir);
     }
     else {
-        absolutePath = sdscatprintf(absolutePath, "%s", cfg.targetDir);
+        absolutePath = strdup(cfg.targetDir);
     }
 
     if (mkdir(absolutePath, 0755) && errno != EEXIST) {
@@ -458,11 +450,10 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
         perror("mkdir");
     }
 
-    sds completePath = sdsempty();
-    completePath = sdscatprintf(completePath, "%s%s", absolutePath, fileName);
+    char *completePath;
+    asprintf(&completePath, "%s%s", absolutePath, fileName);
 
-    sdsfree(lastCharOfTargetDir);
-    sdsfree(absolutePath);
+    free(absolutePath);
 
     struct dccDownloadProgress *progress = newDccProgress(completePath, size);
     curDownload = progress;
@@ -511,7 +502,7 @@ accept_flag:
         }
     }
 
-    sdsfree(fileName);
+    free(fileName);
 }
 
 void print_output_callback (irc_session_t *session) {
@@ -598,17 +589,17 @@ void parseArguments(int argc, char **argv, struct xdccGetConfig *cfg) {
 
             case 'd':
                 DBG_OK("setting target dir as %s", optarg);
-                cfg->targetDir = sdsnew(optarg);
+                cfg->targetDir = strdup(optarg);
                 break;
 
             case 'n':
                 DBG_OK("setting nickname as %s", optarg);
-                cfg->nick = sdsnew(optarg);
+                cfg->nick = strdup(optarg);
                 break;
 
             case 'l':
                 DBG_OK("setting login-command as %s", optarg);
-                cfg->login_command = sdsnew(optarg);
+                cfg->login_command = strdup(optarg);
                 break;
 
             case 'p':
@@ -661,7 +652,8 @@ int main (int argc, char **argv)
     cfg.port = 6667;
 
     const char *homeDir = getHomeDir();
-    sds targetDir = sdscatprintf(sdsempty(), "%s%s%s", homeDir, "/", "Downloads");
+    char *targetDir;
+    asprintf(&targetDir, "%s/%s", homeDir, "Downloads");
 
     cfg.targetDir = targetDir;
 
@@ -692,7 +684,7 @@ int main (int argc, char **argv)
     logprintf(LOG_ERR, "test message for error");
 
     if (cfg.nick == NULL) {
-        cfg.nick = sdsnewlen(NULL, NICKLEN);
+        cfg.nick = malloc(NICKLEN);
         createRandomNick(NICKLEN, cfg.nick);
     }
 

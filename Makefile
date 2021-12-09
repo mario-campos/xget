@@ -5,8 +5,7 @@ CFLAGS += -std=gnu99 -D_FILE_OFFSET_BITS=64 -DENABLE_SSL -DENABLE_IPV6 -DHAVE_PO
 SRCS = xdccget.c \
        helper.c \
        argument_parser.c \
-       libircclient-src/libircclient.c \
-       sds.c
+       libircclient-src/libircclient.c
 
 all: $(SRCS)
 	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)

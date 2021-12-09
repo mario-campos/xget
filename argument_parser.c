@@ -4,7 +4,7 @@
 #include "helper.h"
 #include "libircclient.h"
 
-struct dccDownload* newDccDownload(sds botNick, sds xdccCmd) {
+struct dccDownload* newDccDownload(char *botNick, char *xdccCmd) {
     struct dccDownload *t = (struct dccDownload*)malloc(sizeof (struct dccDownload));
     t->botNick = botNick;
     t->xdccCmd = xdccCmd;
@@ -12,8 +12,8 @@ struct dccDownload* newDccDownload(sds botNick, sds xdccCmd) {
 }
 
 void freeDccDownload(struct dccDownload *t) {
-    sdsfree(t->botNick);
-    sdsfree(t->xdccCmd);
+    free(t->botNick);
+    free(t->xdccCmd);
     free(t);
 }
 
@@ -29,11 +29,11 @@ struct dccDownloadProgress* newDccProgress(char *completePath, irc_dcc_size_t co
 }
 
 void freeDccProgress(struct dccDownloadProgress *progress) {
-    sdsfree(progress->completePath);
+    free(progress->completePath);
     free(progress);
 }
 
-void parseDccDownload(char *dccDownloadString, sds *nick, sds *xdccCmd) {
+void parseDccDownload(char *dccDownloadString, char **nick, char **xdccCmd) {
     size_t i;
     size_t strLen = strlen(dccDownloadString);
     size_t spaceFound = 0;
@@ -50,27 +50,56 @@ void parseDccDownload(char *dccDownloadString, sds *nick, sds *xdccCmd) {
 
     DBG_OK("nickLen = %zu, cmdLen = %zu", nickLen, cmdLen);
 
-    sds nickPtr = sdsnewlen(NULL, nickLen);
-    sds xdccPtr = sdsnewlen(NULL, cmdLen);
+    char nickPtr[nickLen];
+    char xdccPtr[cmdLen];
 
-    nickPtr = sdscpylen(nickPtr, dccDownloadString, nickLen - 1);
-    xdccPtr = sdscpylen(xdccPtr, dccDownloadString + (spaceFound + 1), cmdLen - 1);
+    strlcpy(nickPtr, dccDownloadString, sizeof(nickPtr));
+    strlcpy(xdccPtr, dccDownloadString + (spaceFound + 1), sizeof(xdccPtr));
 
-    *nick = nickPtr;
-    *xdccCmd = xdccPtr;
+    *nick = strdup(nickPtr);
+    *xdccCmd = strdup(xdccPtr);
 }
 
-sds* parseChannels(char *channelString, uint32_t *numChannels) {
+char *strip(char *s) {
+    char *it;
+    char *separated = s;
+    while ((it = strsep(&separated, " \t")) != NULL) {
+        if (*it != '\0') {
+            s = strdup(it);
+            break;
+        }
+    }
+    return s;
+}
+
+char **split(char *s, int *count) {
+    char *it, **parts, **head;
+    *count = 0;
+    head = parts = calloc(10, sizeof(char*));
+    while ((it = strsep(&s, ",")) != NULL) {
+        if (*it != '\0') {
+            *parts = strdup(it);
+            parts++;
+            (*count)++;
+        }
+    }
+    *parts = NULL;
+    return head;
+}
+
+char** parseChannels(char *channelString, uint32_t *numChannels) {
     int numFound = 0;
     char *seperator = ",";
-    sds *splittedString = sdssplitlen(channelString, strlen(channelString), seperator, strlen(seperator), &numFound);
+    char **splittedString = split(channelString, &numFound);
     if (splittedString == NULL) {
         DBG_ERR("splittedString = NULL, cant continue from here.");
     }
     int i = 0;
 
     for (i = 0; i < numFound; i++) {
-        sdstrim(splittedString[i], " \t");
+        char *tmp = splittedString[i];
+        splittedString[i] = strip(splittedString[i]);
+        free(tmp);
         DBG_OK("%d: '%s'", i, splittedString[i]);
     }
 
@@ -80,26 +109,19 @@ sds* parseChannels(char *channelString, uint32_t *numChannels) {
 }
 
 struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *numDownloads) {
-    int numFound = 0;
+    int numFound = 1;
     int i = 0, j = 0;
     char *seperator = ",";
-
-    sds *splittedString = sdssplitlen(dccDownloadString, strlen(dccDownloadString), seperator, strlen(seperator), &numFound);
-
-    if (splittedString == NULL) {
-        DBG_ERR("splittedString = NULL, cant continue from here.");
-    }
 
     struct dccDownload **dccDownloadArray = (struct dccDownload**)calloc(numFound + 1, sizeof (struct dccDownload*));
 
     *numDownloads = numFound;
 
     for (i = 0; i < numFound; i++) {
-        sdstrim(splittedString[i], " \t");
-        sds nick = NULL;
-        sds xdccCmd = NULL;
-        DBG_OK("%d: '%s'\n", i, splittedString[i]);
-        parseDccDownload(splittedString[i], &nick, &xdccCmd);
+        char *nick = NULL;
+        char *xdccCmd = NULL;
+        DBG_OK("%d: '%s'\n", i, dccDownloadString);
+        parseDccDownload(dccDownloadString, &nick, &xdccCmd);
         DBG_OK("%d: '%s' '%s'\n", i, nick, xdccCmd);
         if (nick != NULL && xdccCmd != NULL) {
             dccDownloadArray[j] = newDccDownload(nick, xdccCmd);
@@ -107,14 +129,12 @@ struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *nu
         }
         else {
             if (nick != NULL)
-                sdsfree(nick);
+                free(nick);
 
             if (xdccCmd != NULL)
-                sdsfree(xdccCmd);
+                free(xdccCmd);
         }
-        sdsfree(splittedString[i]);
     }
 
-    free(splittedString);
     return dccDownloadArray;
 }

@@ -11,7 +11,6 @@
     #include <openssl/pem.h>
 #endif
 
-#include "sds.h"
 #include "libircclient-include/strings_utils.h"
 #include "xdccget.h"
 #include "libircclient.h"
@@ -76,10 +75,10 @@ struct xdccGetConfig {
     bitset_t flags;
     
     char *ircServer;
-    sds *channelsToJoin;
-    sds targetDir;
-    sds nick;
-    sds login_command;
+    char **channelsToJoin;
+    char *targetDir;
+    char *nick;
+    char *login_command;
     char *args[3];
     
     uint32_t numChannels;
@@ -101,8 +100,8 @@ struct terminalDimension {
 };
 
 struct checksumThreadData {
-	sds completePath;
-	sds expectedHash;
+	char *completePath;
+	char *expectedHash;
 };
 
 struct dccDownloadContext {
