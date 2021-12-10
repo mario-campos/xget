@@ -32,3 +32,6 @@ xdccget
 
 # Debug files
 *.dSYM/
+
+# IDE files
+.idea
