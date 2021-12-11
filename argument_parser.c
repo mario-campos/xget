@@ -53,8 +53,8 @@ void parseDccDownload(char *dccDownloadString, char **nick, char **xdccCmd) {
     char nickPtr[nickLen];
     char xdccPtr[cmdLen];
 
-    strncpy(nickPtr, dccDownloadString, nickLen - 1);
-    strncpy(xdccPtr, dccDownloadString + (spaceFound + 1), cmdLen - 1);
+    strlcpy(nickPtr, dccDownloadString, sizeof(nickPtr));
+    strlcpy(xdccPtr, dccDownloadString + (spaceFound + 1), sizeof(xdccPtr));
 
     *nick = strdup(nickPtr);
     *xdccCmd = strdup(xdccPtr);
