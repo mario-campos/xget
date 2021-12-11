@@ -205,14 +205,14 @@ static char * extractMD5 (const char *string) {
     char *md5sum = strstr(string, "md5sum");
 
     if (md5sum != NULL) {
-        strncpy(md5ChecksumString, md5sum+8, MD5_STR_SIZE);
+        strlcpy(md5ChecksumString, md5sum+8, sizeof(md5ChecksumString));
         return strdup(md5ChecksumString);
     }
 
     md5sum = strstr(string, "MD5");
 
     if (md5sum != NULL) {
-        strncpy(md5ChecksumString, md5sum+4, MD5_STR_SIZE);
+        strlcpy(md5ChecksumString, md5sum+4, sizeof(md5ChecksumString));
         return strdup(md5ChecksumString);
     }
 
@@ -248,10 +248,10 @@ void dump_event (irc_session_t * session, const char * event, irc_parser_result_
 
     for (cnt = 0; cnt < result->num_params; cnt++) {
         if (cnt)
-            strncat(param_string, "|", 1024 - strlen(param_string) - 1);
+            strlcat(param_string, "|", 1024);
 
         char *message_without_color_codes = irc_color_strip_from_mirc(result->params[cnt]);
-        strncat(param_string, message_without_color_codes, 1024 - strlen(param_string) - 1);
+        strlcat(param_string, message_without_color_codes, 1024);
         free(message_without_color_codes);
     }
 

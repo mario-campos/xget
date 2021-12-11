@@ -33,6 +33,9 @@ jobs:
         language: [ 'cpp' ]
 
     steps:
+    - name: Install libbsd-dev
+      run: sudo apt install libbsd-dev
+
     - name: Checkout repository
       uses: actions/checkout@v2
 
