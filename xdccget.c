@@ -545,12 +545,6 @@ void init_signal(int signum, void (*handler) (int)) {
     }
 }
 
-const char* getHomeDir(void) {
-    struct passwd *pw = getpwuid(getuid());
-    const char *homedir = pw->pw_dir;
-    return homedir;
-}
-
 static char* usage = "usage: xdccget [-46aDqv] [-n <nickname>] [-p <port number>]\n"
                      "[-l <login-command>] [-d <download-directory>]\n"
                      "<server> <channel(s)> <bot cmds>";
@@ -651,11 +645,9 @@ int main (int argc, char **argv)
     cfg.logLevel = LOG_WARN;
     cfg.port = 6667;
 
-    const char *homeDir = getHomeDir();
-    char *targetDir;
-    asprintf(&targetDir, "%s/%s", homeDir, "Downloads");
-
-    cfg.targetDir = targetDir;
+    cfg.targetDir = getwd(NULL);
+    if (cfg.targetDir != NULL)
+        DBG_ERR("cannot get current working directory to download file.");
 
     parseArguments(argc, argv);
 
