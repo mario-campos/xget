@@ -431,7 +431,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
 
     char *fileName = strdup(filename);
 
-    /* chars / and \ are not permitted to appear in a valid filename. if someone wants to send us such a file 
+    /* chars / and \ are not permitted to appear in a valid filename. if someone wants to send us such a file
        then something is definately wrong. so just exit pgm then and print error msg to user.*/
     if (strchr(fileName, '/') || strchr(fileName, '\\')) {
         /* filename contained bad chars. print msg and exit...*/
@@ -439,26 +439,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
         exitPgm(EXIT_FAILURE);
     }
 
-    char * absolutePath;
-
-    if (cfg.targetDir[strlen(cfg.targetDir)-1] != '/') {
-        asprintf(&absolutePath, "%s/", cfg.targetDir);
-    }
-    else {
-        absolutePath = strdup(cfg.targetDir);
-    }
-
-    if (mkdir(absolutePath, 0755) && errno != EEXIST) {
-        DBG_WARN("cant create dir %s", absolutePath);
-        perror("mkdir");
-    }
-
-    char *completePath;
-    asprintf(&completePath, "%s%s", absolutePath, fileName);
-
-    free(absolutePath);
-
-    struct dccDownloadProgress *progress = newDccProgress(completePath, size);
+    struct dccDownloadProgress *progress = newDccProgress(fileName, size);
     curDownload = progress;
 
     struct dccDownloadContext *context = malloc(sizeof(struct dccDownloadContext));
@@ -468,7 +449,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
 
     DBG_OK("nick at recvFileReq is %s\n", nick);
 
-    if (access(completePath, F_OK) == 0) {
+    if (access(filename, F_OK) == 0) {
         struct stat st;
 
         if (stat(filename, &st) != 0) {
@@ -476,12 +457,12 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
             exitPgm(EXIT_FAILURE);
         }
 
-        context->fd = fopen(completePath, "ab");
+        context->fd = fopen(filename, "ab");
 
         off_t fileSize = st.st_size;
 
         if (size == (irc_dcc_size_t) fileSize) {
-            logprintf(LOG_ERR, "file %s is already downloaded, exit pgm now.", completePath);
+            logprintf(LOG_ERR, "file %s is already downloaded, exit pgm now.", filename);
             exitPgm(EXIT_FAILURE);
         }
 
@@ -490,13 +471,13 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
             goto accept_flag;
         }
 
-        logprintf(LOG_INFO, "file %s already exists, need to resume.\n", completePath);
+        logprintf(LOG_INFO, "file %s already exists, need to resume.\n", filename);
         irc_dcc_resume(session, dccid, context, callback_dcc_resume_file, nick, fileSize);
     }
     else {
         int ret;
-        context->fd = fopen(completePath, "wb");
-        logprintf(LOG_INFO, "file %s does not exist. creating file and downloading it now.", completePath);
+        context->fd = fopen(filename, "wb");
+        logprintf(LOG_INFO, "file %s does not exist. creating file and downloading it now.", filename);
 accept_flag:
         ret = irc_dcc_accept(session, dccid, context, callback_dcc_recv_file);
         if (ret != 0) {
@@ -504,8 +485,6 @@ accept_flag:
             exitPgm(EXIT_FAILURE);
         }
     }
-
-    free(fileName);
 }
 
 void print_output_callback (irc_session_t *session) {
