@@ -30,6 +30,9 @@ struct xdccGetConfig *getCfg() {
     return &cfg;
 }
 
+/*
+ * Close IRC sessions and deallocate memory.
+ */
 void doCleanUp() {
     uint32_t i;
     if (cfg.session)
@@ -512,6 +515,9 @@ void print_output_callback (irc_session_t *session) {
     }
 }
 
+/*
+ * This function configures the libircclient event loop.
+ */
 void initCallbacks(irc_callbacks_t *callbacks) {
     memset (callbacks, 0, sizeof(*callbacks));
 
@@ -528,6 +534,10 @@ void initCallbacks(irc_callbacks_t *callbacks) {
     callbacks->keep_alive_callback = print_output_callback;
 }
 
+/*
+ * `init_signal` is a wrapper for `sigaction`; i.e. it defines
+ * a signal handler for the given signal number.
+ */
 void init_signal(int signum, void (*handler) (int)) {
     struct sigaction act;
     int ret;
