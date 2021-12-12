@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <sys/ioctl.h>
 #include <inttypes.h>

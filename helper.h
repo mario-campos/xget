@@ -11,7 +11,6 @@
     #include <openssl/pem.h>
 #endif
 
-#include "libircclient-include/strings_utils.h"
 #include "xdccget.h"
 #include "libircclient.h"
 #include "argument_parser.h"

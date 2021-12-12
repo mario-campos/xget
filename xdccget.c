@@ -223,7 +223,7 @@ static char * extractMD5 (const char *string) {
 }
 
 static void checkMD5ChecksumNotice(const char * event, irc_parser_result_t *result) {
-    if (!str_equals(event, "NOTICE")) {
+    if (strcmp(event, "NOTICE") != 0) {
         return;
     }
 
@@ -295,7 +295,7 @@ void event_notice(irc_session_t * session, const char * event, irc_parser_result
 
 void event_mode(irc_session_t * session, const char * event, irc_parser_result_t *result) {
     if (cfg.login_command != NULL && result->num_params > 1) {
-        if (str_equals(result->params[1], "+v")) {
+        if (strcmp(result->params[1], "+v") == 0) {
             send_xdcc_requests(session);
         }
     }
@@ -304,7 +304,7 @@ void event_mode(irc_session_t * session, const char * event, irc_parser_result_t
 
 void event_umode(irc_session_t * session, const char * event, irc_parser_result_t *result) {
     if (cfg.login_command != NULL) {
-        if (str_equals(result->params[0], "+r")) {
+        if (strcmp(result->params[0], "+r") == 0) {
             join_channels(session);
         }
     }

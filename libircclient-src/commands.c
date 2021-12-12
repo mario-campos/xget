@@ -3,7 +3,6 @@
 #include "commands.h"
 #include "params.h"
 #include "irc_line_parser.h"
-#include "strings_utils.h"
 
 static void irc_ping_command(irc_session_t *session, const char *command, irc_parser_result_t *result);
 static void irc_nick_command(irc_session_t *session, const char *command, irc_parser_result_t *result);
@@ -47,7 +46,7 @@ const irc_command_t* get_command(const char *commandString, size_t n) {
     
     for (; i < commandLength; i++) {
         const irc_command_t *irc_command = &commands[i];
-        if ( strn_equals(commandString, irc_command->name, n) ) {
+        if ( strncmp(commandString, irc_command->name, n) == 0 ) {
             return irc_command;
         }
     }
@@ -65,7 +64,7 @@ static void irc_ping_command(irc_session_t *session, const char *command, irc_pa
 
 static void irc_nick_command (irc_session_t *session, const char *command, irc_parser_result_t *result) {
     
-   if ( strn_equals (result->nick, session->nick, strlen(session->nick)) && result->num_params > 0 )
+   if ( (strncmp(result->nick, session->nick, strlen(session->nick)) == 0) && result->num_params > 0 )
    {
            free (session->nick);
            session->nick = strdup (result->params[0]);
@@ -91,7 +90,7 @@ static void irc_part_command(irc_session_t *session, const char *command, irc_pa
 }
 
 static void irc_mode_command(irc_session_t *session, const char *command, irc_parser_result_t *result) {
-    if ( result->num_params > 0 && strn_equals (result->params[0], session->nick, strlen(session->nick)) )
+    if ( result->num_params > 0 && (strncmp(result->params[0], session->nick, strlen(session->nick)) == 0) )
     {
         result->params[0] = result->params[1];
         result->num_params = 1;
