@@ -75,7 +75,7 @@ static int socket_connect(socket_t * sock, const struct sockaddr *saddr, socklen
             if (socket_error() != EINPROGRESS && socket_error() != EWOULDBLOCK)
                 return 1;
         }
-        DBG_OK("socket_connect succeded!\n");
+        DBG_OK("socket_connect succeded!");
         return 0;
     }
 

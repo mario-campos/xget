@@ -427,7 +427,7 @@ void callback_dcc_resume_file (irc_session_t * session, irc_dcc_t dccid, int sta
 
 void recvFileRequest (irc_session_t *session, const char *nick, const char *addr, const char *filename, irc_dcc_size_t size, irc_dcc_t dccid)
 {
-    DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)\n", dccid, nick, addr, filename, size);
+    DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
 
     char *fileName = strdup(filename);
 
@@ -447,7 +447,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
     numActiveDownloads++;
     context->progress = progress;
 
-    DBG_OK("nick at recvFileReq is %s\n", nick);
+    DBG_OK("nick at recvFileReq is %s", nick);
 
     if (access(filename, F_OK) == 0) {
         struct stat st;
