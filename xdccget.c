@@ -3,16 +3,13 @@
  */
 
 #include <pwd.h>
-#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include <pthread.h>
 #include <inttypes.h>
 #include <sys/stat.h>
-#include <openssl/md5.h>
 
 #include "helper.h"
 
@@ -23,7 +20,6 @@ static struct xdccGetConfig cfg;
 static uint32_t numActiveDownloads = 0;
 static uint32_t finishedDownloads = 0;
 static struct dccDownloadContext **downloadContext = NULL;
-static struct dccDownloadProgress *lastDownload = NULL;
 static struct dccDownloadProgress *curDownload = NULL;
 
 struct xdccGetConfig *getCfg() {
@@ -115,135 +111,6 @@ void output_handler (int signum) {
     cfg_set_bit(getCfg(), OUTPUT_FLAG);
 }
 
-static unsigned char hexCharToBin(char c) {
-    if (c >= '0' && c <= '9') {
-        return c - '0';
-    } else if (c >= 'a' && c <= 'f') {
-        return c - 'a' + 10;
-    } else if (c >= 'A' && c <= 'F') {
-        return c - 'A' + 10;
-    } else {
-        return 0;
-    }
-}
-
-static unsigned char hexToBin(char c1, char c2) {
-    unsigned char temp = 0;
-    temp = hexCharToBin(c2);
-    temp |= hexCharToBin(c1) << 4;
-    return temp;
-}
-
-static unsigned char* convertHashStringToBinary(char *hashString) {
-    unsigned int i, j;
-    unsigned char *hashBinary = (unsigned char*) malloc(sizeof (unsigned char) * MD5_DIGEST_LENGTH);
-    for (i = 0, j = 0; i < MD5_DIGEST_LENGTH; i++, j += 2) {
-        hashBinary[i] = hexToBin(hashString[j], hashString[j + 1]);
-    }
-    return hashBinary;
-}
-
-static void getHashFromFile(char *filename, unsigned char *hash) {
-    MD5_CTX *ctx = malloc(sizeof(MD5_CTX));
-    MD5_Init(ctx);
-
-    char buffer[BUFSIZ + 1];
-    size_t bytesRead;
-    FILE *file;
-
-    file = fopen(filename, "rb");
-
-    do {
-        bytesRead = fread(buffer, 1, BUFSIZ, file);
-        MD5_Update(ctx, buffer, bytesRead);
-    } while (bytesRead == BUFSIZ);
-
-    fclose(file);
-
-    MD5_Final(hash, ctx);
-    free(ctx);
-}
-
-void* checksum_verification_thread(void *args) {
-    struct checksumThreadData *data = args;
-    char * md5ChecksumString = data->expectedHash;
-
-    logprintf(LOG_INFO, "Verifying md5-checksum '%s'!", md5ChecksumString);
-
-    unsigned char hashFromFile[MD5_DIGEST_LENGTH];
-    getHashFromFile(data->completePath , hashFromFile);
-
-    unsigned char *expectedHash = convertHashStringToBinary(md5ChecksumString);
-
-    if (memcmp(expectedHash, hashFromFile, MD5_DIGEST_LENGTH) == 0) {
-        logprintf(LOG_INFO, "Checksum-Verification succeeded!");
-    }
-    else {
-        logprintf(LOG_WARN, "Checksum-Verification failed!");
-    }
-
-    free(expectedHash);
-    free(data->expectedHash);
-    free(data->completePath);
-    free(data);
-
-    return NULL;
-}
-
-void startChecksumThread(char *md5ChecksumSDS, char * completePath) {
-    struct checksumThreadData *threadData = malloc(sizeof(struct checksumThreadData));
-    threadData->completePath = completePath;
-    threadData->expectedHash = md5ChecksumSDS;
-
-    pthread_t threadID;
-
-    pthread_create(&threadID, NULL, checksum_verification_thread, threadData);
-}
-
-static char * extractMD5 (const char *string) {
-    const unsigned int MD5_STR_SIZE = 32;
-    char md5ChecksumString[MD5_STR_SIZE+1];
-    md5ChecksumString[MD5_STR_SIZE] = (char) 0;
-
-    char *md5sum = strstr(string, "md5sum");
-
-    if (md5sum != NULL) {
-        strlcpy(md5ChecksumString, md5sum+8, sizeof(md5ChecksumString));
-        return strdup(md5ChecksumString);
-    }
-
-    md5sum = strstr(string, "MD5");
-
-    if (md5sum != NULL) {
-        strlcpy(md5ChecksumString, md5sum+4, sizeof(md5ChecksumString));
-        return strdup(md5ChecksumString);
-    }
-
-    return NULL;
-}
-
-static void checkMD5ChecksumNotice(const char * event, irc_parser_result_t *result) {
-    if (strcmp(event, "NOTICE") != 0) {
-        return;
-    }
-
-    if (result->num_params != 2) {
-        return;
-    }
-
-    if (lastDownload == NULL) {
-        return;
-    }
-
-    char* md5ChecksumSDS = extractMD5(result->params[1]);
-
-    if (md5ChecksumSDS == NULL) {
-        return;
-    }
-
-    startChecksumThread(md5ChecksumSDS, strdup(lastDownload->completePath));
-}
-
 void dump_event (irc_session_t * session, const char * event, irc_parser_result_t *result)
 {
     char *param_string = calloc(1024, sizeof(char));
@@ -290,7 +157,6 @@ static void send_xdcc_requests(irc_session_t *session) {
 
 void event_notice(irc_session_t * session, const char * event, irc_parser_result_t *result) {
     dump_event(session, event, result);
-    checkMD5ChecksumNotice(event, result);
 }
 
 void event_mode(irc_session_t * session, const char * event, irc_parser_result_t *result) {
@@ -390,7 +256,6 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
     if (unlikely(progress->sizeRcvd == progress->completeFileSize)) {
         alarm(0);
         outputProgress(progress);
-        lastDownload = curDownload;
         printf("\nDownload completed!\n");
         fflush(NULL);
 
