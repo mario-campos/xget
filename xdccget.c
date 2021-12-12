@@ -635,7 +635,7 @@ int main (int argc, char **argv)
     cfg.port = 6667;
 
     cfg.targetDir = getwd(NULL);
-    if (cfg.targetDir != NULL)
+    if (cfg.targetDir == NULL)
         DBG_ERR("cannot get current working directory to download file.");
 
     parseArguments(argc, argv);
