@@ -14,7 +14,6 @@
 #include "libircclient-include/strings_utils.h"
 #include "xdccget.h"
 #include "libircclient.h"
-#include "hashmap.h"
 #include "argument_parser.h"
 
 #define LOG_ERR   0
