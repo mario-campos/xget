@@ -91,6 +91,7 @@ struct xdccGetConfig {
 #define ACCEPT_ALL_NICKS_FLAG     0x07
 #define DONT_CONFIRM_OFFSETS_FLAG 0x08
 
+#define IRC_DCC_SIZE_T_FORMAT PRIu64
 
 struct terminalDimension {
     int rows;

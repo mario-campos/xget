@@ -111,21 +111,21 @@ void output_handler (int signum) {
     cfg_set_bit(getCfg(), OUTPUT_FLAG);
 }
 
-void dump_event (irc_session_t * session, const char * event, irc_parser_result_t *result)
+void dump_event (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
     char *param_string = calloc(1024, sizeof(char));
     unsigned int cnt;
 
-    for (cnt = 0; cnt < result->num_params; cnt++) {
+    for (cnt = 0; cnt < count; cnt++) {
         if (cnt)
             strlcat(param_string, "|", 1024);
 
-        char *message_without_color_codes = irc_color_strip_from_mirc(result->params[cnt]);
+        char *message_without_color_codes = irc_color_strip_from_mirc(params[cnt]);
         strlcat(param_string, message_without_color_codes, 1024);
         free(message_without_color_codes);
     }
 
-    logprintf(LOG_INFO, "Event \"%s\", origin: \"%s\", params: %d [%s]", event, result->nick ? result->nick : "NULL", cnt, param_string);
+    logprintf(LOG_INFO, "Event \"%s\", origin: \"%s\", params: %d [%s]", event, origin ? origin : "NULL", cnt, param_string);
     free(param_string);
 }
 
@@ -155,29 +155,29 @@ static void send_xdcc_requests(irc_session_t *session) {
     }
 }
 
-void event_notice(irc_session_t * session, const char * event, irc_parser_result_t *result) {
-    dump_event(session, event, result);
+void event_notice(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count) {
+    dump_event(session, event, origin, params, count);
 }
 
-void event_mode(irc_session_t * session, const char * event, irc_parser_result_t *result) {
-    if (cfg.login_command != NULL && result->num_params > 1) {
-        if (strcmp(result->params[1], "+v") == 0) {
+void event_mode(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count) {
+    if (cfg.login_command != NULL && count > 1) {
+        if (strcmp(params[1], "+v") == 0) {
             send_xdcc_requests(session);
         }
     }
 
 }
 
-void event_umode(irc_session_t * session, const char * event, irc_parser_result_t *result) {
+void event_umode(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count) {
     if (cfg.login_command != NULL) {
-        if (strcmp(result->params[0], "+r") == 0) {
+        if (strcmp(params[0], "+r") == 0) {
             join_channels(session);
         }
     }
 }
 
 
-void event_join (irc_session_t * session, const char * event, irc_parser_result_t *result)
+void event_join (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
     irc_cmd_user_mode (session, "+i");
 
@@ -208,13 +208,9 @@ static void send_login_command(irc_session_t *session) {
 }
 
 
-void event_connect (irc_session_t *session, const char * event, irc_parser_result_t *result)
+void event_connect (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
-    dump_event (session, event, result);
-
-#ifdef ENABLE_SSL
-    logprintf(LOG_INFO, "using cipher suite: %s", irc_get_ssl_ciphers_used(session));
-#endif
+    dump_event (session, event, origin, params, count);
 
     if (cfg.login_command != NULL) {
         send_login_command(session);
@@ -226,7 +222,7 @@ void event_connect (irc_session_t *session, const char * event, irc_parser_resul
 
 // This callback is used when we receive a file from the remote party
 
-void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, irc_dcc_size_t length) {
+void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, unsigned int length) {
     if (data == NULL) {
         DBG_WARN("callback_dcc_recv_file called with data = NULL!");
         return;
@@ -290,7 +286,7 @@ void callback_dcc_resume_file (irc_session_t * session, irc_dcc_t dccid, int sta
     DBG_OK("after irc_dcc_accept!\n");
 }
 
-void recvFileRequest (irc_session_t *session, const char *nick, const char *addr, const char *filename, irc_dcc_size_t size, irc_dcc_t dccid)
+void recvFileRequest (irc_session_t *session, const char *nick, const char *addr, const char *filename, unsigned long size, unsigned int dccid)
 {
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
 
@@ -335,9 +331,6 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
         if (fileSize == 0) {
             goto accept_flag;
         }
-
-        logprintf(LOG_INFO, "file %s already exists, need to resume.\n", filename);
-        irc_dcc_resume(session, dccid, context, callback_dcc_resume_file, nick, fileSize);
     }
     else {
         int ret;
@@ -375,7 +368,6 @@ void initCallbacks(irc_callbacks_t *callbacks) {
     callbacks->event_notice = event_notice;
     callbacks->event_umode = event_umode;
     callbacks->event_mode = event_mode;
-    callbacks->keep_alive_callback = print_output_callback;
 }
 
 /*
@@ -530,13 +522,10 @@ int main (int argc, char **argv)
     }
 
     logprintf(LOG_INFO, "nick is %s\n", cfg.nick);
-
-#ifdef ENABLE_SSL
-    irc_set_cert_verify_callback(cfg.session, openssl_check_certificate_callback);
-#endif
+    irc_option_set(cfg.session, LIBIRC_OPTION_DEBUG);
 
     if (cfg_get_bit(&cfg, USE_IPV4_FLAG)) {
-        ret = irc_connect4(cfg.session, cfg.ircServer, cfg.port, 0, cfg.nick, 0, 0);
+        ret = irc_connect(cfg.session, cfg.ircServer, cfg.port, 0, cfg.nick, 0, 0);
     }
 #ifdef ENABLE_IPV6
     else if (cfg_get_bit(&cfg, USE_IPV6_FLAG)) {
