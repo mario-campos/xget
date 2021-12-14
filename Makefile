@@ -1,6 +1,6 @@
 PROG = xdccget
 LIBS = -lpthread `pkg-config --libs openssl` `pkg-config --silence-errors --libs libbsd`
-CFLAGS += -std=gnu99 -D_FILE_OFFSET_BITS=64 -DENABLE_SSL -DENABLE_IPV6 -DHAVE_POLL -Wall -Wfatal-errors -Os -fstack-protector -Ilibircclient-include `pkg-config --cflags openssl`
+CFLAGS += -std=gnu99 -D_FILE_OFFSET_BITS=64 -DENABLE_SSL -DENABLE_IPV6 -DHAVE_POLL -Ilibircclient-include `pkg-config --cflags openssl`
 
 SRCS = xdccget.c \
        helper.c \
