@@ -1,7 +1,7 @@
 diff --git a/libircclient-1.6/src/dcc.c b/libircclient-1.6/src/dcc.c
 index b245ae7..70ee7bd 100644
---- a/libircclient-1.6/src/dcc.c
-+++ b/libircclient-1.6/src/dcc.c
+--- a/libircclient-1.10/src/dcc.c
++++ b/libircclient-1.10/src/dcc.c
 @@ -732,6 +732,34 @@ static void libirc_dcc_request (irc_session_t * session, const char * nick, cons
  
  		return;

@@ -1,5 +1,5 @@
 PROG = xdccget
-LIBIRCCLIENT = libircclient-1.6
+LIBIRCCLIENT = libircclient-1.10
 LIBS = `pkg-config --silence-errors --libs libbsd`
 CFLAGS += -std=gnu99 -D_FILE_OFFSET_BITS=64 -I$(LIBIRCCLIENT)/include
 
