@@ -1,0 +1,26 @@
+diff --git a/libircclient-1.10/src/dcc.c b/libircclient-1.10/src/dcc.c
+index a52d7d2..8d657b3 100644
+--- a/libircclient-1.10/src/dcc.c
++++ b/libircclient-1.10/src/dcc.c
+@@ -12,6 +12,8 @@
+  * License for more details.
+  */
+ 
++#include <arpa/inet.h>
++
+ #define LIBIRC_DCC_CHAT			1
+ #define LIBIRC_DCC_SENDFILE		2
+ #define LIBIRC_DCC_RECVFILE		3
+@@ -375,10 +377,8 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
+                              	dcc->file_confirm_offset += offset;
+ 								
+ 								// Store as big endian
+-								dcc->outgoing_buf[0] = (char) dcc->file_confirm_offset >> 24;
+-								dcc->outgoing_buf[1] = (char) dcc->file_confirm_offset >> 16;
+-								dcc->outgoing_buf[2] = (char) dcc->file_confirm_offset >> 8;
+-								dcc->outgoing_buf[3] = (char) dcc->file_confirm_offset;
++                                unsigned int file_confirm_offset = htonl(dcc->file_confirm_offset);
++                                memcpy(dcc->outgoing_buf, &file_confirm_offset, sizeof(file_confirm_offset));
+                              	dcc->outgoing_offset = 4;
+ 							}
+ 						}
