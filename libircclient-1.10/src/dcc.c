@@ -737,6 +737,34 @@ static void libirc_dcc_request (irc_session_t * session, const char * nick, cons
 
 		return;
 	}
+    /*
+     * If the filename contains space characters, it will be delimited by double-quotes,
+     * which won't be scanned with `%s`.
+     */
+    else if (sscanf(req, "DCC SEND \"%[^\"]\" %lu %hu %lu", filenamebuf, &ip, &port, &size) == 4) {
+        if ( session->callbacks.event_dcc_send_req )
+        {
+            irc_dcc_session_t * dcc;
+
+            int err = libirc_new_dcc_session (session, ip, port, LIBIRC_DCC_RECVFILE, 0, &dcc);
+            if ( err )
+            {
+                session->lasterror = err;
+                return;
+            }
+
+            (*session->callbacks.event_dcc_send_req) (session,
+                                                      nick,
+                                                      inet_ntoa (dcc->remote_addr.sin_addr),
+                                                      filenamebuf,
+                                                      size,
+                                                      dcc->id);
+
+            dcc->received_file_size = size;
+        }
+
+        return;
+    }
 	else if ( sscanf (req, "DCC SEND %s %lu %hu %lu", filenamebuf, &ip, &port, &size) == 4 )
 	{
 		if ( session->callbacks.event_dcc_send_req )
