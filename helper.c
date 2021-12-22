@@ -1,12 +1,12 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <sys/ioctl.h>
 #include <inttypes.h>
-#include <openssl/x509v3.h>
 
 #include "helper.h"
 

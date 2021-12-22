@@ -3,6 +3,8 @@
 
 #include "helper.h"
 
+typedef uint64_t irc_dcc_size_t;
+
 struct dccDownload {
     char *botNick;
     char *xdccCmd;
