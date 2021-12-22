@@ -4,10 +4,10 @@ on:
   push:
     branches: [ master ]
     paths-ignore:
-    - README.md
-    - LICENSE
-    - .gitignore
-    - .github/workflows/codeql-analysis.yml
+      - '.github/workflows/**'
+      - .gitignore
+      - README.md
+      - LICENSE
   pull_request:
     branches: [ master ]
 
