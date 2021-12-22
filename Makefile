@@ -1,7 +1,7 @@
 PROG = xdccget
 LIBIRCCLIENT = libircclient-1.10
-LIBS = `pkg-config --silence-errors --libs libbsd`
-CFLAGS += -std=gnu99 -D_FILE_OFFSET_BITS=64 -I$(LIBIRCCLIENT)/include
+LIBS = `pkg-config --silence-errors --libs libbsd-overlay`
+CFLAGS += -std=gnu99 -D_FILE_OFFSET_BITS=64 -I$(LIBIRCCLIENT)/include `pkg-config --silence-errors --cflags libbsd-overlay`
 
 SRCS = xdccget.c \
        helper.c \
