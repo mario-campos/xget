@@ -36,7 +36,7 @@ jobs:
     - name: build
       run: make
       env:
-        CFLAGS: -Wall -Wextra -Wfatal-errors
+        CFLAGS: -Wall -Wextra
   
   macOS:
     runs-on: macos-latest
