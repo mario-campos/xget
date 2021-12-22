@@ -491,7 +491,7 @@ int main (int argc, char **argv)
     cfg.logLevel = LOG_WARN;
     cfg.port = 6667;
 
-    cfg.targetDir = getwd(NULL);
+    cfg.targetDir = getcwd(NULL, 0);
     if (cfg.targetDir == NULL)
         DBG_ERR("cannot get current working directory to download file.");
 
