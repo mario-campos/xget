@@ -716,8 +716,7 @@ void parseArguments(int argc, char **argv) {
             case 'V': {
                 unsigned int major, minor;
                 irc_get_version(&major, &minor);
-                puts("xdccget-0.0.0");
-                printf("libircclient-%d.%02d\n", major, minor);
+                printf("xdccget-0.0.0\nlibircclient-%d.%02d\n", major, minor);
                 exit(0);
             }
             case 'h':
