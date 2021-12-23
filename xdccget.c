@@ -146,17 +146,6 @@ struct dccDownload* newDccDownload(char *botNick, char *xdccCmd) {
     return t;
 }
 
-struct dccDownloadProgress* newDccProgress(char *completePath, irc_dcc_size_t complFileSize) {
-    struct dccDownloadProgress *t = (struct dccDownloadProgress*)malloc(sizeof (struct dccDownloadProgress));
-    t->completeFileSize = complFileSize;
-    t->sizeRcvd = 0;
-    t->sizeNow = 0;
-    t->sizeLast = 0;
-    t->completePath = completePath;
-    return t;
-
-}
-
 void parseDccDownload(char *dccDownloadString, char **nick, char **xdccCmd) {
     size_t i;
     size_t strLen = strlen(dccDownloadString);
@@ -779,7 +768,12 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
         exitPgm(EXIT_FAILURE);
     }
 
-    struct dccDownloadProgress *progress = newDccProgress(fileName, size);
+    struct dccDownloadProgress *progress = malloc(sizeof(*progress));
+    progress->completeFileSize = size;
+    progress->sizeRcvd = 0;
+    progress->sizeNow = 0;
+    progress->sizeLast = 0;
+    progress->completePath = fileName;
     curDownload = progress;
 
     struct dccDownloadContext *context = malloc(sizeof(struct dccDownloadContext));
