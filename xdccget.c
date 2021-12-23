@@ -1,7 +1,3 @@
-/*
-	xdccget -- download files from xdcc via cmd line
- */
-
 #include <pwd.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,8 +5,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <inttypes.h>
-#include <sys/stat.h>
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
@@ -527,9 +521,8 @@ static void join_channels(irc_session_t *session) {
 }
 
 static void send_xdcc_requests(irc_session_t *session) {
-    int i;
     if (!cfg_get_bit(&cfg, SENDED_FLAG)) {
-        for (i = 0; cfg.dccDownloadArray[i] != NULL; i++) {
+        for (int i = 0; cfg.dccDownloadArray[i] != NULL; i++) {
             char *botNick = cfg.dccDownloadArray[i]->botNick;
             char *xdccCommand = cfg.dccDownloadArray[i]->xdccCmd;
 
@@ -613,6 +606,11 @@ void event_connect (irc_session_t * session, const char * event, const char * or
 // This callback is used when we receive a file from the remote party
 
 void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, unsigned int length) {
+    if (status) {
+        DBG_ERR("File sent error: %d\nerror desc: %s", status, irc_strerror(status));
+        return;
+    }
+
     if (data == NULL) {
         DBG_WARN("callback_dcc_recv_file called with data = NULL!");
         return;
@@ -628,11 +626,6 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
         return;
     }
 
-    if (status) {
-        DBG_ERR("File sent error: %d\nerror desc: %s", status, irc_strerror(status));
-        return;
-    }
-
     struct dccDownloadContext *context = (struct dccDownloadContext*) ctx;
     struct dccDownloadProgress *progress = context->progress;
 
@@ -642,8 +635,6 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
     if (progress->sizeRcvd == progress->completeFileSize) {
         alarm(0);
         outputProgress(progress);
-        printf("\nDownload completed!\n");
-        fflush(NULL);
 
         fclose(context->fd);
         context->fd = NULL;
