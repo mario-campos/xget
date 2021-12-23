@@ -138,9 +138,6 @@ struct dccDownloadProgress {
     irc_dcc_size_t sizeLast;
     char *completePath;
 };
-struct xdccGetConfig *getCfg() {
-    return &cfg;
-}
 
 struct dccDownload* newDccDownload(char *botNick, char *xdccCmd) {
     struct dccDownload *t = (struct dccDownload*)malloc(sizeof (struct dccDownload));
@@ -296,9 +293,8 @@ static inline void logprintf_line (FILE *stream, char *color_code, char *prefix,
 
 void logprintf(int logLevel, char *formatString, ...) {
     va_list va_alist;
-    struct xdccGetConfig *cfg = getCfg();
 
-    if (cfg->logLevel == LOG_QUIET) {
+    if (cfg.logLevel == LOG_QUIET) {
         return;
     }
 
@@ -306,12 +302,12 @@ void logprintf(int logLevel, char *formatString, ...) {
 
     switch (logLevel) {
         case LOG_INFO:
-            if (cfg->logLevel >= LOG_INFO) {
+            if (cfg.logLevel >= LOG_INFO) {
                 logprintf_line(stdout, KGRN, "Info", formatString, va_alist);
             }
             break;
         case LOG_WARN:
-            if (cfg->logLevel >= LOG_WARN) {
+            if (cfg.logLevel >= LOG_WARN) {
                 logprintf_line(stderr, KYEL, "Warning", formatString, va_alist);
             }
             break;
@@ -611,7 +607,7 @@ void interrupt_handler(int signum) {
 
 void output_handler (int signum) {
     alarm(1);
-    cfg_set_bit(getCfg(), OUTPUT_FLAG);
+    cfg_set_bit(&cfg, OUTPUT_FLAG);
 }
 
 void dump_event (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
