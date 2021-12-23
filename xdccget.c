@@ -149,12 +149,6 @@ struct dccDownload* newDccDownload(char *botNick, char *xdccCmd) {
     return t;
 }
 
-void freeDccDownload(struct dccDownload *t) {
-    free(t->botNick);
-    free(t->xdccCmd);
-    free(t);
-}
-
 struct dccDownloadProgress* newDccProgress(char *completePath, irc_dcc_size_t complFileSize) {
     struct dccDownloadProgress *t = (struct dccDownloadProgress*)malloc(sizeof (struct dccDownloadProgress));
     t->completeFileSize = complFileSize;
@@ -569,7 +563,9 @@ void doCleanUp() {
     }
 
     for (i = 0; cfg.dccDownloadArray[i]; i++) {
-        freeDccDownload(cfg.dccDownloadArray[i]);
+        free(cfg.dccDownloadArray[i]->botNick);
+        free(cfg.dccDownloadArray[i]->xdccCmd);
+        free(cfg.dccDownloadArray[i]);
     }
 
     for (i = 0; i < cfg.numDownloads && downloadContext[i]; i++) {
