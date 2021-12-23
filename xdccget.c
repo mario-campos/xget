@@ -76,7 +76,6 @@ struct xdccGetConfig {
 #define USE_IPV6_FLAG	          0x04
 #define SENDED_FLAG               0x06
 #define ACCEPT_ALL_NICKS_FLAG     0x07
-#define DONT_CONFIRM_OFFSETS_FLAG 0x08
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
 #define NICKLEN 20
@@ -654,7 +653,7 @@ void parseArguments(int argc, char **argv) {
 
     cfg.logLevel = LOG_INFO;
 
-    while ((opt = getopt(argc, argv, "Vhqvkd:n:p:aD46")) != -1) {
+    while ((opt = getopt(argc, argv, "Vhqvkd:n:p:a46")) != -1) {
         switch (opt) {
             case 'V': {
                 unsigned int major, minor;
@@ -697,10 +696,6 @@ void parseArguments(int argc, char **argv) {
 
             case 'a':
                 cfg_set_bit(&cfg, ACCEPT_ALL_NICKS_FLAG);
-                break;
-
-            case 'D':
-                cfg_set_bit(&cfg, DONT_CONFIRM_OFFSETS_FLAG);
                 break;
 
             case '4':
