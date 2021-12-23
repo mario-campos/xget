@@ -19,11 +19,6 @@
 
 #include "libircclient.h"
 
-#ifdef ENABLE_SSL
-#include <openssl/ssl.h>
-#include <openssl/pem.h>
-#endif
-
 #define LOG_ERR   0
 #define LOG_QUIET 1
 #define LOG_WARN  2
@@ -111,10 +106,6 @@ static uint32_t numActiveDownloads = 0;
 static uint32_t finishedDownloads = 0;
 static struct dccDownloadContext **downloadContext = NULL;
 static struct dccDownloadProgress *curDownload = NULL;
-
-#ifdef ENABLE_SSL
-int openssl_check_certificate_callback(int preverify_ok, X509_STORE_CTX *ctx);
-#endif
 
 struct dccDownload {
     char *botNick;
@@ -454,71 +445,6 @@ void outputProgress(struct dccDownloadProgress *progress) {
         printf(" ");
     }
 }
-
-#ifdef ENABLE_SSL
-
-static void print_validation_errstr(long verify_result) {
-    logprintf(LOG_ERR, "There was a problem with the server certificate:");
-
-    switch (verify_result) {
-    case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
-        logprintf(LOG_ERR, "Unable to locally verify the issuer's authority.");
-        break;
-    case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
-    case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-        logprintf(LOG_ERR, "Self-signed certificate encountered.");
-        break;
-    case X509_V_ERR_CERT_NOT_YET_VALID:
-        logprintf(LOG_ERR, "Issued certificate not yet valid.");
-        break;
-    case X509_V_ERR_CERT_HAS_EXPIRED:
-        logprintf(LOG_ERR, "Issued certificate has expired.");
-        break;
-    default:
-        logprintf(LOG_ERR, "  %s", X509_verify_cert_error_string(verify_result));
-    }
-}
-
-int openssl_check_certificate_callback(int verify_result, X509_STORE_CTX *ctx) {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    X509* cert = ctx->cert;
-#else
-    X509* cert = X509_STORE_CTX_get0_cert(ctx);
-#endif
-
-    struct xdccGetConfig *cfg = getCfg();
-
-    if (cert == NULL) {
-        logprintf(LOG_ERR, "Got no certificate from the server.");
-        return 0;
-    }
-
-    char *subj = X509_NAME_oneline(X509_get_subject_name(cert), NULL, 0);
-    char *issuer = X509_NAME_oneline(X509_get_issuer_name(cert), NULL, 0);
-
-    logprintf(LOG_INFO, "Got the following certificate with");
-    logprintf(LOG_INFO, "%s", subj);
-    logprintf(LOG_INFO, "The issuer was:");
-    logprintf(LOG_INFO, "%s", issuer);
-
-    if (!verify_result) {
-        print_validation_errstr(X509_STORE_CTX_get_error(ctx));
-    }
-    else {
-        logprintf(LOG_INFO, "This certificate is trusted");
-    }
-
-    free(subj);
-    free(issuer);
-
-    if (cfg_get_bit(cfg, ALLOW_ALL_CERTS_FLAG)) {
-        return 1;
-    }
-
-    return verify_result;
-}
-
-#endif
 
 /*
  * Close IRC sessions and deallocate memory.
