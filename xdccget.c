@@ -815,12 +815,9 @@ void parseArguments(int argc, char **argv) {
             case '4':
                 cfg_set_bit(&cfg, USE_IPV4_FLAG);
                 break;
-
-#ifdef ENABLE_IPV6
             case '6':
                 cfg_set_bit(&cfg, USE_IPV6_FLAG);
                 break;
-#endif
             case '?':
                 logprintf(LOG_ERR, "%s\n", usage);
                 exit(EXIT_FAILURE);
@@ -894,11 +891,9 @@ int main (int argc, char **argv)
     if (cfg_get_bit(&cfg, USE_IPV4_FLAG)) {
         ret = irc_connect(cfg.session, cfg.ircServer, cfg.port, 0, cfg.nick, 0, 0);
     }
-#ifdef ENABLE_IPV6
     else if (cfg_get_bit(&cfg, USE_IPV6_FLAG)) {
         ret = irc_connect6(cfg.session, cfg.ircServer, cfg.port, 0, cfg.nick, 0, 0);
     }
-#endif
     else {
         ret = irc_connect(cfg.session, cfg.ircServer, cfg.port, 0, cfg.nick, 0, 0);
     }
