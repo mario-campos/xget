@@ -97,8 +97,6 @@ struct dccDownloadContext {
     FILE *fd;
 };
 
-typedef uint64_t irc_dcc_size_t;
-
 static struct xdccGetConfig cfg;
 
 static uint32_t numActiveDownloads = 0;
@@ -111,10 +109,10 @@ struct dccDownload {
 };
 
 struct dccDownloadProgress {
-    irc_dcc_size_t completeFileSize;
-    irc_dcc_size_t sizeRcvd;
-    irc_dcc_size_t sizeNow;
-    irc_dcc_size_t sizeLast;
+    uint64_t completeFileSize;
+    uint64_t sizeRcvd;
+    uint64_t sizeNow;
+    uint64_t sizeLast;
     char *completePath;
 };
 
@@ -342,7 +340,7 @@ void printProgressBar(const int numBars, const double percentRdy) {
     putchar(']');
 }
 
-int printSize(irc_dcc_size_t size) {
+int printSize(uint64_t size) {
     char *sizeNames[] = {"Byte", "KByte", "MByte", "GByte", "TByte", "PByte"};
 
     double temp = (double) size;
@@ -399,9 +397,9 @@ void outputProgress(struct dccDownloadProgress *progress) {
     progress->sizeLast = progress->sizeNow;
     progress->sizeNow = progress->sizeRcvd;
 
-    irc_dcc_size_t temp = (progress->completeFileSize == 0) ? 0 : progress->sizeRcvd * 1000000L / progress->completeFileSize;
+    uint64_t temp = (progress->completeFileSize == 0) ? 0 : progress->sizeRcvd * 1000000L / progress->completeFileSize;
     double curProcess = (double) temp / 1000000;
-    irc_dcc_size_t curSpeed = progress->sizeNow - progress->sizeLast;
+    uint64_t curSpeed = progress->sizeNow - progress->sizeLast;
 
     int printedChars = progBarLen + 2;
 
@@ -422,7 +420,7 @@ void outputProgress(struct dccDownloadProgress *progress) {
     printedChars += printf("/s|");
 
     /*calc ETA - max 13 chars */
-    irc_dcc_size_t remainingSize = progress->completeFileSize - progress->sizeRcvd;
+    uint64_t remainingSize = progress->completeFileSize - progress->sizeRcvd;
     if (remainingSize > 0 && curSpeed > 0) {
         double etaSeconds = ((double) remainingSize / (double) curSpeed);
         printedChars += printETA(etaSeconds);
