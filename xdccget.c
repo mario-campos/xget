@@ -678,7 +678,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
     context->fd = fopen(filename, "wb");
     logprintf(LOG_INFO, "file %s does not exist. creating file and downloading it now.", filename);
     if (irc_dcc_accept(session, dccid, context, callback_dcc_recv_file) != 0) {
-        logprintf(LOG_ERR, "Could not connect to bot\nError was: %s\n", irc_strerror(irc_errno(cfg.session)));
+        logprintf(LOG_ERR, "error: could not connect to bot: %s", irc_strerror(irc_errno(cfg.session)));
         exitPgm(EXIT_FAILURE);
     }
 }
@@ -773,7 +773,7 @@ void parseArguments(int argc, char **argv) {
                 break;
             case '?':
             default:
-                logprintf(LOG_ERR, "%s\n", usage);
+                logprintf(LOG_ERR, "%s", usage);
                 exit(EXIT_FAILURE);
         }
     }
@@ -830,7 +830,7 @@ int main (int argc, char **argv)
     cfg.session = irc_create_session (&callbacks);
 
     if (!cfg.session) {
-        logprintf(LOG_ERR, "Could not create session\n");
+        logprintf(LOG_ERR, "Could not create session");
         exitPgm(EXIT_FAILURE);
     }
 
@@ -839,7 +839,7 @@ int main (int argc, char **argv)
         createRandomNick(NICKLEN, cfg.nick);
     }
 
-    logprintf(LOG_INFO, "nick is %s\n", cfg.nick);
+    logprintf(LOG_INFO, "nick is %s", cfg.nick);
     irc_option_set(cfg.session, LIBIRC_OPTION_DEBUG);
 
     if (cfg_get_bit(&cfg, USE_IPV4_FLAG)) {
@@ -853,7 +853,7 @@ int main (int argc, char **argv)
     }
 
     if (ret != 0) {
-        logprintf(LOG_ERR, "Could not connect to server %s and port %u.\nError was: %s\n", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
+        logprintf(LOG_ERR, "error: could not connect to server %s:%u: %s", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
         exitPgm(EXIT_FAILURE);
     }
 
@@ -861,7 +861,7 @@ int main (int argc, char **argv)
 
     if (irc_run(cfg.session) != 0) {
         if (irc_errno(cfg.session) != LIBIRC_ERR_TERMINATED && irc_errno(cfg.session) != LIBIRC_ERR_CLOSED) {
-            logprintf(LOG_ERR, "Could not connect or I/O error at server %s and port %u\nError was:%s\n", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
+            logprintf(LOG_ERR, "error: could not connect or I/O error at server %s:%u: %s\n", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
             exitPgm(EXIT_FAILURE);
         }
     }
