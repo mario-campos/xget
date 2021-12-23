@@ -223,7 +223,7 @@ inline int cfg_get_bit(struct xdccGetConfig *config, int bitNum) {
     return get_bit(&config->flags, bitNum);
 }
 
-static inline void logprintf_line (FILE *stream, char *color_code, char *prefix, char *formatString, va_list va_alist) {
+static inline void logprintf_line(FILE *stream, char *color_code, char *prefix, char *formatString, va_list va_alist) {
     fprintf(stream, "%s[%s] - ", color_code, prefix);
     vfprintf(stream, formatString, va_alist);
     fprintf(stream, "%s\n", KNRM);
@@ -684,9 +684,11 @@ void parseArguments(int argc, char **argv) {
             case '4':
                 cfg_set_bit(&cfg, USE_IPV4_FLAG);
                 break;
+
             case '6':
                 cfg_set_bit(&cfg, USE_IPV6_FLAG);
                 break;
+
             case '?':
             default:
                 logprintf(LOG_ERR, "%s", usage);
@@ -704,7 +706,7 @@ void parseArguments(int argc, char **argv) {
     }
 }
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     int ret;
 
@@ -739,7 +741,7 @@ int main (int argc, char **argv)
     callbacks.event_umode = event_umode;
     callbacks.event_mode = event_mode;
 
-    cfg.session = irc_create_session (&callbacks);
+    cfg.session = irc_create_session(&callbacks);
     if (!cfg.session) {
         logprintf(LOG_ERR, "Could not create session");
         exitPgm(EXIT_FAILURE);
