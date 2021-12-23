@@ -664,7 +664,7 @@ void parseArguments(int argc, char **argv) {
             }
             case 'h':
                 puts(usage);
-                exit(EXIT_FAILURE);
+                exit(EXIT_SUCCESS);
 
             case 'q':
                 DBG_OK("setting log-level as quiet.");
@@ -717,7 +717,7 @@ void parseArguments(int argc, char **argv) {
     }
 
     if (optind >= argc || (argc - optind) > 3) {
-        puts(usage);
+        fprintf(stderr, "%s\n", usage);
         exit(EXIT_FAILURE);
     }
 
