@@ -277,9 +277,6 @@ struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *nu
 
 struct terminalDimension terminal_dimension;
 
-static inline void clear_bit(bitset_t *x, int bitNum) {
-    *x &= ~(1L << bitNum);
-}
 
 static inline void set_bit(bitset_t *x, int bitNum) {
     *x |= (1L << bitNum);
@@ -291,14 +288,8 @@ static inline int get_bit(bitset_t *x, int bitNum) {
     return bit;
 }
 
-void cfg_clear_bit(struct xdccGetConfig *config, int bitNum);
 void cfg_set_bit(struct xdccGetConfig *config, int bitNum);
 int cfg_get_bit(struct xdccGetConfig *config, int bitNum);
-
-
-inline void cfg_clear_bit(struct xdccGetConfig *config, int bitNum) {
-    clear_bit(&config->flags, bitNum);
-}
 
 inline void cfg_set_bit(struct xdccGetConfig *config, int bitNum) {
     set_bit(&config->flags, bitNum);
@@ -626,30 +617,6 @@ void interrupt_handler(int signum) {
     }
 }
 
-void output_all_progesses() {
-    unsigned int i;
-
-    if (numActiveDownloads < 1) {
-        printf("Please wait until the download is started!\r");
-    }
-    else {
-        for (i = 0; i < numActiveDownloads; i++) {
-            outputProgress(downloadContext[i]->progress);
-
-            if (numActiveDownloads != 1) {
-                printf("\n");
-            }
-        }
-    }
-
-    fflush(stdout);
-
-    if (numActiveDownloads == 1) {
-        /* send \r so that we override this line the next time...*/
-        printf("\r");
-    }
-}
-
 void output_handler (int signum) {
     alarm(1);
     cfg_set_bit(getCfg(), OUTPUT_FLAG);
@@ -810,26 +777,6 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
     }
 }
 
-void callback_dcc_resume_file (irc_session_t * session, irc_dcc_t dccid, int status, void * ctx, const char * data, irc_dcc_size_t length) {
-    struct dccDownloadContext *context = (struct dccDownloadContext*) ctx;
-
-    DBG_OK("got to callback_dcc_resume_file\n");
-    fseek(context->fd, length, SEEK_SET);
-    DBG_OK("before irc_dcc_accept!\n");
-
-    struct dccDownloadProgress *tdp = context->progress;
-    tdp->sizeRcvd = length;
-
-    int ret = irc_dcc_accept (session, dccid, ctx, callback_dcc_recv_file);
-
-    if (ret != 0) {
-        logprintf(LOG_ERR, "Could not connect to bot\nError was: %s\n", irc_strerror(irc_errno(cfg.session)));
-        exitPgm(EXIT_FAILURE);
-    }
-
-    DBG_OK("after irc_dcc_accept!\n");
-}
-
 void recvFileRequest (irc_session_t *session, const char *nick, const char *addr, const char *filename, unsigned long size, unsigned int dccid)
 {
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
@@ -886,13 +833,6 @@ accept_flag:
             logprintf(LOG_ERR, "Could not connect to bot\nError was: %s\n", irc_strerror(irc_errno(cfg.session)));
             exitPgm(EXIT_FAILURE);
         }
-    }
-}
-
-void print_output_callback (irc_session_t *session) {
-    if (unlikely(cfg_get_bit(getCfg(), OUTPUT_FLAG))) {
-        output_all_progesses();
-        cfg_clear_bit(getCfg(), OUTPUT_FLAG);
     }
 }
 
