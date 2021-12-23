@@ -875,9 +875,7 @@ void init_signal(int signum, void (*handler) (int)) {
     }
 }
 
-static char* usage = "usage: xdccget [-46aDqv] [-n <nickname>] [-p <port number>]\n"
-                     "[-l <login-command>] [-d <download-directory>]\n"
-                     "<server> <channel(s)> <bot cmds>";
+static char* usage = "usage: xdccget [-46aDqv] [-n <nick>] [-p <port>] [-l <login command>] [-d <path>] <server> <channel(s)> <XDCC command>";
 
 void parseArguments(int argc, char **argv) {
     int opt;
@@ -894,7 +892,7 @@ void parseArguments(int argc, char **argv) {
                 exit(0);
             }
             case 'h':
-                logprintf(LOG_ERR, "%s\n", usage);
+                puts(usage);
                 exit(EXIT_FAILURE);
 
             case 'q':
@@ -955,7 +953,7 @@ void parseArguments(int argc, char **argv) {
     }
 
     if (optind >= argc || (argc - optind) > 3) {
-        logprintf(LOG_ERR, "%s\n", usage);
+        puts(usage);
         exit(EXIT_FAILURE);
     }
 
