@@ -493,24 +493,6 @@ void output_handler() {
     cfg_set_bit(&cfg, OUTPUT_FLAG);
 }
 
-void dump_event (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
-{
-    char *param_string = calloc(1024, sizeof(char));
-    unsigned int cnt;
-
-    for (cnt = 0; cnt < count; cnt++) {
-        if (cnt)
-            strlcat(param_string, "|", 1024);
-
-        char *message_without_color_codes = irc_color_strip_from_mirc(params[cnt]);
-        strlcat(param_string, message_without_color_codes, 1024);
-        free(message_without_color_codes);
-    }
-
-    logprintf(LOG_INFO, "Event \"%s\", origin: \"%s\", params: %d [%s]", event, origin ? origin : "NULL", cnt, param_string);
-    free(param_string);
-}
-
 static void join_channels(irc_session_t *session) {
     for (uint32_t i = 0; i < cfg.numChannels; i++) {
         logprintf(LOG_INFO, "joining %s\n", cfg.channelsToJoin[i]);
@@ -534,10 +516,6 @@ static void send_xdcc_requests(irc_session_t *session) {
 
         cfg_set_bit(&cfg, SENDED_FLAG);
     }
-}
-
-void event_notice(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count) {
-    dump_event(session, event, origin, params, count);
 }
 
 void event_mode(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count) {
@@ -780,7 +758,6 @@ int main (int argc, char **argv)
     callbacks.event_connect = event_connect;
     callbacks.event_join = event_join;
     callbacks.event_dcc_send_req = recvFileRequest;
-    callbacks.event_notice = event_notice;
     callbacks.event_umode = event_umode;
     callbacks.event_mode = event_mode;
 
