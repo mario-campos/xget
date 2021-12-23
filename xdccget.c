@@ -816,19 +816,15 @@ int main (int argc, char **argv)
     init_signal(SIGALRM, output_handler);
 
     irc_callbacks_t callbacks;
-    memset(&callbacks, 0, sizeof(callbacks));
+    bzero(&callbacks, sizeof(callbacks));
     callbacks.event_connect = event_connect;
     callbacks.event_join = event_join;
     callbacks.event_dcc_send_req = recvFileRequest;
-    callbacks.event_ctcp_rep = dump_event;
-    callbacks.event_ctcp_action = dump_event;
-    callbacks.event_unknown = dump_event;
-    callbacks.event_privmsg = dump_event;
     callbacks.event_notice = event_notice;
     callbacks.event_umode = event_umode;
     callbacks.event_mode = event_mode;
-    cfg.session = irc_create_session (&callbacks);
 
+    cfg.session = irc_create_session (&callbacks);
     if (!cfg.session) {
         logprintf(LOG_ERR, "Could not create session");
         exitPgm(EXIT_FAILURE);
