@@ -475,14 +475,14 @@ void output_handler() {
     cfg_set_bit(&cfg, OUTPUT_FLAG);
 }
 
-static void join_channels(irc_session_t *session) {
+void join_channels(irc_session_t *session) {
     for (uint32_t i = 0; i < cfg.numChannels; i++) {
         logprintf(LOG_INFO, "joining %s\n", cfg.channelsToJoin[i]);
         irc_cmd_join (session, cfg.channelsToJoin[i], 0);
     }
 }
 
-static void send_xdcc_requests(irc_session_t *session) {
+void send_xdcc_requests(irc_session_t *session) {
     if (!cfg_get_bit(&cfg, SENDED_FLAG)) {
         for (int i = 0; i < 1; i++) {
             char *botNick = cfg.botNick;
