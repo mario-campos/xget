@@ -64,7 +64,6 @@ struct xdccGetConfig {
     char **channelsToJoin;
     char *targetDir;
     char *nick;
-    char *login_command;
     char *args[3];
 
     uint32_t numChannels;
@@ -470,7 +469,6 @@ void doCleanUp() {
 
     free(cfg.targetDir);
     free(cfg.nick);
-    free(cfg.login_command);
     free(cfg.dccDownloadArray);
     free(cfg.channelsToJoin);
     free(downloadContext);
@@ -543,7 +541,7 @@ void event_notice(irc_session_t * session, const char * event, const char * orig
 }
 
 void event_mode(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count) {
-    if (cfg.login_command != NULL && count > 1) {
+    if (count > 1) {
         if (strcmp(params[1], "+v") == 0) {
             send_xdcc_requests(session);
         }
@@ -552,10 +550,8 @@ void event_mode(irc_session_t * session, const char * event, const char * origin
 }
 
 void event_umode(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count) {
-    if (cfg.login_command != NULL) {
-        if (strcmp(params[0], "+r") == 0) {
-            join_channels(session);
-        }
+    if (strcmp(params[0], "+r") == 0) {
+        join_channels(session);
     }
 }
 
@@ -563,44 +559,13 @@ void event_umode(irc_session_t * session, const char * event, const char * origi
 void event_join (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
     irc_cmd_user_mode (session, "+i");
-
-    if (cfg.login_command == NULL) {
-        send_xdcc_requests(session);
-    }
-}
-
-static void send_login_command(irc_session_t *session) {
-    if (strlen(cfg.login_command) >= 9) {
-        char *user = strdup(cfg.login_command);
-        char *auth_command = strdup(&cfg.login_command[9]);
-        user[9] = '\0';
-
-        logprintf(LOG_INFO, "sending login-command: %s", cfg.login_command);
-
-        bool cmdSendingFailed = irc_cmd_msg(session, user, auth_command) == 1;
-
-        if (cmdSendingFailed) {
-            logprintf(LOG_ERR, "Cannot send command to authenticate!");
-        }
-
-        free(user);
-        free(auth_command);
-    } else {
-        logprintf(LOG_ERR, "the login-command is too short. cant send this login-command.");
-    }
+    send_xdcc_requests(session);
 }
 
 
 void event_connect (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
-    dump_event (session, event, origin, params, count);
-
-    if (cfg.login_command != NULL) {
-        send_login_command(session);
-    }
-    else {
-        join_channels(session);
-    }
+    join_channels(session);
 }
 
 // This callback is used when we receive a file from the remote party
@@ -704,14 +669,14 @@ void init_signal(int signum, void (*handler) (int)) {
     }
 }
 
-static char* usage = "usage: xdccget [-46aDqv] [-n <nick>] [-p <port>] [-l <login command>] [-d <path>] <server> <channel(s)> <XDCC command>";
+static char* usage = "usage: xdccget [-46aDqv] [-n <nick>] [-p <port>] [-d <path>] <server> <channel(s)> <XDCC command>";
 
 void parseArguments(int argc, char **argv) {
     int opt;
 
     cfg.logLevel = LOG_INFO;
 
-    while ((opt = getopt(argc, argv, "Vhqvkd:n:l:p:aD46")) != -1) {
+    while ((opt = getopt(argc, argv, "Vhqvkd:n:p:aD46")) != -1) {
         switch (opt) {
             case 'V': {
                 unsigned int major, minor;
@@ -745,11 +710,6 @@ void parseArguments(int argc, char **argv) {
             case 'n':
                 DBG_OK("setting nickname as %s", optarg);
                 cfg.nick = strdup(optarg);
-                break;
-
-            case 'l':
-                DBG_OK("setting login-command as %s", optarg);
-                cfg.login_command = strdup(optarg);
                 break;
 
             case 'p':
