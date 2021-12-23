@@ -89,7 +89,6 @@ struct xdccGetConfig {
 #define NICKLEN 20
 
 struct terminalDimension {
-    int rows;
     int cols;
 };
 
@@ -105,7 +104,6 @@ static struct xdccGetConfig cfg;
 static uint32_t numActiveDownloads = 0;
 static uint32_t finishedDownloads = 0;
 static struct dccDownloadContext **downloadContext = NULL;
-static struct dccDownloadProgress *curDownload = NULL;
 
 struct dccDownload {
     char *botNick;
@@ -180,9 +178,8 @@ char** parseChannels(char *channelString, uint32_t *numChannels) {
     if (splittedString == NULL) {
         DBG_ERR("splittedString = NULL, cant continue from here.");
     }
-    int i = 0;
 
-    for (i = 0; i < numFound; i++) {
+    for (int i = 0; i < numFound; i++) {
         char *tmp = splittedString[i];
         splittedString[i] = strip(splittedString[i]);
         free(tmp);
@@ -196,13 +193,12 @@ char** parseChannels(char *channelString, uint32_t *numChannels) {
 
 struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *numDownloads) {
     int numFound = 1;
-    int i = 0, j = 0;
 
     struct dccDownload **dccDownloadArray = (struct dccDownload**)calloc(numFound + 1, sizeof (struct dccDownload*));
 
     *numDownloads = numFound;
 
-    for (i = 0; i < numFound; i++) {
+    for (int i = 0, j = 0; i < numFound; i++) {
         char *nick = NULL;
         char *xdccCmd = NULL;
         DBG_OK("%d: '%s'", i, dccDownloadString);
@@ -233,9 +229,8 @@ static inline void set_bit(uint64_t *x, int bitNum) {
     *x |= (1L << bitNum);
 }
 
-static inline int get_bit(uint64_t *x, int bitNum) {
-    int bit = 0;
-    bit = (*x >> bitNum) & 1L;
+static inline int get_bit(const uint64_t *x, int bitNum) {
+    int bit = (*x >> bitNum) & 1L;
     return bit;
 }
 
@@ -326,18 +321,16 @@ struct terminalDimension *getTerminalDimension() {
     struct winsize w;
     ioctl(0, TIOCGWINSZ, &w);
 
-    terminal_dimension.rows = w.ws_row;
     terminal_dimension.cols = w.ws_col;
     return &terminal_dimension;
 }
 
 void printProgressBar(const int numBars, const double percentRdy) {
     const int NUM_BARS = numBars;
-    int i = 0;
 
     putchar('[');
 
-    for (i = 0; i < NUM_BARS; i++) {
+    for (int i = 0; i < NUM_BARS; i++) {
         if (i < (int) (NUM_BARS * percentRdy)) {
             putchar('#');
         }
@@ -360,7 +353,7 @@ int printSize(irc_dcc_size_t size) {
         i++;
     }
 
-    int charsPrinted = 0;
+    int charsPrinted;
 
     if (i >= (sizeof (sizeNames) / sizeof (char*))) {
         charsPrinted = printf("%" IRC_DCC_SIZE_T_FORMAT " Byte", size);
@@ -496,7 +489,7 @@ void exitPgm(int retCode) {
     exit(retCode);
 }
 
-void interrupt_handler(int signum) {
+void interrupt_handler() {
     if (cfg.session && irc_is_connected(cfg.session)) {
         irc_cmd_quit(cfg.session, "Goodbye!");
     }
@@ -505,7 +498,7 @@ void interrupt_handler(int signum) {
     }
 }
 
-void output_handler (int signum) {
+void output_handler() {
     alarm(1);
     cfg_set_bit(&cfg, OUTPUT_FLAG);
 }
@@ -685,7 +678,6 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
     progress->sizeNow = 0;
     progress->sizeLast = 0;
     progress->completePath = fileName;
-    curDownload = progress;
 
     struct dccDownloadContext *context = malloc(sizeof(struct dccDownloadContext));
     downloadContext[numActiveDownloads] = context;
@@ -819,6 +811,7 @@ void parseArguments(int argc, char **argv) {
                 cfg_set_bit(&cfg, USE_IPV6_FLAG);
                 break;
             case '?':
+            default:
                 logprintf(LOG_ERR, "%s\n", usage);
                 exit(EXIT_FAILURE);
         }
@@ -836,7 +829,7 @@ void parseArguments(int argc, char **argv) {
 
 int main (int argc, char **argv)
 {
-    int ret = -1;
+    int ret;
 
     initRand();
 
@@ -905,9 +898,7 @@ int main (int argc, char **argv)
 
     alarm(1);
 
-    ret = irc_run (cfg.session);
-
-    if (ret != 0) {
+    if (irc_run(cfg.session) != 0) {
         if (irc_errno(cfg.session) != LIBIRC_ERR_TERMINATED && irc_errno(cfg.session) != LIBIRC_ERR_CLOSED) {
             logprintf(LOG_ERR, "Could not connect or I/O error at server %s and port %u\nError was:%s\n", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
             exitPgm(EXIT_FAILURE);
