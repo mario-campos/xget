@@ -64,14 +64,12 @@
 
 /* define macro for free that checks if ptr is null and sets ptr after free to null. */
 
-#define bitset_t uint64_t
-
 struct xdccGetConfig {
     irc_session_t *session;
     uint32_t logLevel;
     struct dccDownload **dccDownloadArray;
     uint32_t numDownloads;
-    bitset_t flags;
+    uint64_t flags;
 
     char *ircServer;
     char **channelsToJoin;
@@ -240,11 +238,11 @@ struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *nu
 struct terminalDimension terminal_dimension;
 
 
-static inline void set_bit(bitset_t *x, int bitNum) {
+static inline void set_bit(uint64_t *x, int bitNum) {
     *x |= (1L << bitNum);
 }
 
-static inline int get_bit(bitset_t *x, int bitNum) {
+static inline int get_bit(uint64_t *x, int bitNum) {
     int bit = 0;
     bit = (*x >> bitNum) & 1L;
     return bit;
