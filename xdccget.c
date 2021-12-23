@@ -139,13 +139,6 @@ struct dccDownloadProgress {
     char *completePath;
 };
 
-struct dccDownload* newDccDownload(char *botNick, char *xdccCmd) {
-    struct dccDownload *t = (struct dccDownload*)malloc(sizeof (struct dccDownload));
-    t->botNick = botNick;
-    t->xdccCmd = xdccCmd;
-    return t;
-}
-
 void parseDccDownload(char *dccDownloadString, char **nick, char **xdccCmd) {
     size_t i;
     size_t strLen = strlen(dccDownloadString);
@@ -235,7 +228,9 @@ struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *nu
         parseDccDownload(dccDownloadString, &nick, &xdccCmd);
         DBG_OK("%d: '%s' '%s'", i, nick, xdccCmd);
         if (nick != NULL && xdccCmd != NULL) {
-            dccDownloadArray[j] = newDccDownload(nick, xdccCmd);
+            dccDownloadArray[j] = malloc(sizeof(struct dccDownload));
+            dccDownloadArray[j]->botNick = nick;
+            dccDownloadArray[j]->xdccCmd = xdccCmd;
             j++;
         }
         else {
