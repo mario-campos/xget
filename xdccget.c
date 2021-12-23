@@ -166,11 +166,6 @@ struct dccDownloadProgress* newDccProgress(char *completePath, irc_dcc_size_t co
 
 }
 
-void freeDccProgress(struct dccDownloadProgress *progress) {
-    free(progress->completePath);
-    free(progress);
-}
-
 void parseDccDownload(char *dccDownloadString, char **nick, char **xdccCmd) {
     size_t i;
     size_t strLen = strlen(dccDownloadString);
@@ -589,7 +584,8 @@ void doCleanUp() {
                 current_context->fd = NULL;
             }
 
-            freeDccProgress(current_context->progress);
+            free(current_context->progress->completePath);
+            free(current_context->progress);
         }
 
         free(downloadContext[i]);
