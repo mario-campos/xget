@@ -686,38 +686,11 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
 
     DBG_OK("nick at recvFileReq is %s", nick);
 
-    if (access(filename, F_OK) == 0) {
-        struct stat st;
-
-        if (stat(filename, &st) != 0) {
-            logprintf(LOG_ERR, "Cant stat the file %s. Exiting now.", filename);
-            exitPgm(EXIT_FAILURE);
-        }
-
-        context->fd = fopen(filename, "ab");
-
-        off_t fileSize = st.st_size;
-
-        if (size == (irc_dcc_size_t) fileSize) {
-            logprintf(LOG_ERR, "file %s is already downloaded, exit pgm now.", filename);
-            exitPgm(EXIT_FAILURE);
-        }
-
-        /* file already exists but is empty. so accept it, rather than resume... */
-        if (fileSize == 0) {
-            goto accept_flag;
-        }
-    }
-    else {
-        int ret;
-        context->fd = fopen(filename, "wb");
-        logprintf(LOG_INFO, "file %s does not exist. creating file and downloading it now.", filename);
-accept_flag:
-        ret = irc_dcc_accept(session, dccid, context, callback_dcc_recv_file);
-        if (ret != 0) {
-            logprintf(LOG_ERR, "Could not connect to bot\nError was: %s\n", irc_strerror(irc_errno(cfg.session)));
-            exitPgm(EXIT_FAILURE);
-        }
+    context->fd = fopen(filename, "wb");
+    logprintf(LOG_INFO, "file %s does not exist. creating file and downloading it now.", filename);
+    if (irc_dcc_accept(session, dccid, context, callback_dcc_recv_file) != 0) {
+        logprintf(LOG_ERR, "Could not connect to bot\nError was: %s\n", irc_strerror(irc_errno(cfg.session)));
+        exitPgm(EXIT_FAILURE);
     }
 }
 
