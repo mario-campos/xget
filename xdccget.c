@@ -56,8 +56,8 @@
 struct xdccGetConfig {
     irc_session_t *session;
     uint32_t logLevel;
-    struct dccDownload **dccDownloadArray;
-    uint32_t numDownloads;
+    char *botNick;
+    char *xdccCmd;
     uint64_t flags;
 
     char *ircServer;
@@ -94,11 +94,6 @@ static struct xdccGetConfig cfg;
 static uint32_t numActiveDownloads = 0;
 static uint32_t finishedDownloads = 0;
 static struct dccDownloadContext **downloadContext = NULL;
-
-struct dccDownload {
-    char *botNick;
-    char *xdccCmd;
-};
 
 struct dccDownloadProgress {
     uint64_t completeFileSize;
@@ -181,12 +176,8 @@ char** parseChannels(char *channelString, uint32_t *numChannels) {
     return splittedString;
 }
 
-struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *numDownloads) {
+void parseDccDownloads(char *dccDownloadString) {
     int numFound = 1;
-
-    struct dccDownload **dccDownloadArray = (struct dccDownload**)calloc(numFound + 1, sizeof (struct dccDownload*));
-
-    *numDownloads = numFound;
 
     for (int i = 0, j = 0; i < numFound; i++) {
         char *nick = NULL;
@@ -195,9 +186,8 @@ struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *nu
         parseDccDownload(dccDownloadString, &nick, &xdccCmd);
         DBG_OK("%d: '%s' '%s'", i, nick, xdccCmd);
         if (nick != NULL && xdccCmd != NULL) {
-            dccDownloadArray[j] = malloc(sizeof(struct dccDownload));
-            dccDownloadArray[j]->botNick = nick;
-            dccDownloadArray[j]->xdccCmd = xdccCmd;
+            cfg.botNick = nick;
+            cfg.xdccCmd = xdccCmd;
             j++;
         }
         else {
@@ -208,8 +198,6 @@ struct dccDownload** parseDccDownloads(char *dccDownloadString, unsigned int *nu
                 free(xdccCmd);
         }
     }
-
-    return dccDownloadArray;
 }
 
 struct terminalDimension terminal_dimension;
@@ -441,13 +429,7 @@ void doCleanUp() {
         free(cfg.channelsToJoin[i]);
     }
 
-    for (i = 0; cfg.dccDownloadArray[i]; i++) {
-        free(cfg.dccDownloadArray[i]->botNick);
-        free(cfg.dccDownloadArray[i]->xdccCmd);
-        free(cfg.dccDownloadArray[i]);
-    }
-
-    for (i = 0; i < cfg.numDownloads && downloadContext[i]; i++) {
+    for (i = 0; downloadContext[i]; i++) {
         struct dccDownloadContext *current_context = downloadContext[i];
         struct dccDownloadProgress *current_progress = current_context->progress;
 
@@ -468,7 +450,8 @@ void doCleanUp() {
 
     free(cfg.targetDir);
     free(cfg.nick);
-    free(cfg.dccDownloadArray);
+    free(cfg.botNick);
+    free(cfg.xdccCmd);
     free(cfg.channelsToJoin);
     free(downloadContext);
 }
@@ -501,9 +484,9 @@ static void join_channels(irc_session_t *session) {
 
 static void send_xdcc_requests(irc_session_t *session) {
     if (!cfg_get_bit(&cfg, SENDED_FLAG)) {
-        for (int i = 0; cfg.dccDownloadArray[i] != NULL; i++) {
-            char *botNick = cfg.dccDownloadArray[i]->botNick;
-            char *xdccCommand = cfg.dccDownloadArray[i]->xdccCmd;
+        for (int i = 0; i < 1; i++) {
+            char *botNick = cfg.botNick;
+            char *xdccCommand = cfg.xdccCmd;
 
             logprintf(LOG_INFO, "/msg %s %s\n", botNick, xdccCommand);
             bool cmdSendingFailed = irc_cmd_msg(session, botNick, xdccCommand) == 1;
@@ -741,9 +724,9 @@ int main (int argc, char **argv)
     cfg.ircServer = cfg.args[0];
 
     cfg.channelsToJoin = parseChannels(cfg.args[1], &cfg.numChannels);
-    cfg.dccDownloadArray = parseDccDownloads(cfg.args[2], &cfg.numDownloads);
+    parseDccDownloads(cfg.args[2]);
 
-    downloadContext = calloc(cfg.numDownloads, sizeof(struct downloadContext*));
+    downloadContext = calloc(1, sizeof(struct downloadContext*));
 
     init_signal(SIGINT, interrupt_handler);
     init_signal(SIGALRM, output_handler);
