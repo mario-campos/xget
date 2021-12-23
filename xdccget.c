@@ -176,30 +176,6 @@ char** parseChannels(char *channelString, uint32_t *numChannels) {
     return splittedString;
 }
 
-void parseDccDownloads(char *dccDownloadString) {
-    int numFound = 1;
-
-    for (int i = 0, j = 0; i < numFound; i++) {
-        char *nick = NULL;
-        char *xdccCmd = NULL;
-        DBG_OK("%d: '%s'", i, dccDownloadString);
-        parseDccDownload(dccDownloadString, &nick, &xdccCmd);
-        DBG_OK("%d: '%s' '%s'", i, nick, xdccCmd);
-        if (nick != NULL && xdccCmd != NULL) {
-            cfg.botNick = nick;
-            cfg.xdccCmd = xdccCmd;
-            j++;
-        }
-        else {
-            if (nick != NULL)
-                free(nick);
-
-            if (xdccCmd != NULL)
-                free(xdccCmd);
-        }
-    }
-}
-
 struct terminalDimension terminal_dimension;
 
 
@@ -726,7 +702,8 @@ int main(int argc, char **argv)
     cfg.ircServer = cfg.args[0];
 
     cfg.channelsToJoin = parseChannels(cfg.args[1], &cfg.numChannels);
-    parseDccDownloads(cfg.args[2]);
+    parseDccDownload(cfg.args[2], &cfg.botNick, &cfg.xdccCmd);
+    DBG_OK("Parsed XDCC sender as \"%s\" and XDCC command as \"%s\"", cfg.botNick, cfg.xdccCmd);
 
     downloadContext = calloc(1, sizeof(struct downloadContext*));
 
