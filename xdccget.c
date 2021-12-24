@@ -56,13 +56,10 @@ struct xdccGetConfig {
     char *xdccCmd;
     uint64_t flags;
 
-    char *ircServer;
     char **channelsToJoin;
     char *nick;
-    char *args[3];
 
     uint32_t numChannels;
-    uint16_t port;
     struct dccDownloadContext context;
 };
 
@@ -547,10 +544,9 @@ static char* usage = "usage: xdccget [-46aD] [-n <nick>] [-p <port>] <server> <c
 int main(int argc, char **argv)
 {
     int ret;
+    uint16_t port = 6667;
 
     initRand();
-
-    cfg.port = 6667;
 
     int opt;
     while ((opt = getopt(argc, argv, "Vhkn:p:a46")) != -1) {
@@ -575,8 +571,8 @@ int main(int argc, char **argv)
                 break;
 
             case 'p':
-                cfg.port = (unsigned short) strtoul(optarg, NULL, 0);
-                DBG_OK("setting port as %u", cfg.port);
+                port = (uint16_t)strtoul(optarg, NULL, 0);
+                DBG_OK("Port number: %u", port);
                 break;
 
             case 'a':
@@ -597,20 +593,20 @@ int main(int argc, char **argv)
                 exit(EXIT_FAILURE);
         }
     }
+    argc -= optind;
+    argv += optind;
 
-    if (optind >= argc || (argc - optind) > 3) {
+    if (argc != 3) {
         fputs(usage, stderr);
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; (i + optind) < argc; i++) {
-        cfg.args[i] = argv[i + optind];
-    }
+    char *host = argv[0];
+    char *channels = argv[1];
+    char *xdccCommand = argv[2];
 
-    cfg.ircServer = cfg.args[0];
-
-    cfg.channelsToJoin = parseChannels(cfg.args[1], &cfg.numChannels);
-    parseDccDownload(cfg.args[2], &cfg.botNick, &cfg.xdccCmd);
+    cfg.channelsToJoin = parseChannels(channels, &cfg.numChannels);
+    parseDccDownload(xdccCommand, &cfg.botNick, &cfg.xdccCmd);
     DBG_OK("Parsed XDCC sender as \"%s\" and XDCC command as \"%s\"", cfg.botNick, cfg.xdccCmd);
 
     init_signal(SIGINT, interrupt_handler);
@@ -637,14 +633,14 @@ int main(int argc, char **argv)
     DBG_OK("IRC nick: '%s'", cfg.nick);
 
     if (cfg_get_bit(&cfg, USE_IPV6_FLAG)) {
-        ret = irc_connect6(cfg.session, cfg.ircServer, cfg.port, 0, cfg.nick, 0, 0);
+        ret = irc_connect6(cfg.session, host, port, 0, cfg.nick, 0, 0);
     }
     else {
-        ret = irc_connect(cfg.session, cfg.ircServer, cfg.port, 0, cfg.nick, 0, 0);
+        ret = irc_connect(cfg.session, host, port, 0, cfg.nick, 0, 0);
     }
 
     if (ret != 0) {
-        warnx( "error: could not connect to server %s:%u: %s", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
+        warnx( "error: could not connect to server %s:%u: %s", host, port, irc_strerror(irc_errno(cfg.session)));
         exitPgm(EXIT_FAILURE);
     }
 
@@ -652,7 +648,7 @@ int main(int argc, char **argv)
 
     if (irc_run(cfg.session) != 0) {
         if (irc_errno(cfg.session) != LIBIRC_ERR_TERMINATED && irc_errno(cfg.session) != LIBIRC_ERR_CLOSED) {
-            warnx("error: could not connect or I/O error at server %s:%u: %s\n", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
+            warnx("error: could not connect or I/O error at server %s:%u: %s\n", host, port, irc_strerror(irc_errno(cfg.session)));
             exitPgm(EXIT_FAILURE);
         }
     }
