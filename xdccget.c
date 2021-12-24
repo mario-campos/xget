@@ -72,6 +72,7 @@ struct xdccGetConfig {
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
 #define NICKLEN 20
+#define _FILE_OFFSET_BITS 64
 
 struct terminalDimension {
     int cols;
