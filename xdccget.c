@@ -639,8 +639,6 @@ int main(int argc, char **argv)
     }
     DBG_OK("IRC nick: '%s'", cfg.nick);
 
-    irc_option_set(cfg.session, LIBIRC_OPTION_DEBUG);
-
     if (cfg_get_bit(&cfg, USE_IPV6_FLAG)) {
         ret = irc_connect6(cfg.session, cfg.ircServer, cfg.port, 0, cfg.nick, 0, 0);
     }
