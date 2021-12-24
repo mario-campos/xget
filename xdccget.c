@@ -80,7 +80,7 @@ struct terminalDimension {
     int cols;
 };
 
-static struct xdccGetConfig cfg;
+struct xdccGetConfig cfg;
 
 struct dccDownloadProgress {
     uint64_t completeFileSize;
@@ -550,12 +550,9 @@ int main(int argc, char **argv)
 
     initRand();
 
-    memset(&cfg, 0, sizeof(struct xdccGetConfig));
-
     cfg.port = 6667;
 
     int opt;
-
     while ((opt = getopt(argc, argv, "Vhkn:p:a46")) != -1) {
         switch (opt) {
             case 'V': {
