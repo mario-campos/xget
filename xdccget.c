@@ -91,9 +91,7 @@ struct dccDownloadContext {
 
 static struct xdccGetConfig cfg;
 
-static uint32_t numActiveDownloads = 0;
-static uint32_t finishedDownloads = 0;
-static struct dccDownloadContext **downloadContext = NULL;
+static struct dccDownloadContext *downloadContext = NULL;
 
 struct dccDownloadProgress {
     uint64_t completeFileSize;
@@ -405,8 +403,8 @@ void doCleanUp() {
         free(cfg.channelsToJoin[i]);
     }
 
-    for (i = 0; downloadContext[i]; i++) {
-        struct dccDownloadContext *current_context = downloadContext[i];
+    for (i = 0; i < 1; i++) {
+        struct dccDownloadContext *current_context = downloadContext;
         struct dccDownloadProgress *current_progress = current_context->progress;
 
         if (current_progress != NULL) {
@@ -420,8 +418,6 @@ void doCleanUp() {
             free(current_context->progress->completePath);
             free(current_context->progress);
         }
-
-        free(downloadContext[i]);
     }
 
     free(cfg.targetDir);
@@ -540,11 +536,7 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
         fclose(context->fd);
         context->fd = NULL;
 
-        finishedDownloads++;
-
-        if (finishedDownloads == numActiveDownloads) {
-            irc_cmd_quit(cfg.session, "Goodbye!");
-        }
+        irc_cmd_quit(cfg.session, "Goodbye!");
     }
 }
 
@@ -569,9 +561,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
     progress->sizeLast = 0;
     progress->completePath = fileName;
 
-    struct dccDownloadContext *context = malloc(sizeof(struct dccDownloadContext));
-    downloadContext[numActiveDownloads] = context;
-    numActiveDownloads++;
+    struct dccDownloadContext *context = downloadContext;
     context->progress = progress;
 
     DBG_OK("nick at recvFileReq is %s", nick);
@@ -705,7 +695,7 @@ int main(int argc, char **argv)
     parseDccDownload(cfg.args[2], &cfg.botNick, &cfg.xdccCmd);
     DBG_OK("Parsed XDCC sender as \"%s\" and XDCC command as \"%s\"", cfg.botNick, cfg.xdccCmd);
 
-    downloadContext = calloc(1, sizeof(struct downloadContext*));
+    downloadContext = calloc(1, sizeof(struct dccDownloadContext));
 
     init_signal(SIGINT, interrupt_handler);
     init_signal(SIGALRM, output_handler);
