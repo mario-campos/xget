@@ -35,8 +35,6 @@ jobs:
       uses: actions/checkout@v2
     - name: build
       run: make
-      env:
-        CFLAGS: -Wall -Wextra
   
   macOS:
     runs-on: macos-latest
