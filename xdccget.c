@@ -45,7 +45,10 @@
 #define DBG_ERR(format, ...) do {} while(0)
 #endif
 
-/* define macro for free that checks if ptr is null and sets ptr after free to null. */
+struct dccDownloadContext {
+    struct dccDownloadProgress *progress;
+    FILE *fd;
+};
 
 struct xdccGetConfig {
     irc_session_t *session;
@@ -60,6 +63,7 @@ struct xdccGetConfig {
 
     uint32_t numChannels;
     uint16_t port;
+    struct dccDownloadContext context;
 };
 
 #define OUTPUT_FLAG               0x01
@@ -76,14 +80,7 @@ struct terminalDimension {
     int cols;
 };
 
-struct dccDownloadContext {
-    struct dccDownloadProgress *progress;
-    FILE *fd;
-};
-
 static struct xdccGetConfig cfg;
-
-static struct dccDownloadContext *downloadContext = NULL;
 
 struct dccDownloadProgress {
     uint64_t completeFileSize;
@@ -357,7 +354,7 @@ void doCleanUp() {
     }
 
     for (i = 0; i < 1; i++) {
-        struct dccDownloadContext *current_context = downloadContext;
+        struct dccDownloadContext *current_context = &cfg.context;
         struct dccDownloadProgress *current_progress = current_context->progress;
 
         if (current_progress != NULL) {
@@ -377,7 +374,6 @@ void doCleanUp() {
     free(cfg.botNick);
     free(cfg.xdccCmd);
     free(cfg.channelsToJoin);
-    free(downloadContext);
 }
 
 void exitPgm(int retCode) {
@@ -513,7 +509,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
     progress->sizeLast = 0;
     progress->completePath = fileName;
 
-    struct dccDownloadContext *context = downloadContext;
+    struct dccDownloadContext *context = &cfg.context;
     context->progress = progress;
 
     DBG_OK("nick at recvFileReq is %s", nick);
@@ -619,8 +615,6 @@ int main(int argc, char **argv)
     cfg.channelsToJoin = parseChannels(cfg.args[1], &cfg.numChannels);
     parseDccDownload(cfg.args[2], &cfg.botNick, &cfg.xdccCmd);
     DBG_OK("Parsed XDCC sender as \"%s\" and XDCC command as \"%s\"", cfg.botNick, cfg.xdccCmd);
-
-    downloadContext = calloc(1, sizeof(struct dccDownloadContext));
 
     init_signal(SIGINT, interrupt_handler);
     init_signal(SIGALRM, output_handler);
