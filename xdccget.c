@@ -55,7 +55,6 @@ struct xdccGetConfig {
 
     char *ircServer;
     char **channelsToJoin;
-    char *targetDir;
     char *nick;
     char *args[3];
 
@@ -374,7 +373,6 @@ void doCleanUp() {
         }
     }
 
-    free(cfg.targetDir);
     free(cfg.nick);
     free(cfg.botNick);
     free(cfg.xdccCmd);
@@ -548,7 +546,7 @@ void init_signal(int signum, void (*handler) (int)) {
     }
 }
 
-static char* usage = "usage: xdccget [-46aD] [-n <nick>] [-p <port>] [-d <path>] <server> <channel(s)> <XDCC command>";
+static char* usage = "usage: xdccget [-46aD] [-n <nick>] [-p <port>] <server> <channel(s)> <XDCC command>";
 
 int main(int argc, char **argv)
 {
@@ -560,13 +558,9 @@ int main(int argc, char **argv)
 
     cfg.port = 6667;
 
-    cfg.targetDir = getcwd(NULL, 0);
-    if (cfg.targetDir == NULL)
-        DBG_ERR("cannot get current working directory to download file.");
-
     int opt;
 
-    while ((opt = getopt(argc, argv, "Vhkd:n:p:a46")) != -1) {
+    while ((opt = getopt(argc, argv, "Vhkn:p:a46")) != -1) {
         switch (opt) {
             case 'V': {
                 unsigned int major, minor;
@@ -580,11 +574,6 @@ int main(int argc, char **argv)
 
             case 'k':
                 cfg_set_bit(&cfg, ALLOW_ALL_CERTS_FLAG);
-                break;
-
-            case 'd':
-                DBG_OK("setting target dir as %s", optarg);
-                cfg.targetDir = strdup(optarg);
                 break;
 
             case 'n':
