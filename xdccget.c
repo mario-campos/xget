@@ -354,7 +354,6 @@ void doCleanUp() {
         free(cfg.context.progress);
     }
 
-    free(cfg.nick);
     free(cfg.botNick);
     free(cfg.xdccCmd);
     free(cfg.channelsToJoin);
@@ -531,6 +530,7 @@ static char* usage = "usage: xdccget [-46aD] [-n <nick>] [-p <port>] <server> <c
 int main(int argc, char **argv)
 {
     uint16_t port = 6667;
+    char nick[NICKLEN] = {0};
 
     initRand();
 
@@ -553,7 +553,7 @@ int main(int argc, char **argv)
 
             case 'n':
                 DBG_OK("setting nickname as %s", optarg);
-                cfg.nick = strdup(optarg);
+                strlcpy(nick, optarg, sizeof(nick));
                 break;
 
             case 'p':
@@ -612,18 +612,17 @@ int main(int argc, char **argv)
         exitPgm(EXIT_FAILURE);
     }
 
-    if (cfg.nick == NULL) {
-        cfg.nick = malloc(NICKLEN);
-        createRandomNick(NICKLEN, cfg.nick);
+    if (!strlen(nick)) {
+        createRandomNick(sizeof(nick), nick);
     }
-    DBG_OK("IRC nick: '%s'", cfg.nick);
+    DBG_OK("IRC nick: '%s'", nick);
 
     int irc_err;
     if (cfg_get_bit(&cfg, USE_IPV6_FLAG)) {
-        irc_err = irc_connect6(cfg.session, host, port, 0, cfg.nick, 0, 0);
+        irc_err = irc_connect6(cfg.session, host, port, 0, nick, 0, 0);
     }
     else {
-        irc_err = irc_connect(cfg.session, host, port, 0, cfg.nick, 0, 0);
+        irc_err = irc_connect(cfg.session, host, port, 0, nick, 0, 0);
     }
 
     if (irc_err) {
