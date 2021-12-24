@@ -7,7 +7,7 @@ CPPFLAGS += -I$(LIBIRCCLIENT)/include
 CFLAGS += -std=gnu99 `pkg-config --silence-errors --cflags libbsd-overlay`
 
 $(PROG): $(SRCS)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LIBS) -o $(PROG) $(SRCS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $(PROG) $(SRCS) $(LIBS)
 
 $(LIBIRCCLIENT)/src/libircclient.a:
 	cd $(LIBIRCCLIENT) && ./configure && $(MAKE)
