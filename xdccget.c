@@ -342,29 +342,16 @@ void outputProgress(struct dccDownloadProgress *progress) {
  * Close IRC sessions and deallocate memory.
  */
 void doCleanUp() {
-    uint32_t i;
-    if (cfg.session)
-        irc_destroy_session(cfg.session);
+    if (cfg.session) irc_destroy_session(cfg.session);
 
-    for (i = 0; i < cfg.numChannels; i++) {
+    for (size_t i = 0; i < cfg.numChannels; i++)
         free(cfg.channelsToJoin[i]);
-    }
 
-    for (i = 0; i < 1; i++) {
-        struct dccDownloadContext *current_context = &cfg.context;
-        struct dccDownloadProgress *current_progress = current_context->progress;
-
-        if (current_progress != NULL) {
-            bool finishedDownloading = current_progress->sizeRcvd == current_progress->completeFileSize;
-
-            if (!finishedDownloading) {
-                fclose(current_context->fd);
-                current_context->fd = NULL;
-            }
-
-            free(current_context->progress->completePath);
-            free(current_context->progress);
-        }
+    if (cfg.context.progress) {
+        if (cfg.context.progress->sizeRcvd != cfg.context.progress->completeFileSize)
+            fclose(cfg.context.fd);
+        free(cfg.context.progress->completePath);
+        free(cfg.context.progress);
     }
 
     free(cfg.nick);
