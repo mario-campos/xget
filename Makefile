@@ -1,12 +1,13 @@
 PROG = xdccget
-LIBIRCCLIENT = libircclient-1.10
-LIBS = `pkg-config --silence-errors --libs libbsd-overlay`
-CFLAGS += -std=gnu99 -I$(LIBIRCCLIENT)/include `pkg-config --silence-errors --cflags libbsd-overlay`
-
 SRCS = xdccget.c $(LIBIRCCLIENT)/src/libircclient.a
+LIBIRCCLIENT = libircclient-1.10
+
+LIBS = `pkg-config --silence-errors --libs libbsd-overlay`
+CPPFLAGS += -I$(LIBIRCCLIENT)/include
+CFLAGS += -std=gnu99 `pkg-config --silence-errors --cflags libbsd-overlay`
 
 $(PROG): $(SRCS)
-	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LIBS) -o $(PROG) $(SRCS)
 
 $(LIBIRCCLIENT)/src/libircclient.a:
 	cd $(LIBIRCCLIENT) && ./configure && $(MAKE)
