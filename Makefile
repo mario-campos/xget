@@ -5,7 +5,7 @@ CFLAGS += -std=gnu99 -D_FILE_OFFSET_BITS=64 -I$(LIBIRCCLIENT)/include `pkg-confi
 
 SRCS = xdccget.c $(LIBIRCCLIENT)/src/libircclient.a
 
-all: $(SRCS)
+$(PROG): $(SRCS)
 	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)
 
 $(LIBIRCCLIENT)/src/libircclient.a:
