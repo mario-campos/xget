@@ -7,17 +7,11 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdarg.h>
+#include <err.h>
 #include <time.h>
 #include <sys/ioctl.h>
 
 #include "libircclient.h"
-
-#define LOG_ERR   0
-#define LOG_QUIET 1
-#define LOG_WARN  2
-#define LOG_INFO  3
-
 
 /* ansi color codes used at the dbg macros for coloured output. */
 
@@ -55,7 +49,6 @@
 
 struct xdccGetConfig {
     irc_session_t *session;
-    uint32_t logLevel;
     char *botNick;
     char *xdccCmd;
     uint64_t flags;
@@ -195,45 +188,6 @@ inline void cfg_set_bit(struct xdccGetConfig *config, int bitNum) {
 
 inline int cfg_get_bit(struct xdccGetConfig *config, int bitNum) {
     return get_bit(&config->flags, bitNum);
-}
-
-static inline void logprintf_line(FILE *stream, char *color_code, char *prefix, char *formatString, va_list va_alist) {
-    fprintf(stream, "%s[%s] - ", color_code, prefix);
-    vfprintf(stream, formatString, va_alist);
-    fprintf(stream, "%s\n", KNRM);
-}
-
-void logprintf(int logLevel, char *formatString, ...) {
-    va_list va_alist;
-
-    if (cfg.logLevel == LOG_QUIET) {
-        return;
-    }
-
-    va_start(va_alist, formatString);
-
-    switch (logLevel) {
-        case LOG_INFO:
-            if (cfg.logLevel >= LOG_INFO) {
-                logprintf_line(stdout, KGRN, "Info", formatString, va_alist);
-            }
-            break;
-        case LOG_WARN:
-            if (cfg.logLevel >= LOG_WARN) {
-                logprintf_line(stderr, KYEL, "Warning", formatString, va_alist);
-            }
-            break;
-        case LOG_ERR:
-            logprintf_line(stderr, KRED, "Error", formatString, va_alist);
-            break;
-        default:
-            DBG_WARN("logprintf called with unknown log-level. using normal logging.");
-            vfprintf(stdout, formatString, va_alist);
-            fprintf(stdout, "\n");
-            break;
-    }
-
-    va_end(va_alist);
 }
 
 void initRand() {
@@ -449,7 +403,7 @@ void output_handler() {
 
 void join_channels(irc_session_t *session) {
     for (uint32_t i = 0; i < cfg.numChannels; i++) {
-        logprintf(LOG_INFO, "joining %s\n", cfg.channelsToJoin[i]);
+        DBG_OK("Joining channel '%s'", cfg.channelsToJoin[i]);
         irc_cmd_join (session, cfg.channelsToJoin[i], 0);
     }
 }
@@ -460,11 +414,11 @@ void send_xdcc_requests(irc_session_t *session) {
             char *botNick = cfg.botNick;
             char *xdccCommand = cfg.xdccCmd;
 
-            logprintf(LOG_INFO, "/msg %s %s\n", botNick, xdccCommand);
+            DBG_OK("Sending XDCC command '%s' to nick '%s'", xdccCommand, botNick);
             bool cmdSendingFailed = irc_cmd_msg(session, botNick, xdccCommand) == 1;
 
             if (cmdSendingFailed) {
-                logprintf(LOG_ERR, "Cannot send xdcc command to bot!");
+                warnx("failed to send XDCC command '%s' to nick '%s': %s", xdccCommand, botNick, irc_strerror(cmdSendingFailed));
             }
         }
 
@@ -550,7 +504,7 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
        then something is definately wrong. so just exit pgm then and print error msg to user.*/
     if (strchr(fileName, '/') || strchr(fileName, '\\')) {
         /* filename contained bad chars. print msg and exit...*/
-        logprintf(LOG_ERR, "Someone wants to send us a file that contains / or \\. This is not permitted.\nFilename was: %s", fileName);
+        warnx("The file name contains invalid characters ('/' or '\\'). Aborting...");
         exitPgm(EXIT_FAILURE);
     }
 
@@ -567,9 +521,8 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
     DBG_OK("nick at recvFileReq is %s", nick);
 
     context->fd = fopen(filename, "wb");
-    logprintf(LOG_INFO, "file %s does not exist. creating file and downloading it now.", filename);
     if (irc_dcc_accept(session, dccid, context, callback_dcc_recv_file) != 0) {
-        logprintf(LOG_ERR, "error: could not connect to bot: %s", irc_strerror(irc_errno(cfg.session)));
+        warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(cfg.session)));
         exitPgm(EXIT_FAILURE);
     }
 }
@@ -590,7 +543,7 @@ void init_signal(int signum, void (*handler) (int)) {
 
     ret = sigaction(signum, &act, NULL);
     if (ret == -1) {
-        logprintf(LOG_ERR, "could not set up signal %d", signum);
+        warn("sigaction(2): cannot handle signal %d", signum);
         exitPgm(EXIT_FAILURE);
     }
 }
@@ -605,7 +558,6 @@ int main(int argc, char **argv)
 
     memset(&cfg, 0, sizeof(struct xdccGetConfig));
 
-    cfg.logLevel = LOG_WARN;
     cfg.port = 6667;
 
     cfg.targetDir = getcwd(NULL, 0);
@@ -614,9 +566,7 @@ int main(int argc, char **argv)
 
     int opt;
 
-    cfg.logLevel = LOG_INFO;
-
-    while ((opt = getopt(argc, argv, "Vhqvkd:n:p:a46")) != -1) {
+    while ((opt = getopt(argc, argv, "Vhkd:n:p:a46")) != -1) {
         switch (opt) {
             case 'V': {
                 unsigned int major, minor;
@@ -627,16 +577,6 @@ int main(int argc, char **argv)
             case 'h':
                 puts(usage);
                 exit(EXIT_SUCCESS);
-
-            case 'q':
-                DBG_OK("setting log-level as quiet.");
-                cfg.logLevel = LOG_QUIET;
-                break;
-
-            case 'v':
-                DBG_OK("setting log-level as warn.");
-                cfg.logLevel = LOG_WARN;
-                break;
 
             case 'k':
                 cfg_set_bit(&cfg, ALLOW_ALL_CERTS_FLAG);
@@ -671,13 +611,13 @@ int main(int argc, char **argv)
 
             case '?':
             default:
-                logprintf(LOG_ERR, "%s", usage);
+                fputs(usage, stderr);
                 exit(EXIT_FAILURE);
         }
     }
 
     if (optind >= argc || (argc - optind) > 3) {
-        fprintf(stderr, "%s\n", usage);
+        fputs(usage, stderr);
         exit(EXIT_FAILURE);
     }
 
@@ -706,7 +646,7 @@ int main(int argc, char **argv)
 
     cfg.session = irc_create_session(&callbacks);
     if (!cfg.session) {
-        logprintf(LOG_ERR, "Could not create session");
+        warn("failed to create IRC session object");
         exitPgm(EXIT_FAILURE);
     }
 
@@ -714,8 +654,8 @@ int main(int argc, char **argv)
         cfg.nick = malloc(NICKLEN);
         createRandomNick(NICKLEN, cfg.nick);
     }
+    DBG_OK("IRC nick: '%s'", cfg.nick);
 
-    logprintf(LOG_INFO, "nick is %s", cfg.nick);
     irc_option_set(cfg.session, LIBIRC_OPTION_DEBUG);
 
     if (cfg_get_bit(&cfg, USE_IPV4_FLAG)) {
@@ -729,7 +669,7 @@ int main(int argc, char **argv)
     }
 
     if (ret != 0) {
-        logprintf(LOG_ERR, "error: could not connect to server %s:%u: %s", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
+        warnx( "error: could not connect to server %s:%u: %s", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
         exitPgm(EXIT_FAILURE);
     }
 
@@ -737,7 +677,7 @@ int main(int argc, char **argv)
 
     if (irc_run(cfg.session) != 0) {
         if (irc_errno(cfg.session) != LIBIRC_ERR_TERMINATED && irc_errno(cfg.session) != LIBIRC_ERR_CLOSED) {
-            logprintf(LOG_ERR, "error: could not connect or I/O error at server %s:%u: %s\n", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
+            warnx("error: could not connect or I/O error at server %s:%u: %s\n", cfg.ircServer, cfg.port, irc_strerror(irc_errno(cfg.session)));
             exitPgm(EXIT_FAILURE);
         }
     }
