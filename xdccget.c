@@ -543,7 +543,6 @@ static char* usage = "usage: xdccget [-46aD] [-n <nick>] [-p <port>] <server> <c
 
 int main(int argc, char **argv)
 {
-    int ret;
     uint16_t port = 6667;
 
     initRand();
@@ -632,14 +631,15 @@ int main(int argc, char **argv)
     }
     DBG_OK("IRC nick: '%s'", cfg.nick);
 
+    int irc_err;
     if (cfg_get_bit(&cfg, USE_IPV6_FLAG)) {
-        ret = irc_connect6(cfg.session, host, port, 0, cfg.nick, 0, 0);
+        irc_err = irc_connect6(cfg.session, host, port, 0, cfg.nick, 0, 0);
     }
     else {
-        ret = irc_connect(cfg.session, host, port, 0, cfg.nick, 0, 0);
+        irc_err = irc_connect(cfg.session, host, port, 0, cfg.nick, 0, 0);
     }
 
-    if (ret != 0) {
+    if (irc_err) {
         warnx( "error: could not connect to server %s:%u: %s", host, port, irc_strerror(irc_errno(cfg.session)));
         exitPgm(EXIT_FAILURE);
     }
