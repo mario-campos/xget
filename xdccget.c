@@ -597,7 +597,21 @@ void init_signal(int signum, void (*handler) (int)) {
 
 static char* usage = "usage: xdccget [-46aDqv] [-n <nick>] [-p <port>] [-d <path>] <server> <channel(s)> <XDCC command>";
 
-void parseArguments(int argc, char **argv) {
+int main(int argc, char **argv)
+{
+    int ret;
+
+    initRand();
+
+    memset(&cfg, 0, sizeof(struct xdccGetConfig));
+
+    cfg.logLevel = LOG_WARN;
+    cfg.port = 6667;
+
+    cfg.targetDir = getcwd(NULL, 0);
+    if (cfg.targetDir == NULL)
+        DBG_ERR("cannot get current working directory to download file.");
+
     int opt;
 
     cfg.logLevel = LOG_INFO;
@@ -670,24 +684,6 @@ void parseArguments(int argc, char **argv) {
     for (int i = 0; (i + optind) < argc; i++) {
         cfg.args[i] = argv[i + optind];
     }
-}
-
-int main(int argc, char **argv)
-{
-    int ret;
-
-    initRand();
-
-    memset(&cfg, 0, sizeof(struct xdccGetConfig));
-
-    cfg.logLevel = LOG_WARN;
-    cfg.port = 6667;
-
-    cfg.targetDir = getcwd(NULL, 0);
-    if (cfg.targetDir == NULL)
-        DBG_ERR("cannot get current working directory to download file.");
-
-    parseArguments(argc, argv);
 
     cfg.ircServer = cfg.args[0];
 
