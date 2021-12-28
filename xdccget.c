@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <inttypes.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <err.h>
 #include <time.h>
@@ -58,10 +57,7 @@ struct xdccGetConfig {
     char *botNick;
     char *xdccCmd;
     uint64_t flags;
-
     char **channelsToJoin;
-    char *nick;
-
     uint32_t numChannels;
     struct dccDownloadContext context;
 };
