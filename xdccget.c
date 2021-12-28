@@ -365,19 +365,12 @@ void join_channels(irc_session_t *session) {
 }
 
 void send_xdcc_requests(irc_session_t *session) {
+    int err;
     if (!(cfg.flags & SENDED_FLAG)) {
-        for (int i = 0; i < 1; i++) {
-            char *botNick = cfg.botNick;
-            char *xdccCommand = cfg.xdccCmd;
-
-            DBG_OK("Sending XDCC command '%s' to nick '%s'", xdccCommand, botNick);
-            bool cmdSendingFailed = irc_cmd_msg(session, botNick, xdccCommand) == 1;
-
-            if (cmdSendingFailed) {
-                warnx("failed to send XDCC command '%s' to nick '%s': %s", xdccCommand, botNick, irc_strerror(cmdSendingFailed));
-            }
+        DBG_OK("Sending XDCC command '%s' to nick '%s'", cfg.xdccCmd, cfg.botNick);
+        if ((err = irc_cmd_msg(session, cfg.botNick, cfg.xdccCmd))) {
+            warnx("failed to send XDCC command '%s' to nick '%s': %s", cfg.xdccCmd, cfg.botNick, irc_strerror(err));
         }
-
         cfg.flags |= SENDED_FLAG;
     }
 }
