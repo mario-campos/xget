@@ -398,8 +398,8 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
         return;
     }
 
-    if (data == NULL) {
-        DBG_WARN("callback_dcc_recv_file called with data = NULL!");
+    if (!data) {
+        DBG_OK("callback_dcc_recv_file called with data = NULL!");
         return;
     }
 
