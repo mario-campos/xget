@@ -403,16 +403,6 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
         return;
     }
 
-    if (ctx == NULL) {
-        DBG_WARN("callback_dcc_recv_file called with ctx = NULL!");
-        return;
-    }
-
-    if (length == 0) {
-        DBG_WARN("callback_dcc_recv_file called with length = 0!");
-        return;
-    }
-
     cfg.context.sizeRcvd += length;
     fwrite(data, 1, length, cfg.context.fd);
 
