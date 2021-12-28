@@ -430,11 +430,9 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
 {
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
 
-    char *fileName = strdup(filename);
-
     /* chars / and \ are not permitted to appear in a valid filename. if someone wants to send us such a file
        then something is definately wrong. so just exit pgm then and print error msg to user.*/
-    if (strchr(fileName, '/') || strchr(fileName, '\\')) {
+    if (strchr(filename, '/') || strchr(filename, '\\')) {
         /* filename contained bad chars. print msg and exit...*/
         warnx("The file name contains invalid characters ('/' or '\\'). Aborting...");
         exitPgm(EXIT_FAILURE);
