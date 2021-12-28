@@ -183,7 +183,7 @@ void createRandomNick(int nickLen, char *nick) {
     for (i = 0; i < nickLen; i++) {
         nick[i] = possibleChars[rand_range(0, numChars - 1)];
     }
-
+    nick[nickLen-1] = '\0';
 }
 
 struct terminalDimension *getTerminalDimension() {
