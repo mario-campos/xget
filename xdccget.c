@@ -470,7 +470,7 @@ void init_signal(int signum, void (*handler) (int)) {
     ret = sigaction(signum, &act, NULL);
     if (ret == -1) {
         warn("sigaction(2): cannot handle signal %d", signum);
-        exitPgm(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -540,12 +540,12 @@ int main(int argc, char **argv)
     char *channels = argv[1];
     char *xdccCommand = argv[2];
 
+    init_signal(SIGINT, interrupt_handler);
+    init_signal(SIGALRM, output_handler);
+
     cfg.channelsToJoin = parseChannels(channels, &cfg.numChannels);
     parseDccDownload(xdccCommand, &cfg.botNick, &cfg.xdccCmd);
     DBG_OK("Parsed XDCC sender as \"%s\" and XDCC command as \"%s\"", cfg.botNick, cfg.xdccCmd);
-
-    init_signal(SIGINT, interrupt_handler);
-    init_signal(SIGALRM, output_handler);
 
     irc_callbacks_t callbacks;
     bzero(&callbacks, sizeof(callbacks));
