@@ -65,10 +65,9 @@ struct xdccGetConfig {
 
 #define OUTPUT_FLAG               0x01
 #define ALLOW_ALL_CERTS_FLAG      0x02
-#define USE_IPV4_FLAG             0x03
 #define USE_IPV6_FLAG	          0x04
-#define SENDED_FLAG               0x06
-#define ACCEPT_ALL_NICKS_FLAG     0x07
+#define SENDED_FLAG               0x08
+#define ACCEPT_ALL_NICKS_FLAG     0x10
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
 #define NICKLEN 20
@@ -162,27 +161,6 @@ char** parseChannels(char *channelString, uint32_t *numChannels) {
 }
 
 struct terminalDimension terminal_dimension;
-
-
-static inline void set_bit(uint64_t *x, int bitNum) {
-    *x |= (1L << bitNum);
-}
-
-static inline int get_bit(const uint64_t *x, int bitNum) {
-    int bit = (*x >> bitNum) & 1L;
-    return bit;
-}
-
-void cfg_set_bit(struct xdccGetConfig *config, int bitNum);
-int cfg_get_bit(struct xdccGetConfig *config, int bitNum);
-
-inline void cfg_set_bit(struct xdccGetConfig *config, int bitNum) {
-    set_bit(&config->flags, bitNum);
-}
-
-inline int cfg_get_bit(struct xdccGetConfig *config, int bitNum) {
-    return get_bit(&config->flags, bitNum);
-}
 
 void initRand() {
     time_t t = time(NULL);
@@ -376,7 +354,7 @@ void interrupt_handler() {
 
 void output_handler() {
     alarm(1);
-    cfg_set_bit(&cfg, OUTPUT_FLAG);
+    cfg.flags |= OUTPUT_FLAG;
 }
 
 void join_channels(irc_session_t *session) {
@@ -387,7 +365,7 @@ void join_channels(irc_session_t *session) {
 }
 
 void send_xdcc_requests(irc_session_t *session) {
-    if (!cfg_get_bit(&cfg, SENDED_FLAG)) {
+    if (!(cfg.flags & SENDED_FLAG)) {
         for (int i = 0; i < 1; i++) {
             char *botNick = cfg.botNick;
             char *xdccCommand = cfg.xdccCmd;
@@ -400,7 +378,7 @@ void send_xdcc_requests(irc_session_t *session) {
             }
         }
 
-        cfg_set_bit(&cfg, SENDED_FLAG);
+        cfg.flags |= SENDED_FLAG;
     }
 }
 
@@ -549,7 +527,7 @@ int main(int argc, char **argv)
                 exit(EXIT_SUCCESS);
 
             case 'k':
-                cfg_set_bit(&cfg, ALLOW_ALL_CERTS_FLAG);
+                cfg.flags |= ALLOW_ALL_CERTS_FLAG;
                 break;
 
             case 'n':
@@ -563,15 +541,15 @@ int main(int argc, char **argv)
                 break;
 
             case 'a':
-                cfg_set_bit(&cfg, ACCEPT_ALL_NICKS_FLAG);
+                cfg.flags |= ACCEPT_ALL_NICKS_FLAG;
                 break;
 
             case '4':
-                cfg_set_bit(&cfg, USE_IPV4_FLAG);
+                cfg.flags &= ~USE_IPV6_FLAG;
                 break;
 
             case '6':
-                cfg_set_bit(&cfg, USE_IPV6_FLAG);
+                cfg.flags |= USE_IPV6_FLAG;
                 break;
 
             case '?':
@@ -619,7 +597,7 @@ int main(int argc, char **argv)
     DBG_OK("IRC nick: '%s'", nick);
 
     int irc_err;
-    if (cfg_get_bit(&cfg, USE_IPV6_FLAG)) {
+    if (cfg.flags & USE_IPV6_FLAG) {
         irc_err = irc_connect6(cfg.session, host, port, 0, nick, 0, 0);
     }
     else {
