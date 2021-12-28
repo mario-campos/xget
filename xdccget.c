@@ -46,7 +46,10 @@
 #endif
 
 struct dccDownloadContext {
-    struct dccDownloadProgress *progress;
+    uint64_t completeFileSize;
+    uint64_t sizeRcvd;
+    uint64_t sizeNow;
+    uint64_t sizeLast;
     FILE *fd;
 };
 
@@ -78,14 +81,6 @@ struct terminalDimension {
 };
 
 struct xdccGetConfig cfg;
-
-struct dccDownloadProgress {
-    uint64_t completeFileSize;
-    uint64_t sizeRcvd;
-    uint64_t sizeNow;
-    uint64_t sizeLast;
-    char *completePath;
-};
 
 void parseDccDownload(char *dccDownloadString, char **nick, char **xdccCmd) {
     size_t i;
@@ -269,17 +264,17 @@ int printETA(double seconds) {
     return charsPrinted;
 }
 
-void outputProgress(struct dccDownloadProgress *progress) {
+void outputProgress() {
     struct terminalDimension *terminalDimension = getTerminalDimension();
     /* see comments below how these "numbers" are calculated */
     int progBarLen = terminalDimension->cols - (8 + 14 + 1 + 14 + 1 + 14 + 3 + 13 /* +1 for windows...*/);
 
-    progress->sizeLast = progress->sizeNow;
-    progress->sizeNow = progress->sizeRcvd;
+    cfg.context.sizeLast = cfg.context.sizeNow;
+    cfg.context.sizeNow = cfg.context.sizeRcvd;
 
-    uint64_t temp = (progress->completeFileSize == 0) ? 0 : progress->sizeRcvd * 1000000L / progress->completeFileSize;
+    uint64_t temp = (cfg.context.completeFileSize == 0) ? 0 : cfg.context.sizeRcvd * 1000000L / cfg.context.completeFileSize;
     double curProcess = (double) temp / 1000000;
-    uint64_t curSpeed = progress->sizeNow - progress->sizeLast;
+    uint64_t curSpeed = cfg.context.sizeNow - cfg.context.sizeLast;
 
     int printedChars = progBarLen + 2;
 
@@ -287,11 +282,11 @@ void outputProgress(struct dccDownloadProgress *progress) {
     /* 8 chars -->' 75.30% ' */
     printedChars += printf(" %.2f%% ", curProcess * 100);
     /* 14 chars --> '1001.132 MByte' */
-    printedChars += printSize(progress->sizeRcvd);
+    printedChars += printSize(cfg.context.sizeRcvd);
     /* 1 char */
     printedChars += printf("/");
     /* 14 chars --> '1001.132 MByte' */
-    printedChars += printSize(progress->completeFileSize);
+    printedChars += printSize(cfg.context.completeFileSize);
     /* 1 char */
     printedChars += printf("|");
     /* 14 chars --> '1001.132 MByte' */
@@ -300,7 +295,7 @@ void outputProgress(struct dccDownloadProgress *progress) {
     printedChars += printf("/s|");
 
     /*calc ETA - max 13 chars */
-    uint64_t remainingSize = progress->completeFileSize - progress->sizeRcvd;
+    uint64_t remainingSize = cfg.context.completeFileSize - cfg.context.sizeRcvd;
     if (remainingSize > 0 && curSpeed > 0) {
         double etaSeconds = ((double) remainingSize / (double) curSpeed);
         printedChars += printETA(etaSeconds);
@@ -326,12 +321,8 @@ void doCleanUp() {
     for (size_t i = 0; i < cfg.numChannels; i++)
         free(cfg.channelsToJoin[i]);
 
-    if (cfg.context.progress) {
-        if (cfg.context.progress->sizeRcvd != cfg.context.progress->completeFileSize)
-            fclose(cfg.context.fd);
-        free(cfg.context.progress->completePath);
-        free(cfg.context.progress);
-    }
+    if (cfg.context.sizeRcvd != cfg.context.completeFileSize)
+        fclose(cfg.context.fd);
 
     free(cfg.botNick);
     free(cfg.xdccCmd);
@@ -426,18 +417,14 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
         return;
     }
 
-    struct dccDownloadContext *context = (struct dccDownloadContext*) ctx;
-    struct dccDownloadProgress *progress = context->progress;
+    cfg.context.sizeRcvd += length;
+    fwrite(data, 1, length, cfg.context.fd);
 
-    progress->sizeRcvd += length;
-    fwrite(data, 1, length, context->fd);
-
-    if (progress->sizeRcvd == progress->completeFileSize) {
+    if (cfg.context.sizeRcvd == cfg.context.completeFileSize) {
         alarm(0);
-        outputProgress(progress);
+        outputProgress();
 
-        fclose(context->fd);
-        context->fd = NULL;
+        fclose(cfg.context.fd);
 
         irc_cmd_quit(cfg.session, "Goodbye!");
     }
@@ -456,21 +443,15 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
         warnx("The file name contains invalid characters ('/' or '\\'). Aborting...");
         exitPgm(EXIT_FAILURE);
     }
-
-    struct dccDownloadProgress *progress = malloc(sizeof(*progress));
-    progress->completeFileSize = size;
-    progress->sizeRcvd = 0;
-    progress->sizeNow = 0;
-    progress->sizeLast = 0;
-    progress->completePath = fileName;
-
-    struct dccDownloadContext *context = &cfg.context;
-    context->progress = progress;
+    cfg.context.completeFileSize = size;
+    cfg.context.sizeRcvd = 0;
+    cfg.context.sizeNow = 0;
+    cfg.context.sizeLast = 0;
 
     DBG_OK("nick at recvFileReq is %s", nick);
 
-    context->fd = fopen(filename, "wb");
-    if (irc_dcc_accept(session, dccid, context, callback_dcc_recv_file) != 0) {
+    cfg.context.fd = fopen(filename, "wb");
+    if (irc_dcc_accept(session, dccid, NULL, callback_dcc_recv_file) != 0) {
         warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(cfg.session)));
         exitPgm(EXIT_FAILURE);
     }
