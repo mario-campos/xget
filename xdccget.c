@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <signal.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <err.h>
@@ -330,20 +329,6 @@ void exitPgm(int retCode) {
     exit(retCode);
 }
 
-void interrupt_handler() {
-    if (cfg.session && irc_is_connected(cfg.session)) {
-        irc_cmd_quit(cfg.session, "Goodbye!");
-    }
-    else {
-        exitPgm(0);
-    }
-}
-
-void output_handler() {
-    alarm(1);
-    cfg.flags |= OUTPUT_FLAG;
-}
-
 void join_channels(irc_session_t *session) {
     for (uint32_t i = 0; i < cfg.numChannels; i++) {
         DBG_OK("Joining channel '%s'", cfg.channelsToJoin[i]);
@@ -407,7 +392,6 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
     fwrite(data, 1, length, cfg.context.fd);
 
     if (cfg.context.sizeRcvd == cfg.context.completeFileSize) {
-        alarm(0);
         outputProgress();
 
         fclose(cfg.context.fd);
@@ -438,27 +422,6 @@ void recvFileRequest (irc_session_t *session, const char *nick, const char *addr
     if (irc_dcc_accept(session, dccid, NULL, callback_dcc_recv_file) != 0) {
         warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(cfg.session)));
         exitPgm(EXIT_FAILURE);
-    }
-}
-
-/*
- * `init_signal` is a wrapper for `sigaction`; i.e. it defines
- * a signal handler for the given signal number.
- */
-void init_signal(int signum, void (*handler) (int)) {
-    struct sigaction act;
-    int ret;
-
-    memset(&act, 0, sizeof(act));
-    sigemptyset (&act.sa_mask);
-
-    act.sa_handler = handler;
-    act.sa_flags = SA_RESTART;
-
-    ret = sigaction(signum, &act, NULL);
-    if (ret == -1) {
-        warn("sigaction(2): cannot handle signal %d", signum);
-        exit(EXIT_FAILURE);
     }
 }
 
@@ -528,9 +491,6 @@ int main(int argc, char **argv)
     char *channels = argv[1];
     char *xdccCommand = argv[2];
 
-    init_signal(SIGINT, interrupt_handler);
-    init_signal(SIGALRM, output_handler);
-
     cfg.channelsToJoin = parseChannels(channels, &cfg.numChannels);
     parseDccDownload(xdccCommand, &cfg.botNick, &cfg.xdccCmd);
     DBG_OK("Parsed XDCC sender as \"%s\" and XDCC command as \"%s\"", cfg.botNick, cfg.xdccCmd);
@@ -566,8 +526,6 @@ int main(int argc, char **argv)
         warnx( "error: could not connect to server %s:%u: %s", host, port, irc_strerror(irc_errno(cfg.session)));
         exitPgm(EXIT_FAILURE);
     }
-
-    alarm(1);
 
     if (irc_run(cfg.session) != 0) {
         if (irc_errno(cfg.session) != LIBIRC_ERR_TERMINATED && irc_errno(cfg.session) != LIBIRC_ERR_CLOSED) {
