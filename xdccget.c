@@ -68,7 +68,7 @@ struct xdccGetConfig {
 #define ACCEPT_ALL_NICKS_FLAG     0x10
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
-#define NICKLEN 20
+#define IRC_NICK_MAX_SIZE 30
 #define _FILE_OFFSET_BITS 64
 
 struct terminalDimension {
@@ -152,37 +152,23 @@ char** parseChannels(char *channelString, uint32_t *numChannels) {
 
 struct terminalDimension terminal_dimension;
 
-void initRand() {
-    time_t t = time(NULL);
+void invent_nick(char *dst, size_t dst_size) {
+    size_t new_size;
+    char *adjectives[] = {"Pandering", "Foul", "Decrepit", "Sanguine","Illustrious",
+                          "Cantankerous", "Dubious", "Auspicious", "Valorous", "Venal",
+                          "Virulent", "Voracious", "Votive", "Voluptuous"};
+    char *nouns[] = {"Buffoon", "Vixen", "Nincompoop", "Lad", "Phantom", "Banshee", "Jollux",
+                     "Lark", "Wench", "Sobriquet", "Vexation","Violation", "Volition",
+                     "Vendetta", "Veracity", "Vim"};
 
-    if (t == ((time_t) -1)) {
-        DBG_ERR("time failed");
-    }
+    srand(getpid());
 
-    srand((unsigned int) t);
-}
-
-int rand_range(int low, int high) {
-    if (high == 0) {
-        return 0;
-    }
-    return (rand() % high + low);
-}
-
-void createRandomNick(int nickLen, char *nick) {
-    char *possibleChars = "abcdefghiklmnopqrstuvwxyzABCDEFGHIJHKLMOPQRSTUVWXYZ";
-    size_t numChars = strlen(possibleChars);
-    int i;
-
-    if (nick == NULL) {
-        DBG_WARN("nick = NULL!");
-        return;
-    }
-
-    for (i = 0; i < nickLen; i++) {
-        nick[i] = possibleChars[rand_range(0, numChars - 1)];
-    }
-    nick[nickLen-1] = '\0';
+    do {
+        size_t i = rand() % (sizeof(adjectives) / sizeof(adjectives[0]));
+        size_t j = rand() % (sizeof(nouns) / sizeof(nouns[0]));
+        new_size = strlcpy(dst, adjectives[i], dst_size);
+        new_size += strlcat(dst, nouns[j], dst_size);
+    } while (new_size >= dst_size);
 }
 
 struct terminalDimension *getTerminalDimension() {
@@ -430,9 +416,7 @@ static char* usage = "usage: xdccget [-46aD] [-n <nick>] [-p <port>] <server> <c
 int main(int argc, char **argv)
 {
     uint16_t port = 6667;
-    char nick[NICKLEN] = {0};
-
-    initRand();
+    char nick[IRC_NICK_MAX_SIZE] = {0};
 
     int opt;
     while ((opt = getopt(argc, argv, "Vhkn:p:a46")) != -1) {
@@ -509,9 +493,7 @@ int main(int argc, char **argv)
         exitPgm(EXIT_FAILURE);
     }
 
-    if (!strlen(nick)) {
-        createRandomNick(sizeof(nick), nick);
-    }
+    if (!strlen(nick)) invent_nick(nick, sizeof(nick));
     DBG_OK("IRC nick: '%s'", nick);
 
     int irc_err;
