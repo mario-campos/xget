@@ -271,13 +271,6 @@ void outputProgress() {
     }
 }
 
-void join_channels(irc_session_t *session) {
-    for (uint32_t i = 0; i < cfg.numChannels; i++) {
-        DBG_OK("Joining channel '%s'", cfg.channelsToJoin[i]);
-        irc_cmd_join (session, cfg.channelsToJoin[i], 0);
-    }
-}
-
 void send_xdcc_requests(irc_session_t *session) {
     int err;
     if (!(cfg.flags & SENDED_FLAG)) {
@@ -298,13 +291,6 @@ void event_mode(irc_session_t * session, const char * event, const char * origin
 
 }
 
-void event_umode(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count) {
-    if (strcmp(params[0], "+r") == 0) {
-        join_channels(session);
-    }
-}
-
-
 void event_join (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
     irc_cmd_user_mode (session, "+i");
@@ -314,7 +300,10 @@ void event_join (irc_session_t * session, const char * event, const char * origi
 
 void event_connect (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
-    join_channels(session);
+    for (uint32_t i = 0; i < cfg.numChannels; i++) {
+        DBG_OK("Joining channel '%s'", cfg.channelsToJoin[i]);
+        irc_cmd_join(session, cfg.channelsToJoin[i], 0);
+    }
 }
 
 // This callback is used when we receive a file from the remote party
@@ -421,7 +410,6 @@ int main(int argc, char **argv)
     callbacks.event_connect = event_connect;
     callbacks.event_join = event_join;
     callbacks.event_dcc_send_req = event_dcc_send_req;
-    callbacks.event_umode = event_umode;
     callbacks.event_mode = event_mode;
 
     cfg.session = irc_create_session(&callbacks);
