@@ -361,7 +361,7 @@ void event_dcc_send_req(irc_session_t *session, const char *nick, const char *ad
     cfg.context.fd = fopen(filename, "wb");
 }
 
-static char* usage = "usage: xdccget [-46aD] [-n <nick>] [-p <port>] <server> <channel(s)> <XDCC command>";
+static char* usage = "usage: xdccget [-46] [-p <port>] <server> <channel(s)> <XDCC command>";
 
 int main(int argc, char **argv)
 {
@@ -369,7 +369,7 @@ int main(int argc, char **argv)
     char nick[IRC_NICK_MAX_SIZE] = {0};
 
     int opt;
-    while ((opt = getopt(argc, argv, "Vhkn:p:a46")) != -1) {
+    while ((opt = getopt(argc, argv, "Vhp:46")) != -1) {
         switch (opt) {
             case 'V': {
                 unsigned int major, minor;
