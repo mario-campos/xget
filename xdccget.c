@@ -282,18 +282,12 @@ void outputProgress()
 
 void event_join(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
-    irc_cmd_user_mode (session, "+i");
-
-    int err1;
-    if (!(cfg.flags & SENDED_FLAG)) {
-        DBG_OK("Sending XDCC command '%s' to nick '%s'", cfg.xdccCmd, cfg.botNick);
-        if ((err1 = irc_cmd_msg(session, cfg.botNick, cfg.xdccCmd))) {
-            warnx("failed to send XDCC command '%s' to nick '%s': %s", cfg.xdccCmd, cfg.botNick, irc_strerror(err1));
-        }
-        cfg.flags |= SENDED_FLAG;
+    DBG_OK("Sending XDCC command '%s' to nick '%s'", cfg.xdccCmd, cfg.botNick);
+    if (irc_cmd_msg(session, cfg.botNick, cfg.xdccCmd)) {
+        warnx("failed to send XDCC command '%s' to nick '%s': %s", cfg.xdccCmd, cfg.botNick, irc_strerror(irc_errno(session)));
+        irc_disconnect(session);
     }
 }
-
 
 void event_connect(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
