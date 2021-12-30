@@ -12,7 +12,6 @@
 #include "libircclient.h"
 
 #define USE_IPV6_FLAG 0x01
-#define SENDED_FLAG   0x02
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
 #define IRC_NICK_MAX_SIZE 30
