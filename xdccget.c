@@ -40,7 +40,6 @@
 		    } while(0)
 	#define DBG_ERR(format, ...) do {\
 		    	DBG_MSG(KRED, stderr, format, ##__VA_ARGS__);\
-                doCleanUp();\
                 exit(EXIT_FAILURE);\
 			} while(0)
 #else
