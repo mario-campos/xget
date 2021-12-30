@@ -11,6 +11,12 @@
 
 #include "libircclient.h"
 
+#define USE_IPV6_FLAG 0x01
+#define SENDED_FLAG   0x02
+
+#define IRC_DCC_SIZE_T_FORMAT PRIu64
+#define IRC_NICK_MAX_SIZE 30
+
 /* ansi color codes used at the dbg macros for coloured output. */
 
 #define KNRM  "\x1B[0m"
@@ -61,13 +67,6 @@ struct xdccGetConfig {
     uint32_t numChannels;
     struct dccDownloadContext context;
 };
-
-#define USE_IPV6_FLAG	          0x04
-#define SENDED_FLAG               0x08
-
-#define IRC_DCC_SIZE_T_FORMAT PRIu64
-#define IRC_NICK_MAX_SIZE 30
-#define _FILE_OFFSET_BITS 64
 
 struct terminalDimension {
     int cols;
