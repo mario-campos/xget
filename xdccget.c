@@ -398,11 +398,11 @@ int main(int argc, char **argv)
                 unsigned int major, minor;
                 irc_get_version(&major, &minor);
                 printf("xdccget-0.0.0\nlibircclient-%d.%02d\n", major, minor);
-                exit(0);
+                return EXIT_SUCCESS;
             }
             case 'h':
                 puts(usage);
-                exit(EXIT_SUCCESS);
+                return EXIT_SUCCESS;
 
             case 'p':
                 port = (uint16_t)strtoul(optarg, NULL, 0);
@@ -420,7 +420,7 @@ int main(int argc, char **argv)
             case '?':
             default:
                 fputs(usage, stderr);
-                exit(EXIT_FAILURE);
+                return EXIT_FAILURE;
         }
     }
     argc -= optind;
@@ -428,7 +428,7 @@ int main(int argc, char **argv)
 
     if (argc != 3) {
         fputs(usage, stderr);
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     char *host = argv[0];
@@ -455,7 +455,7 @@ int main(int argc, char **argv)
         free(cfg.botNick);
         free(cfg.xdccCmd);
         free(cfg.channelsToJoin);
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     if (!strlen(nick)) invent_nick(nick, sizeof(nick));
@@ -477,7 +477,7 @@ int main(int argc, char **argv)
         free(cfg.botNick);
         free(cfg.xdccCmd);
         free(cfg.channelsToJoin);
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     if (irc_run(cfg.session) != 0) {
@@ -490,7 +490,7 @@ int main(int argc, char **argv)
             free(cfg.botNick);
             free(cfg.xdccCmd);
             free(cfg.channelsToJoin);
-            exit(EXIT_FAILURE);
+            return EXIT_FAILURE;
         }
     }
 
