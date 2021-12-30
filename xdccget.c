@@ -280,32 +280,18 @@ void outputProgress()
     }
 }
 
-void send_xdcc_requests(irc_session_t *session)
-{
-    int err;
-    if (!(cfg.flags & SENDED_FLAG)) {
-        DBG_OK("Sending XDCC command '%s' to nick '%s'", cfg.xdccCmd, cfg.botNick);
-        if ((err = irc_cmd_msg(session, cfg.botNick, cfg.xdccCmd))) {
-            warnx("failed to send XDCC command '%s' to nick '%s': %s", cfg.xdccCmd, cfg.botNick, irc_strerror(err));
-        }
-        cfg.flags |= SENDED_FLAG;
-    }
-}
-
-void event_mode(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
-{
-    if (count > 1) {
-        if (strcmp(params[1], "+v") == 0) {
-            send_xdcc_requests(session);
-        }
-    }
-
-}
-
 void event_join(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
     irc_cmd_user_mode (session, "+i");
-    send_xdcc_requests(session);
+
+    int err1;
+    if (!(cfg.flags & SENDED_FLAG)) {
+        DBG_OK("Sending XDCC command '%s' to nick '%s'", cfg.xdccCmd, cfg.botNick);
+        if ((err1 = irc_cmd_msg(session, cfg.botNick, cfg.xdccCmd))) {
+            warnx("failed to send XDCC command '%s' to nick '%s': %s", cfg.xdccCmd, cfg.botNick, irc_strerror(err1));
+        }
+        cfg.flags |= SENDED_FLAG;
+    }
 }
 
 
@@ -420,7 +406,6 @@ int main(int argc, char **argv)
     callbacks.event_connect = event_connect;
     callbacks.event_join = event_join;
     callbacks.event_dcc_send_req = event_dcc_send_req;
-    callbacks.event_mode = event_mode;
 
     cfg.session = irc_create_session(&callbacks);
     if (!cfg.session) {
