@@ -437,12 +437,10 @@ int main(int argc, char **argv)
     DBG_OK("IRC nick: '%s'", nick);
 
     int irc_err;
-    if (cfg.flags & USE_IPV6_FLAG) {
+    if (cfg.flags & USE_IPV6_FLAG)
         irc_err = irc_connect6(cfg.session, host, port, 0, nick, 0, 0);
-    }
-    else {
+    else
         irc_err = irc_connect(cfg.session, host, port, 0, nick, 0, 0);
-    }
 
     if (irc_err) {
         warnx( "error: could not connect to server %s:%u: %s", host, port, irc_strerror(irc_errno(cfg.session)));
