@@ -68,10 +68,6 @@ struct xdccGetConfig {
     struct dccDownloadContext context;
 };
 
-struct terminalDimension {
-    int cols;
-};
-
 struct xdccGetConfig cfg;
 
 void parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, char *xdcc_command, size_t xdcc_cmd_size) {
@@ -134,8 +130,6 @@ char** parseChannels(char *channelString, uint32_t *numChannels) {
     return splittedString;
 }
 
-struct terminalDimension terminal_dimension;
-
 void invent_nick(char *dst, size_t dst_size) {
     size_t new_size;
     char *adjectives[] = {"Pandering", "Foul", "Decrepit", "Sanguine","Illustrious",
@@ -157,12 +151,10 @@ void invent_nick(char *dst, size_t dst_size) {
     } while (new_size >= dst_size);
 }
 
-struct terminalDimension *getTerminalDimension() {
+unsigned short getTerminalDimension() {
     struct winsize w;
     ioctl(0, TIOCGWINSZ, &w);
-
-    terminal_dimension.cols = w.ws_col;
-    return &terminal_dimension;
+    return w.ws_col;
 }
 
 void printProgressBar(const int numBars, const double percentRdy) {
@@ -232,9 +224,9 @@ int printETA(double seconds) {
 }
 
 void outputProgress() {
-    struct terminalDimension *terminalDimension = getTerminalDimension();
+    int terminalDimension = getTerminalDimension();
     /* see comments below how these "numbers" are calculated */
-    int progBarLen = terminalDimension->cols - (8 + 14 + 1 + 14 + 1 + 14 + 3 + 13 /* +1 for windows...*/);
+    int progBarLen = terminalDimension - (8 + 14 + 1 + 14 + 1 + 14 + 3 + 13 /* +1 for windows...*/);
 
     cfg.context.sizeLast = cfg.context.sizeNow;
     cfg.context.sizeNow = cfg.context.sizeRcvd;
@@ -274,7 +266,7 @@ void outputProgress() {
     /* fill remaining columns of terminal with spaces, in ordner to clean the output... */
 
     int j;
-    for (j = printedChars; j < terminalDimension->cols - 1; j++) {
+    for (j = printedChars; j < terminalDimension - 1; j++) {
         printf(" ");
     }
 }
