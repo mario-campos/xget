@@ -61,11 +61,8 @@ struct xdccGetConfig {
     struct dccDownloadContext context;
 };
 
-#define OUTPUT_FLAG               0x01
-#define ALLOW_ALL_CERTS_FLAG      0x02
 #define USE_IPV6_FLAG	          0x04
 #define SENDED_FLAG               0x08
-#define ACCEPT_ALL_NICKS_FLAG     0x10
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
 #define IRC_NICK_MAX_SIZE 30
@@ -431,22 +428,9 @@ int main(int argc, char **argv)
                 puts(usage);
                 exit(EXIT_SUCCESS);
 
-            case 'k':
-                cfg.flags |= ALLOW_ALL_CERTS_FLAG;
-                break;
-
-            case 'n':
-                DBG_OK("setting nickname as %s", optarg);
-                strlcpy(nick, optarg, sizeof(nick));
-                break;
-
             case 'p':
                 port = (uint16_t)strtoul(optarg, NULL, 0);
                 DBG_OK("Port number: %u", port);
-                break;
-
-            case 'a':
-                cfg.flags |= ACCEPT_ALL_NICKS_FLAG;
                 break;
 
             case '4':
