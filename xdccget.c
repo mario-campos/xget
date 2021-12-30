@@ -34,7 +34,8 @@
 		    } while(0)
 	#define DBG_ERR(format, ...) do {\
 		    	DBG_MSG(KRED, stderr, format, ##__VA_ARGS__);\
-		    	exitPgm(EXIT_FAILURE);\
+                doCleanUp();\
+                exit(EXIT_FAILURE);\
 			} while(0)
 #else
 #define DBG_MSG(color, stream, format, ...) do {} while(0)
@@ -309,11 +310,6 @@ void doCleanUp() {
     free(cfg.channelsToJoin);
 }
 
-void exitPgm(int retCode) {
-    doCleanUp();
-    exit(retCode);
-}
-
 void join_channels(irc_session_t *session) {
     for (uint32_t i = 0; i < cfg.numChannels; i++) {
         DBG_OK("Joining channel '%s'", cfg.channelsToJoin[i]);
@@ -471,7 +467,8 @@ int main(int argc, char **argv)
     cfg.session = irc_create_session(&callbacks);
     if (!cfg.session) {
         warn("failed to create IRC session object");
-        exitPgm(EXIT_FAILURE);
+        doCleanUp();
+        exit(EXIT_FAILURE);
     }
 
     if (!strlen(nick)) invent_nick(nick, sizeof(nick));
@@ -487,13 +484,15 @@ int main(int argc, char **argv)
 
     if (irc_err) {
         warnx( "error: could not connect to server %s:%u: %s", host, port, irc_strerror(irc_errno(cfg.session)));
-        exitPgm(EXIT_FAILURE);
+        doCleanUp();
+        exit(EXIT_FAILURE);
     }
 
     if (irc_run(cfg.session) != 0) {
         if (irc_errno(cfg.session) != LIBIRC_ERR_TERMINATED && irc_errno(cfg.session) != LIBIRC_ERR_CLOSED) {
             warnx("error: could not connect or I/O error at server %s:%u: %s\n", host, port, irc_strerror(irc_errno(cfg.session)));
-            exitPgm(EXIT_FAILURE);
+            doCleanUp();
+            exit(EXIT_FAILURE);
         }
     }
 
