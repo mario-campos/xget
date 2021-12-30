@@ -385,29 +385,24 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
     }
 }
 
-void recvFileRequest (irc_session_t *session, const char *nick, const char *addr, const char *filename, unsigned long size, unsigned int dccid)
+void event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, const char *filename, unsigned long size, unsigned int dccid)
 {
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
 
-    /* chars / and \ are not permitted to appear in a valid filename. if someone wants to send us such a file
-       then something is definately wrong. so just exit pgm then and print error msg to user.*/
-    if (strchr(filename, '/') || strchr(filename, '\\')) {
-        /* filename contained bad chars. print msg and exit...*/
-        warnx("The file name contains invalid characters ('/' or '\\'). Aborting...");
-        exitPgm(EXIT_FAILURE);
+    if (irc_dcc_accept(session, dccid, NULL, callback_dcc_recv_file)) {
+        warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(session)));
+        irc_disconnect(session);
+        return;
     }
+
+    // The forward-slash (/) and backslash (\) characters are invalid in file names.
+    // If they are present, replace each one with an underscore (_).
+    char *c;
+    while ((c = strchr(filename, '/')) || (c = strchr(filename, '\\')))
+        *c = '_';
+
     cfg.context.completeFileSize = size;
-    cfg.context.sizeRcvd = 0;
-    cfg.context.sizeNow = 0;
-    cfg.context.sizeLast = 0;
-
-    DBG_OK("nick at recvFileReq is %s", nick);
-
     cfg.context.fd = fopen(filename, "wb");
-    if (irc_dcc_accept(session, dccid, NULL, callback_dcc_recv_file) != 0) {
-        warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(cfg.session)));
-        exitPgm(EXIT_FAILURE);
-    }
 }
 
 static char* usage = "usage: xdccget [-46aD] [-n <nick>] [-p <port>] <server> <channel(s)> <XDCC command>";
@@ -469,7 +464,7 @@ int main(int argc, char **argv)
     bzero(&callbacks, sizeof(callbacks));
     callbacks.event_connect = event_connect;
     callbacks.event_join = event_join;
-    callbacks.event_dcc_send_req = recvFileRequest;
+    callbacks.event_dcc_send_req = event_dcc_send_req;
     callbacks.event_umode = event_umode;
     callbacks.event_mode = event_mode;
 
