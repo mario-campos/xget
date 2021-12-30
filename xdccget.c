@@ -321,10 +321,9 @@ void event_connect (irc_session_t * session, const char * event, const char * or
 
 void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, unsigned int length) {
     if (status) {
-        DBG_ERR("File sent error: %d\nerror desc: %s", status, irc_strerror(status));
+        warnx("failed to download file: %s", irc_strerror(status));
         return;
     }
-
     if (!data) {
         DBG_OK("callback_dcc_recv_file called with data = NULL!");
         return;
