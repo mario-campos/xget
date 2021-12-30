@@ -158,6 +158,8 @@ void invent_nick(char *dst, size_t dst_size) {
                      "Lark", "Wench", "Sobriquet", "Vexation","Violation", "Volition",
                      "Vendetta", "Veracity", "Vim"};
 
+    // This is a weak form of entropy, but we don't need much --
+    // just enough to choose a "unique" nick.
     srand(getpid());
 
     do {
