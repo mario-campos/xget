@@ -302,20 +302,12 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
         warnx("failed to download file: %s", irc_strerror(status));
         return;
     }
-    if (!data) {
-        DBG_OK("callback_dcc_recv_file called with data = NULL!");
-        return;
-    }
-
-    cfg.context.sizeRcvd += length;
-    fwrite(data, 1, length, cfg.context.fd);
-
-    if (cfg.context.sizeRcvd == cfg.context.completeFileSize) {
-        outputProgress();
-
+    if (data) {
+        cfg.context.sizeRcvd += length;
+        fwrite(data, 1, length, cfg.context.fd);
+    } else {
         fclose(cfg.context.fd);
-
-        irc_cmd_quit(cfg.session, "Goodbye!");
+        irc_cmd_quit(session, NULL);
     }
 }
 
@@ -436,6 +428,8 @@ int main(int argc, char **argv)
         free(cfg.channelsToJoin);
         return EXIT_FAILURE;
     }
+
+    outputProgress();
 
     irc_destroy_session(cfg.session);
     for (size_t i1 = 0; i1 < cfg.numChannels; i1++)
