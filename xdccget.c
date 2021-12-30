@@ -69,7 +69,8 @@ struct xdccGetConfig {
 
 struct xdccGetConfig cfg;
 
-void parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, char *xdcc_command, size_t xdcc_cmd_size) {
+void parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, char *xdcc_command, size_t xdcc_cmd_size)
+{
     char *space;
 
     if (!(space = strchr(xdcc_nick_command, ' '))) {
@@ -83,7 +84,8 @@ void parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, cha
     strlcpy(xdcc_command, space+1, xdcc_cmd_size);
 }
 
-char *strip(char *s) {
+char *strip(char *s)
+{
     char *it;
     char *separated = s;
     while ((it = strsep(&separated, " \t")) != NULL) {
@@ -95,7 +97,8 @@ char *strip(char *s) {
     return s;
 }
 
-char **split(char *s, int *count) {
+char **split(char *s, int *count)
+{
     char *it, **parts, **head;
     *count = 0;
     head = parts = calloc(10, sizeof(char*));
@@ -110,7 +113,8 @@ char **split(char *s, int *count) {
     return head;
 }
 
-char** parseChannels(char *channelString, uint32_t *numChannels) {
+char** parseChannels(char *channelString, uint32_t *numChannels)
+{
     int numFound = 0;
     char **splittedString = split(channelString, &numFound);
     if (splittedString == NULL) {
@@ -129,7 +133,8 @@ char** parseChannels(char *channelString, uint32_t *numChannels) {
     return splittedString;
 }
 
-void invent_nick(char *dst, size_t dst_size) {
+void invent_nick(char *dst, size_t dst_size)
+{
     size_t new_size;
     char *adjectives[] = {"Pandering", "Foul", "Decrepit", "Sanguine","Illustrious",
                           "Cantankerous", "Dubious", "Auspicious", "Valorous", "Venal",
@@ -150,13 +155,15 @@ void invent_nick(char *dst, size_t dst_size) {
     } while (new_size >= dst_size);
 }
 
-unsigned short getTerminalDimension() {
+unsigned short getTerminalDimension()
+{
     struct winsize w;
     ioctl(0, TIOCGWINSZ, &w);
     return w.ws_col;
 }
 
-void printProgressBar(const int numBars, const double percentRdy) {
+void printProgressBar(const int numBars, const double percentRdy)
+{
     const int NUM_BARS = numBars;
 
     putchar('[');
@@ -173,7 +180,8 @@ void printProgressBar(const int numBars, const double percentRdy) {
     putchar(']');
 }
 
-int printSize(uint64_t size) {
+int printSize(uint64_t size)
+{
     char *sizeNames[] = {"Byte", "KByte", "MByte", "GByte", "TByte", "PByte"};
 
     double temp = (double) size;
@@ -196,7 +204,8 @@ int printSize(uint64_t size) {
     return charsPrinted;
 }
 
-int printETA(double seconds) {
+int printETA(double seconds)
+{
     int charsPrinted = 0;
     if (seconds <= 60) {
         charsPrinted = printf("%.0fs", seconds);
@@ -222,7 +231,8 @@ int printETA(double seconds) {
     return charsPrinted;
 }
 
-void outputProgress() {
+void outputProgress()
+{
     int terminalDimension = getTerminalDimension();
     /* see comments below how these "numbers" are calculated */
     int progBarLen = terminalDimension - (8 + 14 + 1 + 14 + 1 + 14 + 3 + 13 /* +1 for windows...*/);
@@ -270,7 +280,8 @@ void outputProgress() {
     }
 }
 
-void send_xdcc_requests(irc_session_t *session) {
+void send_xdcc_requests(irc_session_t *session)
+{
     int err;
     if (!(cfg.flags & SENDED_FLAG)) {
         DBG_OK("Sending XDCC command '%s' to nick '%s'", cfg.xdccCmd, cfg.botNick);
@@ -281,7 +292,8 @@ void send_xdcc_requests(irc_session_t *session) {
     }
 }
 
-void event_mode(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count) {
+void event_mode(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
+{
     if (count > 1) {
         if (strcmp(params[1], "+v") == 0) {
             send_xdcc_requests(session);
@@ -290,14 +302,14 @@ void event_mode(irc_session_t * session, const char * event, const char * origin
 
 }
 
-void event_join (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
+void event_join(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
     irc_cmd_user_mode (session, "+i");
     send_xdcc_requests(session);
 }
 
 
-void event_connect (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
+void event_connect(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
     for (uint32_t i = 0; i < cfg.numChannels; i++) {
         DBG_OK("Joining channel '%s'", cfg.channelsToJoin[i]);
@@ -305,9 +317,8 @@ void event_connect (irc_session_t * session, const char * event, const char * or
     }
 }
 
-// This callback is used when we receive a file from the remote party
-
-void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, unsigned int length) {
+void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, unsigned int length)
+{
     if (status) {
         warnx("failed to download file: %s", irc_strerror(status));
         return;
