@@ -454,16 +454,14 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    if (irc_run(cfg.session) != 0) {
-        if (irc_errno(cfg.session) != LIBIRC_ERR_TERMINATED && irc_errno(cfg.session) != LIBIRC_ERR_CLOSED) {
-            warnx("error: could not connect or I/O error at server %s:%u: %s\n", host, port, irc_strerror(irc_errno(cfg.session)));
-            irc_destroy_session(cfg.session);
-            for (size_t i = 0; i < cfg.numChannels; i++)
-                free(cfg.channelsToJoin[i]);
-            fclose(cfg.context.fd);
-            free(cfg.channelsToJoin);
-            return EXIT_FAILURE;
-        }
+    if (irc_run(cfg.session)) {
+        warnx("failed to start IRC session: %s", irc_strerror(irc_errno(cfg.session)));
+        irc_destroy_session(cfg.session);
+        for (size_t i = 0; i < cfg.numChannels; i++)
+            free(cfg.channelsToJoin[i]);
+        fclose(cfg.context.fd);
+        free(cfg.channelsToJoin);
+        return EXIT_FAILURE;
     }
 
     irc_destroy_session(cfg.session);
