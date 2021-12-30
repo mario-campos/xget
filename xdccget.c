@@ -293,23 +293,6 @@ void outputProgress() {
     }
 }
 
-/*
- * Close IRC sessions and deallocate memory.
- */
-void doCleanUp() {
-    if (cfg.session) irc_destroy_session(cfg.session);
-
-    for (size_t i = 0; i < cfg.numChannels; i++)
-        free(cfg.channelsToJoin[i]);
-
-    if (cfg.context.sizeRcvd != cfg.context.completeFileSize)
-        fclose(cfg.context.fd);
-
-    free(cfg.botNick);
-    free(cfg.xdccCmd);
-    free(cfg.channelsToJoin);
-}
-
 void join_channels(irc_session_t *session) {
     for (uint32_t i = 0; i < cfg.numChannels; i++) {
         DBG_OK("Joining channel '%s'", cfg.channelsToJoin[i]);
@@ -467,7 +450,11 @@ int main(int argc, char **argv)
     cfg.session = irc_create_session(&callbacks);
     if (!cfg.session) {
         warn("failed to create IRC session object");
-        doCleanUp();
+        for (size_t i = 0; i < cfg.numChannels; i++)
+            free(cfg.channelsToJoin[i]);
+        free(cfg.botNick);
+        free(cfg.xdccCmd);
+        free(cfg.channelsToJoin);
         exit(EXIT_FAILURE);
     }
 
@@ -484,17 +471,34 @@ int main(int argc, char **argv)
 
     if (irc_err) {
         warnx( "error: could not connect to server %s:%u: %s", host, port, irc_strerror(irc_errno(cfg.session)));
-        doCleanUp();
+        irc_destroy_session(cfg.session);
+        for (size_t i = 0; i < cfg.numChannels; i++)
+            free(cfg.channelsToJoin[i]);
+        free(cfg.botNick);
+        free(cfg.xdccCmd);
+        free(cfg.channelsToJoin);
         exit(EXIT_FAILURE);
     }
 
     if (irc_run(cfg.session) != 0) {
         if (irc_errno(cfg.session) != LIBIRC_ERR_TERMINATED && irc_errno(cfg.session) != LIBIRC_ERR_CLOSED) {
             warnx("error: could not connect or I/O error at server %s:%u: %s\n", host, port, irc_strerror(irc_errno(cfg.session)));
-            doCleanUp();
+            irc_destroy_session(cfg.session);
+            for (size_t i = 0; i < cfg.numChannels; i++)
+                free(cfg.channelsToJoin[i]);
+            fclose(cfg.context.fd);
+            free(cfg.botNick);
+            free(cfg.xdccCmd);
+            free(cfg.channelsToJoin);
             exit(EXIT_FAILURE);
         }
     }
 
-    doCleanUp();
+    irc_destroy_session(cfg.session);
+    for (size_t i1 = 0; i1 < cfg.numChannels; i1++)
+        free(cfg.channelsToJoin[i1]);
+    fclose(cfg.context.fd);
+    free(cfg.botNick);
+    free(cfg.xdccCmd);
+    free(cfg.channelsToJoin);
 }
