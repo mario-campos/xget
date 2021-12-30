@@ -60,8 +60,8 @@ struct dccDownloadContext {
 
 struct xdccGetConfig {
     irc_session_t *session;
-    char *botNick;
-    char *xdccCmd;
+    char botNick[IRC_NICK_MAX_SIZE];
+    char xdccCmd[IRC_NICK_MAX_SIZE];
     uint64_t flags;
     char **channelsToJoin;
     uint32_t numChannels;
@@ -74,31 +74,18 @@ struct terminalDimension {
 
 struct xdccGetConfig cfg;
 
-void parseDccDownload(char *dccDownloadString, char **nick, char **xdccCmd) {
-    size_t i;
-    size_t strLen = strlen(dccDownloadString);
-    size_t spaceFound = 0;
+void parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, char *xdcc_command, size_t xdcc_cmd_size) {
+    char *space;
 
-    for (i = 0; i < strLen; i++) {
-        if (dccDownloadString[i] == ' ') {
-            spaceFound = i;
-            break;
-        }
+    if (!(space = strchr(xdcc_nick_command, ' '))) {
+        *nick = '\0';
+        *xdcc_command = '\0';
+        return;
     }
 
-    size_t nickLen = spaceFound + 1;
-    size_t cmdLen = (strLen - spaceFound) + 1;
-
-    DBG_OK("nickLen = %zu, cmdLen = %zu", nickLen, cmdLen);
-
-    char nickPtr[nickLen];
-    char xdccPtr[cmdLen];
-
-    strlcpy(nickPtr, dccDownloadString, sizeof(nickPtr));
-    strlcpy(xdccPtr, dccDownloadString + (spaceFound + 1), sizeof(xdccPtr));
-
-    *nick = strdup(nickPtr);
-    *xdccCmd = strdup(xdccPtr);
+    *space = '\0';
+    strlcpy(nick, xdcc_nick_command, nick_size);
+    strlcpy(xdcc_command, space+1, xdcc_cmd_size);
 }
 
 char *strip(char *s) {
@@ -435,7 +422,7 @@ int main(int argc, char **argv)
     char *xdccCommand = argv[2];
 
     cfg.channelsToJoin = parseChannels(channels, &cfg.numChannels);
-    parseDccDownload(xdccCommand, &cfg.botNick, &cfg.xdccCmd);
+    parseDccDownload(xdccCommand, cfg.botNick, sizeof(cfg.botNick), cfg.xdccCmd, sizeof(cfg.xdccCmd));
     DBG_OK("Parsed XDCC sender as \"%s\" and XDCC command as \"%s\"", cfg.botNick, cfg.xdccCmd);
 
     irc_callbacks_t callbacks;
@@ -451,8 +438,6 @@ int main(int argc, char **argv)
         warn("failed to create IRC session object");
         for (size_t i = 0; i < cfg.numChannels; i++)
             free(cfg.channelsToJoin[i]);
-        free(cfg.botNick);
-        free(cfg.xdccCmd);
         free(cfg.channelsToJoin);
         return EXIT_FAILURE;
     }
@@ -473,8 +458,6 @@ int main(int argc, char **argv)
         irc_destroy_session(cfg.session);
         for (size_t i = 0; i < cfg.numChannels; i++)
             free(cfg.channelsToJoin[i]);
-        free(cfg.botNick);
-        free(cfg.xdccCmd);
         free(cfg.channelsToJoin);
         return EXIT_FAILURE;
     }
@@ -486,8 +469,6 @@ int main(int argc, char **argv)
             for (size_t i = 0; i < cfg.numChannels; i++)
                 free(cfg.channelsToJoin[i]);
             fclose(cfg.context.fd);
-            free(cfg.botNick);
-            free(cfg.xdccCmd);
             free(cfg.channelsToJoin);
             return EXIT_FAILURE;
         }
@@ -497,7 +478,5 @@ int main(int argc, char **argv)
     for (size_t i1 = 0; i1 < cfg.numChannels; i1++)
         free(cfg.channelsToJoin[i1]);
     fclose(cfg.context.fd);
-    free(cfg.botNick);
-    free(cfg.xdccCmd);
     free(cfg.channelsToJoin);
 }
