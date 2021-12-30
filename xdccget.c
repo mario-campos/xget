@@ -503,5 +503,4 @@ int main(int argc, char **argv)
     }
 
     doCleanUp();
-    return EXIT_SUCCESS;
 }
