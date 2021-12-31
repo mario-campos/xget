@@ -11,8 +11,6 @@
 
 #include "libircclient.h"
 
-#define USE_IPV6_FLAG 0x01
-
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
 #define IRC_NICK_MAX_SIZE 30
 
@@ -60,7 +58,6 @@ struct xdccGetConfig {
     irc_session_t *session;
     char botNick[IRC_NICK_MAX_SIZE];
     char xdccCmd[IRC_NICK_MAX_SIZE];
-    uint64_t flags;
     char **channelsToJoin;
     uint32_t numChannels;
     struct dccDownloadContext context;
@@ -331,7 +328,7 @@ void event_dcc_send_req(irc_session_t *session, const char *nick, const char *ad
     cfg.context.fd = fopen(filename, "wb");
 }
 
-static char* usage = "usage: xdccget [-46] [-p <port>] <server> <channel(s)> <XDCC command>";
+static char* usage = "usage: xdccget [-p <port>] <server> <channel(s)> <XDCC command>";
 
 int main(int argc, char **argv)
 {
@@ -339,7 +336,7 @@ int main(int argc, char **argv)
     char nick[IRC_NICK_MAX_SIZE] = {0};
 
     int opt;
-    while ((opt = getopt(argc, argv, "Vhp:46")) != -1) {
+    while ((opt = getopt(argc, argv, "Vhp:")) != -1) {
         switch (opt) {
             case 'V': {
                 unsigned int major, minor;
@@ -354,14 +351,6 @@ int main(int argc, char **argv)
             case 'p':
                 port = (uint16_t)strtoul(optarg, NULL, 0);
                 DBG_OK("Port number: %u", port);
-                break;
-
-            case '4':
-                cfg.flags &= ~USE_IPV6_FLAG;
-                break;
-
-            case '6':
-                cfg.flags |= USE_IPV6_FLAG;
                 break;
 
             case '?':
@@ -404,11 +393,7 @@ int main(int argc, char **argv)
     if (!strlen(nick)) invent_nick(nick, sizeof(nick));
     DBG_OK("IRC nick: '%s'", nick);
 
-    int irc_err;
-    if (cfg.flags & USE_IPV6_FLAG)
-        irc_err = irc_connect6(cfg.session, host, port, 0, nick, 0, 0);
-    else
-        irc_err = irc_connect(cfg.session, host, port, 0, nick, 0, 0);
+    int irc_err = irc_connect(cfg.session, host, port, 0, nick, 0, 0);
 
     if (irc_err) {
         warnx( "error: could not connect to server %s:%u: %s", host, port, irc_strerror(irc_errno(cfg.session)));
