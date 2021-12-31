@@ -54,8 +54,6 @@ struct xdccGetConfig {
     FILE *fd;
 };
 
-struct xdccGetConfig cfg;
-
 void parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, char *xdcc_command, size_t xdcc_cmd_size)
 {
     char *space;
@@ -205,6 +203,7 @@ int main(int argc, char **argv)
 {
     uint16_t port = 6667;
     char nick[IRC_NICK_MAX_SIZE] = {0};
+    struct xdccGetConfig cfg = {0};
 
     int opt;
     while ((opt = getopt(argc, argv, "Vhp:")) != -1) {
