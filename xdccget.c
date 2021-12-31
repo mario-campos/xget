@@ -375,8 +375,7 @@ int main(int argc, char **argv)
     parseDccDownload(xdccCommand, cfg.botNick, sizeof(cfg.botNick), cfg.xdccCmd, sizeof(cfg.xdccCmd));
     DBG_OK("Parsed XDCC sender as \"%s\" and XDCC command as \"%s\"", cfg.botNick, cfg.xdccCmd);
 
-    irc_callbacks_t callbacks;
-    bzero(&callbacks, sizeof(callbacks));
+    irc_callbacks_t callbacks = {0};
     callbacks.event_connect = event_connect;
     callbacks.event_join = event_join;
     callbacks.event_dcc_send_req = event_dcc_send_req;
