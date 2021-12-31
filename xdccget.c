@@ -7,7 +7,6 @@
 #include <stdint.h>
 #include <err.h>
 #include <time.h>
-#include <sys/ioctl.h>
 
 #include "libircclient.h"
 
@@ -46,21 +45,13 @@
 #define DBG_ERR(format, ...) do {} while(0)
 #endif
 
-struct dccDownloadContext {
-    uint64_t completeFileSize;
-    uint64_t sizeRcvd;
-    uint64_t sizeNow;
-    uint64_t sizeLast;
-    FILE *fd;
-};
-
 struct xdccGetConfig {
     irc_session_t *session;
     char botNick[IRC_NICK_MAX_SIZE];
     char xdccCmd[IRC_NICK_MAX_SIZE];
     char **channelsToJoin;
     uint32_t numChannels;
-    struct dccDownloadContext context;
+    FILE *fd;
 };
 
 struct xdccGetConfig cfg;
@@ -151,131 +142,6 @@ void invent_nick(char *dst, size_t dst_size)
     } while (new_size >= dst_size);
 }
 
-unsigned short getTerminalDimension()
-{
-    struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
-    return w.ws_col;
-}
-
-void printProgressBar(const int numBars, const double percentRdy)
-{
-    const int NUM_BARS = numBars;
-
-    putchar('[');
-
-    for (int i = 0; i < NUM_BARS; i++) {
-        if (i < (int) (NUM_BARS * percentRdy)) {
-            putchar('#');
-        }
-        else {
-            putchar('-');
-        }
-    }
-
-    putchar(']');
-}
-
-int printSize(uint64_t size)
-{
-    char *sizeNames[] = {"Byte", "KByte", "MByte", "GByte", "TByte", "PByte"};
-
-    double temp = (double) size;
-    unsigned int i = 0;
-
-    while (temp > 1024) {
-        temp /= 1024;
-        i++;
-    }
-
-    int charsPrinted;
-
-    if (i >= (sizeof (sizeNames) / sizeof (char*))) {
-        charsPrinted = printf("%" IRC_DCC_SIZE_T_FORMAT " Byte", size);
-    }
-    else {
-        charsPrinted = printf("%0.3f %s", temp, sizeNames[i]);
-    }
-
-    return charsPrinted;
-}
-
-int printETA(double seconds)
-{
-    int charsPrinted = 0;
-    if (seconds <= 60) {
-        charsPrinted = printf("%.0fs", seconds);
-    }
-    else {
-        double mins = seconds / 60;
-        double hours = mins / 60;
-        double remainMins = mins - ((unsigned int) hours) * 60;
-        double days = hours / 24;
-        double remainHours = hours - ((unsigned int) days) * 24;
-        double remainSeconds = seconds - ((unsigned int) mins) *60;
-
-        if (days >= 1) {
-            charsPrinted += printf("%.0fd", days);
-        }
-
-        if (remainHours >= 1) {
-            charsPrinted += printf("%.0fh", remainHours);
-        }
-
-        charsPrinted += printf("%.0fm%.0fs", remainMins, remainSeconds);
-    }
-    return charsPrinted;
-}
-
-void outputProgress()
-{
-    int terminalDimension = getTerminalDimension();
-    /* see comments below how these "numbers" are calculated */
-    int progBarLen = terminalDimension - (8 + 14 + 1 + 14 + 1 + 14 + 3 + 13 /* +1 for windows...*/);
-
-    cfg.context.sizeLast = cfg.context.sizeNow;
-    cfg.context.sizeNow = cfg.context.sizeRcvd;
-
-    uint64_t temp = (cfg.context.completeFileSize == 0) ? 0 : cfg.context.sizeRcvd * 1000000L / cfg.context.completeFileSize;
-    double curProcess = (double) temp / 1000000;
-    uint64_t curSpeed = cfg.context.sizeNow - cfg.context.sizeLast;
-
-    int printedChars = progBarLen + 2;
-
-    printProgressBar(progBarLen, curProcess);
-    /* 8 chars -->' 75.30% ' */
-    printedChars += printf(" %.2f%% ", curProcess * 100);
-    /* 14 chars --> '1001.132 MByte' */
-    printedChars += printSize(cfg.context.sizeRcvd);
-    /* 1 char */
-    printedChars += printf("/");
-    /* 14 chars --> '1001.132 MByte' */
-    printedChars += printSize(cfg.context.completeFileSize);
-    /* 1 char */
-    printedChars += printf("|");
-    /* 14 chars --> '1001.132 MByte' */
-    printedChars += printSize(curSpeed);
-    /* 3 chars */
-    printedChars += printf("/s|");
-
-    /*calc ETA - max 13 chars */
-    uint64_t remainingSize = cfg.context.completeFileSize - cfg.context.sizeRcvd;
-    if (remainingSize > 0 && curSpeed > 0) {
-        double etaSeconds = ((double) remainingSize / (double) curSpeed);
-        printedChars += printETA(etaSeconds);
-    }
-    else {
-        printedChars += printf("---");
-    }
-
-    /* fill remaining columns of terminal with spaces, in ordner to clean the output... */
-
-    int j;
-    for (j = printedChars; j < terminalDimension - 1; j++) {
-        printf(" ");
-    }
-}
-
 void event_join(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
     DBG_OK("Sending XDCC command '%s' to nick '%s'", cfg.xdccCmd, cfg.botNick);
@@ -300,10 +166,9 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
         return;
     }
     if (data) {
-        cfg.context.sizeRcvd += length;
-        fwrite(data, 1, length, cfg.context.fd);
+        fwrite(data, 1, length, cfg.fd);
     } else {
-        fclose(cfg.context.fd);
+        fclose(cfg.fd);
         irc_cmd_quit(session, NULL);
     }
 }
@@ -324,8 +189,7 @@ void event_dcc_send_req(irc_session_t *session, const char *nick, const char *ad
     while ((c = strchr(filename, '/')) || (c = strchr(filename, '\\')))
         *c = '_';
 
-    cfg.context.completeFileSize = size;
-    cfg.context.fd = fopen(filename, "wb");
+    cfg.fd = fopen(filename, "wb");
 }
 
 static char* usage = "usage: xdccget [-p <port>] <server> <channel(s)> <XDCC command>";
@@ -409,17 +273,15 @@ int main(int argc, char **argv)
             irc_destroy_session(cfg.session);
             for (size_t i = 0; i < cfg.numChannels; i++)
                 free(cfg.channelsToJoin[i]);
-            fclose(cfg.context.fd);
+            fclose(cfg.fd);
             free(cfg.channelsToJoin);
             return EXIT_FAILURE;
         }
     }
 
-    outputProgress();
-
     irc_destroy_session(cfg.session);
     for (size_t i1 = 0; i1 < cfg.numChannels; i1++)
         free(cfg.channelsToJoin[i1]);
-    fclose(cfg.context.fd);
+    fclose(cfg.fd);
     free(cfg.channelsToJoin);
 }
