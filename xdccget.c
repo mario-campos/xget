@@ -144,31 +144,36 @@ void invent_nick(char *dst, size_t dst_size)
 
 void event_join(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
-    DBG_OK("Sending XDCC command '%s' to nick '%s'", cfg.xdccCmd, cfg.botNick);
-    if (irc_cmd_msg(session, cfg.botNick, cfg.xdccCmd)) {
-        warnx("failed to send XDCC command '%s' to nick '%s': %s", cfg.xdccCmd, cfg.botNick, irc_strerror(irc_errno(session)));
+    struct xdccGetConfig *state = irc_get_ctx(session);
+    DBG_OK("Sending XDCC command '%s' to nick '%s'", state->xdccCmd, state->botNick);
+    if (irc_cmd_msg(session, state->botNick, state->xdccCmd)) {
+        warnx("failed to send XDCC command '%s' to nick '%s': %s", state->xdccCmd, state->botNick, irc_strerror(irc_errno(session)));
         irc_disconnect(session);
     }
 }
 
 void event_connect(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
-    for (uint32_t i = 0; i < cfg.numChannels; i++) {
-        DBG_OK("Joining channel '%s'", cfg.channelsToJoin[i]);
-        irc_cmd_join(session, cfg.channelsToJoin[i], 0);
+    struct xdccGetConfig *state = irc_get_ctx(session);
+    for (uint32_t i = 0; i < state->numChannels; i++) {
+        DBG_OK("Joining channel '%s'", state->channelsToJoin[i]);
+        irc_cmd_join(session, state->channelsToJoin[i], 0);
     }
 }
 
 void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, unsigned int length)
 {
+    struct xdccGetConfig *state = ctx;
+
     if (status) {
         warnx("failed to download file: %s", irc_strerror(status));
         return;
     }
+
     if (data) {
-        fwrite(data, 1, length, cfg.fd);
+        fwrite(data, 1, length, state->fd);
     } else {
-        fclose(cfg.fd);
+        fclose(state->fd);
         irc_cmd_quit(session, NULL);
     }
 }
@@ -177,7 +182,9 @@ void event_dcc_send_req(irc_session_t *session, const char *nick, const char *ad
 {
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
 
-    if (irc_dcc_accept(session, dccid, NULL, callback_dcc_recv_file)) {
+    struct xdccGetConfig *state = irc_get_ctx(session);
+
+    if (irc_dcc_accept(session, dccid, state, callback_dcc_recv_file)) {
         warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(session)));
         irc_disconnect(session);
         return;
@@ -189,7 +196,7 @@ void event_dcc_send_req(irc_session_t *session, const char *nick, const char *ad
     while ((c = strchr(filename, '/')) || (c = strchr(filename, '\\')))
         *c = '_';
 
-    cfg.fd = fopen(filename, "wb");
+    state->fd = fopen(filename, "wb");
 }
 
 static char* usage = "usage: xdccget [-p <port>] <server> <channel(s)> <XDCC command>";
@@ -252,6 +259,8 @@ int main(int argc, char **argv)
         free(cfg.channelsToJoin);
         return EXIT_FAILURE;
     }
+
+    irc_set_ctx(cfg.session, &cfg);
 
     invent_nick(nick, sizeof(nick));
     DBG_OK("IRC nick: '%s'", nick);
