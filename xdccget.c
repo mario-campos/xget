@@ -253,7 +253,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    if (!strlen(nick)) invent_nick(nick, sizeof(nick));
+    invent_nick(nick, sizeof(nick));
     DBG_OK("IRC nick: '%s'", nick);
 
     int irc_err = irc_connect(cfg.session, host, port, 0, nick, 0, 0);
