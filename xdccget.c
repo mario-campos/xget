@@ -47,6 +47,9 @@
 
 struct xdccGetConfig {
     irc_session_t *session;
+    char *host;
+    uint16_t port;
+    char nick[IRC_NICK_MAX_SIZE];
     char botNick[IRC_NICK_MAX_SIZE];
     char xdccCmd[IRC_NICK_MAX_SIZE];
     char **channelsToJoin;
@@ -201,9 +204,8 @@ static char* usage = "usage: xdccget [-p <port>] <server> <channel(s)> <XDCC com
 
 int main(int argc, char **argv)
 {
-    uint16_t port = 6667;
-    char nick[IRC_NICK_MAX_SIZE] = {0};
     struct xdccGetConfig cfg = {0};
+    cfg.port = 6667;
 
     int opt;
     while ((opt = getopt(argc, argv, "Vhp:")) != -1) {
@@ -219,7 +221,7 @@ int main(int argc, char **argv)
                 return EXIT_SUCCESS;
 
             case 'p':
-                port = (uint16_t)strtoul(optarg, NULL, 0);
+                cfg.port = (uint16_t)strtoul(optarg, NULL, 0);
                 DBG_OK("Port number: %u", port);
                 break;
 
@@ -237,12 +239,10 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    char *host = argv[0];
-    char *channels = argv[1];
-    char *xdccCommand = argv[2];
+    cfg.host = argv[0];
 
-    cfg.channelsToJoin = parseChannels(channels, &cfg.numChannels);
-    parseDccDownload(xdccCommand, cfg.botNick, sizeof(cfg.botNick), cfg.xdccCmd, sizeof(cfg.xdccCmd));
+    cfg.channelsToJoin = parseChannels(argv[1], &cfg.numChannels);
+    parseDccDownload(argv[2], cfg.botNick, sizeof(cfg.botNick), cfg.xdccCmd, sizeof(cfg.xdccCmd));
     DBG_OK("Parsed XDCC sender as \"%s\" and XDCC command as \"%s\"", cfg.botNick, cfg.xdccCmd);
 
     irc_callbacks_t callbacks = {0};
@@ -261,13 +261,13 @@ int main(int argc, char **argv)
 
     irc_set_ctx(cfg.session, &cfg);
 
-    invent_nick(nick, sizeof(nick));
+    invent_nick(cfg.nick, sizeof(cfg.nick));
     DBG_OK("IRC nick: '%s'", nick);
 
-    int irc_err = irc_connect(cfg.session, host, port, 0, nick, 0, 0);
+    int irc_err = irc_connect(cfg.session, cfg.host, cfg.port, 0, cfg.nick, 0, 0);
 
     if (irc_err) {
-        warnx( "error: could not connect to server %s:%u: %s", host, port, irc_strerror(irc_errno(cfg.session)));
+        warnx( "error: could not connect to server %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(cfg.session)));
         irc_destroy_session(cfg.session);
         for (size_t i = 0; i < cfg.numChannels; i++)
             free(cfg.channelsToJoin[i]);
