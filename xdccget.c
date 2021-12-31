@@ -46,7 +46,6 @@
 #endif
 
 struct xdccGetConfig {
-    irc_session_t *session;
     char *host;
     uint16_t port;
     char nick[IRC_NICK_MAX_SIZE];
@@ -250,8 +249,8 @@ int main(int argc, char **argv)
     callbacks.event_join = event_join;
     callbacks.event_dcc_send_req = event_dcc_send_req;
 
-    cfg.session = irc_create_session(&callbacks);
-    if (!cfg.session) {
+    irc_session_t *session = irc_create_session(&callbacks);
+    if (!session) {
         warn("failed to create IRC session object");
         for (size_t i = 0; i < cfg.numChannels; i++)
             free(cfg.channelsToJoin[i]);
@@ -259,26 +258,26 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    irc_set_ctx(cfg.session, &cfg);
+    irc_set_ctx(session, &cfg);
 
     invent_nick(cfg.nick, sizeof(cfg.nick));
     DBG_OK("IRC nick: '%s'", nick);
 
-    int irc_err = irc_connect(cfg.session, cfg.host, cfg.port, 0, cfg.nick, 0, 0);
+    int irc_err = irc_connect(session, cfg.host, cfg.port, 0, cfg.nick, 0, 0);
 
     if (irc_err) {
-        warnx( "error: could not connect to server %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(cfg.session)));
-        irc_destroy_session(cfg.session);
+        warnx( "error: could not connect to server %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
+        irc_destroy_session(session);
         for (size_t i = 0; i < cfg.numChannels; i++)
             free(cfg.channelsToJoin[i]);
         free(cfg.channelsToJoin);
         return EXIT_FAILURE;
     }
 
-    if (irc_run(cfg.session)) {
-        if (irc_errno(cfg.session) != LIBIRC_ERR_TERMINATED && irc_errno(cfg.session) != LIBIRC_ERR_CLOSED) {
-            warnx("failed to start IRC session: %s", irc_strerror(irc_errno(cfg.session)));
-            irc_destroy_session(cfg.session);
+    if (irc_run(session)) {
+        if (irc_errno(session) != LIBIRC_ERR_TERMINATED && irc_errno(session) != LIBIRC_ERR_CLOSED) {
+            warnx("failed to start IRC session: %s", irc_strerror(irc_errno(session)));
+            irc_destroy_session(session);
             for (size_t i = 0; i < cfg.numChannels; i++)
                 free(cfg.channelsToJoin[i]);
             fclose(cfg.fd);
@@ -287,7 +286,7 @@ int main(int argc, char **argv)
         }
     }
 
-    irc_destroy_session(cfg.session);
+    irc_destroy_session(session);
     for (size_t i1 = 0; i1 < cfg.numChannels; i1++)
         free(cfg.channelsToJoin[i1]);
     fclose(cfg.fd);
