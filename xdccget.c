@@ -281,7 +281,7 @@ main(int argc, char **argv)
 
     if (irc_connect(session, cfg.host, cfg.port, 0, cfg.nick, 0, 0)) {
         irc_destroy_session(session);
-        errx(EXIT_FAILURE, "error: could not connect to server %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
+        errx(EXIT_FAILURE, "failed to establish TCP connection to %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
     }
 
     if (irc_run(session)) {
