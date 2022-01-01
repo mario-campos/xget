@@ -186,8 +186,6 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *c
 {
     assert(ctx);
 
-    struct xdccGetConfig *state = ctx;
-
     if (status) {
         warnx("failed to download file: %s", irc_strerror(status));
         return;
@@ -197,7 +195,7 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *c
         return;
     }
 
-    fwrite(data, sizeof(char), length, state->fd);
+    fwrite(data, sizeof(char), length, ((struct xdccGetConfig *)ctx)->fd);
 }
 
 void
