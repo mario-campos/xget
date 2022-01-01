@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <err.h>
 #include <time.h>
+#include <assert.h>
 
 #include "libircclient.h"
 
@@ -59,8 +60,11 @@ struct xdccGetConfig {
 void
 parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, char *xdcc_command, size_t xdcc_cmd_size)
 {
-    char *space;
+    assert(xdcc_nick_command);
+    assert(nick);
+    assert(xdcc_command);
 
+    char *space;
     if (!(space = strchr(xdcc_nick_command, ' '))) {
         *nick = '\0';
         *xdcc_command = '\0';
@@ -75,6 +79,8 @@ parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, char *xd
 char*
 strip(char *s)
 {
+    assert(s);
+
     char *it;
     char *separated = s;
     while ((it = strsep(&separated, " \t")) != NULL) {
@@ -89,6 +95,8 @@ strip(char *s)
 char**
 split(char *s, int *count)
 {
+    assert(s);
+
     char *it, **parts, **head;
     *count = 0;
     head = parts = calloc(10, sizeof(char*));
@@ -106,6 +114,8 @@ split(char *s, int *count)
 char**
 parseChannels(char *channelString, uint32_t *numChannels)
 {
+    assert(channelString);
+
     int numFound = 0;
     char **splittedString = split(channelString, &numFound);
     if (splittedString == NULL) {
@@ -127,6 +137,9 @@ parseChannels(char *channelString, uint32_t *numChannels)
 void
 invent_nick(char *dst, size_t dst_size)
 {
+    assert(dst);
+    assert(dst_size);
+
     size_t new_size;
     char *adjectives[] = {"Pandering", "Foul", "Decrepit", "Sanguine","Illustrious",
                           "Cantankerous", "Dubious", "Auspicious", "Valorous", "Venal",
@@ -171,6 +184,8 @@ event_connect(irc_session_t *session, const char *event, const char *origin, con
 void
 callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *ctx, const char *data, unsigned int length)
 {
+    assert(ctx);
+
     struct xdccGetConfig *state = ctx;
 
     if (status) {
