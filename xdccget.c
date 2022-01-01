@@ -177,13 +177,12 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *c
         warnx("failed to download file: %s", irc_strerror(status));
         return;
     }
-
-    if (data) {
-        fwrite(data, 1, length, state->fd);
-    } else {
-        fclose(state->fd);
+    if (!data) {
         irc_cmd_quit(session, NULL);
+        return;
     }
+
+    fwrite(data, 1, length, state->fd);
 }
 
 void
@@ -283,4 +282,5 @@ main(int argc, char **argv)
     }
 
     irc_destroy_session(session);
+    fclose(cfg.fd);
 }
