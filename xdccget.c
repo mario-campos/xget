@@ -260,13 +260,7 @@ main(int argc, char **argv)
     callbacks.event_dcc_send_req = event_dcc_send_req;
 
     irc_session_t *session = irc_create_session(&callbacks);
-    if (!session) {
-        warn("failed to create IRC session object");
-        for (size_t i = 0; i < cfg.numChannels; i++)
-            free(cfg.channelsToJoin[i]);
-        free(cfg.channelsToJoin);
-        return EXIT_FAILURE;
-    }
+    if (!session) errx(EXIT_FAILURE, "failed to create IRC session object");
 
     irc_set_ctx(session, &cfg);
 
@@ -276,29 +270,17 @@ main(int argc, char **argv)
     int irc_err = irc_connect(session, cfg.host, cfg.port, 0, cfg.nick, 0, 0);
 
     if (irc_err) {
-        warnx("error: could not connect to server %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
         irc_destroy_session(session);
-        for (size_t i = 0; i < cfg.numChannels; i++)
-            free(cfg.channelsToJoin[i]);
-        free(cfg.channelsToJoin);
-        return EXIT_FAILURE;
+        errx(EXIT_FAILURE, "error: could not connect to server %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
     }
 
     if (irc_run(session)) {
         if (irc_errno(session) != LIBIRC_ERR_TERMINATED && irc_errno(session) != LIBIRC_ERR_CLOSED) {
-            warnx("failed to start IRC session: %s", irc_strerror(irc_errno(session)));
             irc_destroy_session(session);
-            for (size_t i = 0; i < cfg.numChannels; i++)
-                free(cfg.channelsToJoin[i]);
             fclose(cfg.fd);
-            free(cfg.channelsToJoin);
-            return EXIT_FAILURE;
+            errx(EXIT_FAILURE, "failed to start IRC session: %s", irc_strerror(irc_errno(session)));
         }
     }
 
     irc_destroy_session(session);
-    for (size_t i1 = 0; i1 < cfg.numChannels; i1++)
-        free(cfg.channelsToJoin[i1]);
-    fclose(cfg.fd);
-    free(cfg.channelsToJoin);
 }
