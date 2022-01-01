@@ -279,9 +279,7 @@ main(int argc, char **argv)
     invent_nick(cfg.nick, sizeof(cfg.nick));
     DBG_OK("IRC nick: '%s'", nick);
 
-    int irc_err = irc_connect(session, cfg.host, cfg.port, 0, cfg.nick, 0, 0);
-
-    if (irc_err) {
+    if (irc_connect(session, cfg.host, cfg.port, 0, cfg.nick, 0, 0)) {
         irc_destroy_session(session);
         errx(EXIT_FAILURE, "error: could not connect to server %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
     }
