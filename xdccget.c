@@ -287,11 +287,9 @@ main(int argc, char **argv)
     if (irc_run(session)) {
         if (irc_errno(session) != LIBIRC_ERR_TERMINATED && irc_errno(session) != LIBIRC_ERR_CLOSED) {
             irc_destroy_session(session);
-            fclose(cfg.fd);
             errx(EXIT_FAILURE, "failed to start IRC session: %s", irc_strerror(irc_errno(session)));
         }
     }
 
     irc_destroy_session(session);
-    fclose(cfg.fd);
 }
