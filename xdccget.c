@@ -163,6 +163,8 @@ invent_nick(char *dst, size_t dst_size)
 void
 event_join(irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
 {
+    assert(session);
+
     struct xdccGetConfig *state = irc_get_ctx(session);
     DBG_OK("Sending XDCC command '%s' to nick '%s'", state->xdccCmd, state->botNick);
     if (irc_cmd_msg(session, state->botNick, state->xdccCmd)) {
@@ -174,6 +176,8 @@ event_join(irc_session_t *session, const char *event, const char *origin, const 
 void
 event_connect(irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
 {
+    assert(session);
+
     struct xdccGetConfig *state = irc_get_ctx(session);
     for (uint32_t i = 0; i < state->numChannels; i++) {
         DBG_OK("Joining channel '%s'", state->channelsToJoin[i]);
@@ -184,6 +188,7 @@ event_connect(irc_session_t *session, const char *event, const char *origin, con
 void
 callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *ctx, const char *data, unsigned int length)
 {
+    assert(session);
     assert(ctx);
 
     if (status) {
@@ -201,6 +206,7 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *c
 void
 event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, const char *filename, unsigned long size, unsigned int dccid)
 {
+    assert(session);
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
 
     struct xdccGetConfig *state = irc_get_ctx(session);
