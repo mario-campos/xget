@@ -186,10 +186,10 @@ event_connect(irc_session_t *session, const char *event, const char *origin, con
 }
 
 void
-callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *ctx, const char *data, unsigned int length)
+callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *fstream, const char *data, unsigned int length)
 {
     assert(session);
-    assert(ctx);
+    assert(fstream);
 
     if (status) {
         warnx("failed to download file: %s", irc_strerror(status));
@@ -200,7 +200,7 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *c
         return;
     }
 
-    fwrite(data, sizeof(char), length, ((struct xdccGetConfig *)ctx)->fd);
+    fwrite(data, sizeof(char), length, fstream);
 }
 
 void
@@ -209,21 +209,20 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     assert(session);
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
 
-    struct xdccGetConfig *state = irc_get_ctx(session);
-
-    if (irc_dcc_accept(session, dccid, state, callback_dcc_recv_file)) {
-        warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(session)));
-        irc_disconnect(session);
-        return;
-    }
-
     // The forward-slash (/) and backslash (\) characters are invalid in file names.
     // If they are present, replace each one with an underscore (_).
     char *c;
     while ((c = strchr(filename, '/')) || (c = strchr(filename, '\\')))
         *c = '_';
 
+    struct xdccGetConfig *state = irc_get_ctx(session);
     state->fd = fopen(filename, "wb");
+
+    if (irc_dcc_accept(session, dccid, state->fd, callback_dcc_recv_file)) {
+        warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(session)));
+        irc_disconnect(session);
+        return;
+    }
 }
 
 static char* usage = "usage: xdccget [-p <port>] <server> <channel(s)> <XDCC command>";
