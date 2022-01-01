@@ -216,7 +216,11 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
         *c = '_';
 
     struct xdccGetConfig *state = irc_get_ctx(session);
-    state->fd = fopen(filename, "wb");
+    if (!(state->fd = fopen(filename, "wb"))) {
+        warn("fopen");
+        irc_disconnect(session);
+        return;
+    }
 
     if (irc_dcc_accept(session, dccid, state->fd, callback_dcc_recv_file)) {
         warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(session)));
