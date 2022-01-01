@@ -249,7 +249,7 @@ main(int argc, char **argv)
 
             case 'p':
                 cfg.port = (uint16_t)strtoul(optarg, NULL, 0);
-                DBG_OK("Port number: %u", port);
+                DBG_OK("Port number: %u", cfg.port);
                 break;
 
             case '?':
@@ -283,7 +283,7 @@ main(int argc, char **argv)
     irc_set_ctx(session, &cfg);
 
     invent_nick(cfg.nick, sizeof(cfg.nick));
-    DBG_OK("IRC nick: '%s'", nick);
+    DBG_OK("IRC nick: '%s'", cfg.nick);
 
     if (irc_connect(session, cfg.host, cfg.port, 0, cfg.nick, 0, 0)) {
         irc_destroy_session(session);
