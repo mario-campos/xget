@@ -56,7 +56,8 @@ struct xdccGetConfig {
     FILE *fd;
 };
 
-void parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, char *xdcc_command, size_t xdcc_cmd_size)
+void
+parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, char *xdcc_command, size_t xdcc_cmd_size)
 {
     char *space;
 
@@ -71,7 +72,8 @@ void parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, cha
     strlcpy(xdcc_command, space+1, xdcc_cmd_size);
 }
 
-char *strip(char *s)
+char*
+strip(char *s)
 {
     char *it;
     char *separated = s;
@@ -84,7 +86,8 @@ char *strip(char *s)
     return s;
 }
 
-char **split(char *s, int *count)
+char**
+split(char *s, int *count)
 {
     char *it, **parts, **head;
     *count = 0;
@@ -100,7 +103,8 @@ char **split(char *s, int *count)
     return head;
 }
 
-char** parseChannels(char *channelString, uint32_t *numChannels)
+char**
+parseChannels(char *channelString, uint32_t *numChannels)
 {
     int numFound = 0;
     char **splittedString = split(channelString, &numFound);
@@ -120,7 +124,8 @@ char** parseChannels(char *channelString, uint32_t *numChannels)
     return splittedString;
 }
 
-void invent_nick(char *dst, size_t dst_size)
+void
+invent_nick(char *dst, size_t dst_size)
 {
     size_t new_size;
     char *adjectives[] = {"Pandering", "Foul", "Decrepit", "Sanguine","Illustrious",
@@ -142,7 +147,8 @@ void invent_nick(char *dst, size_t dst_size)
     } while (new_size >= dst_size);
 }
 
-void event_join(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
+void
+event_join(irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
 {
     struct xdccGetConfig *state = irc_get_ctx(session);
     DBG_OK("Sending XDCC command '%s' to nick '%s'", state->xdccCmd, state->botNick);
@@ -152,7 +158,8 @@ void event_join(irc_session_t * session, const char * event, const char * origin
     }
 }
 
-void event_connect(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
+void
+event_connect(irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
 {
     struct xdccGetConfig *state = irc_get_ctx(session);
     for (uint32_t i = 0; i < state->numChannels; i++) {
@@ -161,7 +168,8 @@ void event_connect(irc_session_t * session, const char * event, const char * ori
     }
 }
 
-void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, unsigned int length)
+void
+callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *ctx, const char *data, unsigned int length)
 {
     struct xdccGetConfig *state = ctx;
 
@@ -178,7 +186,8 @@ void callback_dcc_recv_file(irc_session_t * session, irc_dcc_t id, int status, v
     }
 }
 
-void event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, const char *filename, unsigned long size, unsigned int dccid)
+void
+event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, const char *filename, unsigned long size, unsigned int dccid)
 {
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
 
@@ -201,7 +210,8 @@ void event_dcc_send_req(irc_session_t *session, const char *nick, const char *ad
 
 static char* usage = "usage: xdccget [-p <port>] <server> <channel(s)> <XDCC command>";
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     struct xdccGetConfig cfg = {0};
     cfg.port = 6667;
@@ -266,7 +276,7 @@ int main(int argc, char **argv)
     int irc_err = irc_connect(session, cfg.host, cfg.port, 0, cfg.nick, 0, 0);
 
     if (irc_err) {
-        warnx( "error: could not connect to server %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
+        warnx("error: could not connect to server %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
         irc_destroy_session(session);
         for (size_t i = 0; i < cfg.numChannels; i++)
             free(cfg.channelsToJoin[i]);
