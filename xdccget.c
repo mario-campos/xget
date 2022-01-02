@@ -169,7 +169,7 @@ event_join(irc_session_t *session, const char *event, const char *origin, const 
     DBG_OK("Sending XDCC command '%s' to nick '%s'", state->xdccCmd, state->botNick);
     if (irc_cmd_msg(session, state->botNick, state->xdccCmd)) {
         warnx("failed to send XDCC command '%s' to nick '%s': %s", state->xdccCmd, state->botNick, irc_strerror(irc_errno(session)));
-        irc_disconnect(session);
+        irc_cmd_quit(session, NULL);
     }
 }
 
@@ -193,6 +193,7 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
 
     if (status) {
         warnx("failed to download file: %s", irc_strerror(status));
+        irc_cmd_quit(session, NULL);
         return;
     }
     if (!data) {
@@ -218,13 +219,13 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     struct xdccGetConfig *state = irc_get_ctx(session);
     if (!(state->fd = fopen(filename, "wb"))) {
         warn("fopen");
-        irc_disconnect(session);
+        irc_cmd_quit(session, NULL);
         return;
     }
 
     if (irc_dcc_accept(session, dccid, state->fd, callback_dcc_recv_file)) {
         warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(session)));
-        irc_disconnect(session);
+        irc_cmd_quit(session, NULL);
         return;
     }
 }
