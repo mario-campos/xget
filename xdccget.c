@@ -54,7 +54,6 @@ struct xdccGetConfig {
     char xdccCmd[IRC_NICK_MAX_SIZE];
     char **channelsToJoin;
     uint32_t numChannels;
-    FILE *fd;
 };
 
 void
@@ -216,14 +215,14 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     while ((c = strchr(filename, '/')) || (c = strchr(filename, '\\')))
         *c = '_';
 
-    struct xdccGetConfig *state = irc_get_ctx(session);
-    if (!(state->fd = fopen(filename, "wb"))) {
+    FILE *fstream = fopen(filename, "wb");
+    if (!fstream) {
         warn("fopen");
         irc_cmd_quit(session, NULL);
         return;
     }
 
-    if (irc_dcc_accept(session, dccid, state->fd, callback_dcc_recv_file)) {
+    if (irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file)) {
         warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(session)));
         irc_cmd_quit(session, NULL);
         return;
