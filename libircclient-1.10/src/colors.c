@@ -15,11 +15,11 @@
 #include <ctype.h>
 
 #define LIBIRC_COLORPARSER_BOLD			(1<<1)
-#define LIBIRC_COLORPARSER_UNDERLINE	(1<<2)
+#define LIBIRC_COLORPARSER_UNDERLINE		(1<<2)
 #define LIBIRC_COLORPARSER_REVERSE		(1<<3)
 #define LIBIRC_COLORPARSER_COLOR		(1<<4)
 
-#define LIBIRC_COLORPARSER_MAXCOLORS	15
+#define LIBIRC_COLORPARSER_MAXCOLORS		15
 
 
 static const char * color_replacement_table[] =
@@ -252,11 +252,11 @@ char * irc_color_convert_to_mirc (const char * source)
 	char * destline = 0, *d = 0;
 	const char *p1, *p2, *cur;
 
-    /*
-     * There will be two passes. First pass calculates the total length of
-     * the destination string. The second pass allocates memory for the string,
-     * and fills it.
-     */
+	/*
+	 * There will be two passes. First pass calculates the total length of
+	 * the destination string. The second pass allocates memory for the string,
+	 * and fills it.
+	 */
 	while ( destline == 0 ) // destline will be set after the 2nd pass
 	{
 		if ( destlen > 0 )

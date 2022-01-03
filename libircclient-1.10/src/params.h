@@ -16,13 +16,13 @@
 #define INCLUDE_IRC_PARAMS_H
 
 
-#define LIBIRC_VERSION_HIGH			1
-#define LIBIRC_VERSION_LOW			10
+#define LIBIRC_VERSION_HIGH		1
+#define LIBIRC_VERSION_LOW		10
 
-#define LIBIRC_BUFFER_SIZE			1024
+#define LIBIRC_BUFFER_SIZE		1024
 #define LIBIRC_DCC_BUFFER_SIZE		1024
 
-#define LIBIRC_STATE_INIT			0
+#define LIBIRC_STATE_INIT		0
 #define LIBIRC_STATE_LISTENING		1
 #define LIBIRC_STATE_CONNECTING		2
 #define LIBIRC_STATE_CONNECTED		3
@@ -31,6 +31,6 @@
 #define LIBIRC_STATE_REMOVED		10	// this state is used only in DCC
 
 
-#define SSL_PREFIX					'#'
+#define SSL_PREFIX			'#'
 
 #endif /* INCLUDE_IRC_PARAMS_H */

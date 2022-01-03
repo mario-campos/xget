@@ -33,7 +33,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_WELCOME	001
+#define LIBIRC_RFC_RPL_WELCOME		001
 
 
 /*! \brief 002 Your host is \<servername\>, running version \<ver\>
@@ -42,7 +42,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_YOURHOST	002
+#define LIBIRC_RFC_RPL_YOURHOST		002
 
 
 /*! \brief 003 This server was created \<date\>
@@ -51,7 +51,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_CREATED	003
+#define LIBIRC_RFC_RPL_CREATED		003
 
 
 /*! \brief 004 \<servername\> \<version\> \<available user modes\>
@@ -61,7 +61,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_MYINFO	004
+#define LIBIRC_RFC_RPL_MYINFO		004
 
 
 /*! \brief 005 Try server \<server name\>, port \<port number\>
@@ -70,7 +70,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_BOUNCE	005
+#define LIBIRC_RFC_RPL_BOUNCE		005
 
 
 /*! \brief 302 :*1\<reply\> *( 
@@ -79,7 +79,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_USERHOST	302
+#define LIBIRC_RFC_RPL_USERHOST		302
 
 
 /*! \brief 303 :*1\<nick\> *( 
@@ -88,7 +88,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_ISON	303
+#define LIBIRC_RFC_RPL_ISON		303
 
 
 /*! \brief 301 \<nick\> :\<away message\>
@@ -97,7 +97,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_AWAY	301
+#define LIBIRC_RFC_RPL_AWAY		301
 
 
 /*! \brief 305 :You are no longer marked as being away
@@ -106,7 +106,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_UNAWAY	305
+#define LIBIRC_RFC_RPL_UNAWAY		305
 
 
 /*! \brief 306 :You have been marked as being away
@@ -115,7 +115,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_NOWAWAY	306
+#define LIBIRC_RFC_RPL_NOWAWAY		306
 
 
 /*! \brief 311 \<nick\> \<user\> \<host\> * :\<real name\>
@@ -196,7 +196,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_LIST	322
+#define LIBIRC_RFC_RPL_LIST		322
 
 
 /*! \brief 323 :End of LIST
@@ -205,7 +205,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_LISTEND	323
+#define LIBIRC_RFC_RPL_LISTEND		323
 
 
 /*! \brief 325 \<channel\> \<nickname\>
@@ -214,7 +214,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_UNIQOPIS	325
+#define LIBIRC_RFC_RPL_UNIQOPIS		325
 
 
 /*! \brief 324 \<channel\> \<mode\> \<mode params\>
@@ -232,7 +232,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_NOTOPIC	331
+#define LIBIRC_RFC_RPL_NOTOPIC		331
 
 
 /*! \brief 332 \<channel\> :\<topic\>
@@ -241,7 +241,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_TOPIC	332
+#define LIBIRC_RFC_RPL_TOPIC		332
 
 
 /*! \brief 341 \<channel\> \<nick\>
@@ -250,7 +250,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_INVITING	341
+#define LIBIRC_RFC_RPL_INVITING		341
 
 
 /*! \brief 342 \<user\> :Summoning user to IRC
@@ -304,7 +304,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_VERSION	351
+#define LIBIRC_RFC_RPL_VERSION		351
 
 
 /*! \brief 352 \<channel\> \<user\> \<host\> \<server\> \<nick\>
@@ -314,7 +314,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_WHOREPLY	352
+#define LIBIRC_RFC_RPL_WHOREPLY		352
 
 
 /*! \brief 315 \<name\> :End of WHO list
@@ -323,7 +323,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_ENDOFWHO	315
+#define LIBIRC_RFC_RPL_ENDOFWHO		315
 
 
 /*! \brief 353 ( "=
@@ -332,7 +332,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_NAMREPLY	353
+#define LIBIRC_RFC_RPL_NAMREPLY		353
 
 
 /*! \brief 366 \<channel\> :End of NAMES list
@@ -350,7 +350,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_LINKS	364
+#define LIBIRC_RFC_RPL_LINKS		364
 
 
 /*! \brief 365 \<mask\> :End of LINKS list
@@ -368,7 +368,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_BANLIST	367
+#define LIBIRC_RFC_RPL_BANLIST		367
 
 
 /*! \brief 368 \<channel\> :End of channel ban list
@@ -386,7 +386,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_INFO	371
+#define LIBIRC_RFC_RPL_INFO		371
 
 
 /*! \brief 374 :End of INFO list
@@ -413,7 +413,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_MOTD	372
+#define LIBIRC_RFC_RPL_MOTD		372
 
 
 /*! \brief 376 :End of MOTD command
@@ -458,7 +458,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_TIME	391
+#define LIBIRC_RFC_RPL_TIME		391
 
 
 /*! \brief 392 :UserID   Terminal  Host
@@ -476,7 +476,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_USERS	393
+#define LIBIRC_RFC_RPL_USERS		393
 
 
 /*! \brief 394 :End of users
@@ -494,7 +494,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_NOUSERS	395
+#define LIBIRC_RFC_RPL_NOUSERS		395
 
 
 /*! \brief 200 Link \<version \& debug level\> \<destination\>
@@ -597,7 +597,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_TRACELOG	261
+#define LIBIRC_RFC_RPL_TRACELOG		261
 
 
 /*! \brief 262 \<server name\> \<version \& debug level\> :End of TRACE
@@ -606,7 +606,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_TRACEEND	262
+#define LIBIRC_RFC_RPL_TRACEEND		262
 
 
 /*! \brief 211 \<linkname\> \<sendq\> \<sent messages\>
@@ -662,7 +662,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_UMODEIS	221
+#define LIBIRC_RFC_RPL_UMODEIS		221
 
 
 /*! \brief 234 \<name\> \<server\> \<mask\> \<type\> \<hopcount\> \<info\>
@@ -671,7 +671,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_SERVLIST	234
+#define LIBIRC_RFC_RPL_SERVLIST		234
 
 
 /*! \brief 235 \<mask\> \<type\> :End of service listing
@@ -699,7 +699,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_LUSEROP	252
+#define LIBIRC_RFC_RPL_LUSEROP		252
 
 
 /*! \brief 253 \<integer\> :unknown connection(s)
@@ -727,7 +727,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_LUSERME	255
+#define LIBIRC_RFC_RPL_LUSERME		255
 
 
 /*! \brief 256 \<server\> :Administrative info
@@ -736,7 +736,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_ADMINME	256
+#define LIBIRC_RFC_RPL_ADMINME		256
 
 
 /*! \brief 257 :\<admin info\>
@@ -772,7 +772,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_RPL_TRYAGAIN	263
+#define LIBIRC_RFC_RPL_TRYAGAIN		263
 
 
 /*! \brief 401 \<nickname\> :No such nick/channel
@@ -853,7 +853,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_ERR_NOORIGIN	409
+#define LIBIRC_RFC_ERR_NOORIGIN		409
 
 
 /*! \brief 411 :No recipient given (\<command\>)
@@ -898,7 +898,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_ERR_BADMASK	415
+#define LIBIRC_RFC_ERR_BADMASK		415
 
 
 /*! \brief 421 \<command\> :Unknown command
@@ -916,7 +916,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_ERR_NOMOTD	422
+#define LIBIRC_RFC_ERR_NOMOTD		422
 
 
 /*! \brief 423 \<server\> :No administrative info available
@@ -1015,7 +1015,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_ERR_NOLOGIN	444
+#define LIBIRC_RFC_ERR_NOLOGIN		444
 
 
 /*! \brief 445 :SUMMON has been disabled
@@ -1105,7 +1105,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_ERR_KEYSET	467
+#define LIBIRC_RFC_ERR_KEYSET		467
 
 
 /*! \brief 471 \<channel\> :Cannot join channel (+l)
@@ -1222,7 +1222,7 @@
  *
  * \ingroup rfcnumbers
  */
-#define LIBIRC_RFC_ERR_UNIQOPPRIVSNEEDED	485
+#define LIBIRC_RFC_ERR_UNIQOPPRIVSNEEDED 485
 
 
 /*! \brief 491 :No O-lines for your host

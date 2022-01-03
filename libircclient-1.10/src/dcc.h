@@ -21,33 +21,33 @@
  */
 struct irc_dcc_session_s
 {
-	irc_dcc_session_t	*	next;
+	irc_dcc_session_t	* next;
 
 	irc_dcc_t		id;
-	void		*	ctx;
+	void			* ctx;
 	socket_t		sock;		/*!< DCC socket */
-	int				dccmode;	/*!< Boolean value to differ chat vs send 
-	                             requests. Changes the cb behavior - when
-	                             it is chat, data is sent by lines with 
-	                             stripped CRLFs. In file mode, the data
-	                             is sent as-is */
-	int				state;
+	int			dccmode;	/*!< Boolean value to differ chat vs send 
+	                             		requests. Changes the cb behavior - when
+	                             		it is chat, data is sent by lines with 
+	                             		stripped CRLFs. In file mode, the data
+	                             		is sent as-is */
+	int			state;
 	time_t			timeout;
 
-	FILE		*	dccsend_file_fp;
-	unsigned int	received_file_size;
-	unsigned int	file_confirm_offset;
+	FILE			* dccsend_file_fp;
+	unsigned int		received_file_size;
+	unsigned int		file_confirm_offset;
 
 	struct sockaddr_in	remote_addr;
 
 	char 			incoming_buf[LIBIRC_DCC_BUFFER_SIZE];
-	unsigned int	incoming_offset;
+	unsigned int		incoming_offset;
 
 	char 			outgoing_buf[LIBIRC_DCC_BUFFER_SIZE];
-	unsigned int	outgoing_offset;
-	port_mutex_t	mutex_outbuf;
+	unsigned int		outgoing_offset;
+	port_mutex_t		mutex_outbuf;
 
-	irc_dcc_callback_t		cb;
+	irc_dcc_callback_t	cb;
 };
 
 

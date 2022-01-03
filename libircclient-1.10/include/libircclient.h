@@ -66,7 +66,7 @@ extern "C" {
  * This structure describes an IRC session. Its members are internal to 
  * libircclient, and should not be used directly.
  */
-typedef struct irc_session_s	irc_session_t;
+typedef struct irc_session_s		irc_session_t;
 
 /*! \brief A libircclient DCC session.
  *
@@ -81,7 +81,7 @@ typedef struct irc_dcc_session_s	irc_dcc_session_t;
  * The irc_dcc_t type is a DCC session identifier, used to identify the
  * DCC sessions in callbacks and various functions.
  */
-typedef unsigned int				irc_dcc_t;
+typedef unsigned int			irc_dcc_t;
 
 
 /*!
@@ -166,7 +166,7 @@ typedef void (*irc_dcc_callback_t) (irc_session_t * session, irc_dcc_t id, int s
  * \sa irc_destroy_session
  * \ingroup initclose
  */
-irc_session_t * irc_create_session (irc_callbacks_t	* callbacks);
+irc_session_t * irc_create_session (irc_callbacks_t * callbacks);
 
 
 /*!

@@ -350,9 +350,7 @@ static int session_socket_read( irc_session_t * session )
 	}
 #endif
 	
-	length = socket_recv( &session->sock, 
-						session->incoming_buf + session->incoming_offset, 
-					    (sizeof (session->incoming_buf) - 1) - session->incoming_offset );
+	length = socket_recv( &session->sock, session->incoming_buf + session->incoming_offset, (sizeof (session->incoming_buf) - 1) - session->incoming_offset );
 	
 	// There is no "retry" errors for regular sockets
 	if ( length <= 0 )

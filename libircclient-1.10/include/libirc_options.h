@@ -23,7 +23,7 @@
  * enables additional debug output 
  * \ingroup options
  */
-#define LIBIRC_OPTION_DEBUG			(1 << 1)
+#define LIBIRC_OPTION_DEBUG		(1 << 1)
 
 /*! \brief allows to strip origins automatically.
  *
@@ -50,7 +50,7 @@
  * This option must be set before the irc_connect function is called.
  * \ingroup options
  */
-#define LIBIRC_OPTION_SSL_NO_VERIFY (1 << 3)
+#define LIBIRC_OPTION_SSL_NO_VERIFY	(1 << 3)
 
 
 #endif /* INCLUDE_IRC_OPTIONS_H */

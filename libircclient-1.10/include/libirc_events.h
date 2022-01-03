@@ -153,7 +153,7 @@ typedef struct
 	/*!
 	 * The "on_connect" event is triggered when the client successfully 
 	 * connects to the server, and could send commands to the server.
-     * No extra params supplied; \a params is 0.
+	 * No extra params supplied; \a params is 0.
 	 */
 	irc_event_callback_t	event_connect;
 
@@ -169,8 +169,8 @@ typedef struct
 
 	/*!
 	 * The "quit" event is triggered upon receipt of a QUIT message, which
-     * means that someone on a channel with the client has disconnected.
-     *
+	 * means that someone on a channel with the client has disconnected.
+	 *
 	 * \param origin the person, who is disconnected
 	 * \param params[0] optional, contains the reason message (user-specified).
 	 */
@@ -178,7 +178,7 @@ typedef struct
 
 	/*!
 	 * The "join" event is triggered upon receipt of a JOIN message, which
-     * means that someone has entered a channel that the client is on.
+	 * means that someone has entered a channel that the client is on.
 	 *
 	 * \param origin the person, who joins the channel. By comparing it with 
 	 *               your own nickname, you can check whether your JOIN 
@@ -189,7 +189,7 @@ typedef struct
 
 	/*!
 	 * The "part" event is triggered upon receipt of a PART message, which
-     * means that someone has left a channel that the client is on.
+	 * means that someone has left a channel that the client is on.
 	 *
 	 * \param origin the person, who leaves the channel. By comparing it with 
 	 *               your own nickname, you can check whether your PART 
@@ -203,7 +203,7 @@ typedef struct
 	 * The "mode" event is triggered upon receipt of a channel MODE message,
 	 * which means that someone on a channel with the client has changed the
 	 * channel's parameters.
-     *
+	 *
 	 * \param origin the person, who changed the channel mode.
 	 * \param params[0] mandatory, contains the channel name.
 	 * \param params[1] mandatory, contains the changed channel mode, like 
@@ -217,7 +217,7 @@ typedef struct
 	/*!
 	 * The "umode" event is triggered upon receipt of a user MODE message, 
 	 * which means that your user mode has been changed.
-     *
+	 *
 	 * \param origin the person, who changed the channel mode.
 	 * \param params[0] mandatory, contains the user changed mode, like 
 	 *        '+t', '-i' and so on.
@@ -226,9 +226,9 @@ typedef struct
 
 	/*!
 	 * The "topic" event is triggered upon receipt of a TOPIC message, which
-     * means that someone on a channel with the client has changed the 
-     * channel's topic.
-     *
+	 * means that someone on a channel with the client has changed the 
+	 * channel's topic.
+	 *
 	 * \param origin the person, who changes the channel topic.
 	 * \param params[0] mandatory, contains the channel name.
 	 * \param params[1] optional, contains the new topic.
@@ -237,8 +237,8 @@ typedef struct
 
 	/*!
 	 * The "kick" event is triggered upon receipt of a KICK message, which
-     * means that someone on a channel with the client (or possibly the
-     * client itself!) has been forcibly ejected.
+	 * means that someone on a channel with the client (or possibly the
+	 * client itself!) has been forcibly ejected.
 	 *
 	 * \param origin the person, who kicked the poor.
 	 * \param params[0] mandatory, contains the channel name.
@@ -249,9 +249,9 @@ typedef struct
 
 	/*!
 	 * The "channel" event is triggered upon receipt of a PRIVMSG message
-     * to an entire channel, which means that someone on a channel with
-     * the client has said something aloud. Your own messages don't trigger
-     * PRIVMSG event.
+	 * to an entire channel, which means that someone on a channel with
+	 * the client has said something aloud. Your own messages don't trigger
+	 * PRIVMSG event.
 	 *
 	 * \param origin the person, who generates the message.
 	 * \param params[0] mandatory, contains the channel name.
@@ -261,9 +261,9 @@ typedef struct
            
 	/*!
 	 * The "privmsg" event is triggered upon receipt of a PRIVMSG message
-     * which is addressed to one or more clients, which means that someone
-     * is sending the client a private message.
-     *
+	 * which is addressed to one or more clients, which means that someone
+	 * is sending the client a private message.
+	 *
 	 * \param origin the person, who generates the message.
 	 * \param params[0] mandatory, contains your nick.
 	 * \param params[1] optional, contains the message text
@@ -272,12 +272,12 @@ typedef struct
 
 	/*!
 	 * The "notice" event is triggered upon receipt of a NOTICE message
-     * which means that someone has sent the client a public or private
-     * notice. According to RFC 1459, the only difference between NOTICE 
-     * and PRIVMSG is that you should NEVER automatically reply to NOTICE
-     * messages. Unfortunately, this rule is frequently violated by IRC 
-     * servers itself - for example, NICKSERV messages require reply, and 
-     * are NOTICEs.
+	 * which means that someone has sent the client a public or private
+	 * notice. According to RFC 1459, the only difference between NOTICE 
+	 * and PRIVMSG is that you should NEVER automatically reply to NOTICE
+	 * messages. Unfortunately, this rule is frequently violated by IRC 
+	 * servers itself - for example, NICKSERV messages require reply, and 
+	 * are NOTICEs.
 	 *
 	 * \param origin the person, who generates the message.
 	 * \param params[0] mandatory, contains the target nick name.
@@ -287,12 +287,12 @@ typedef struct
 
 	/*!
 	 * The "channel_notice" event is triggered upon receipt of a NOTICE
-     * message which means that someone has sent the client a public
-     * notice. According to RFC 1459, the only difference between NOTICE 
-     * and PRIVMSG is that you should NEVER automatically reply to NOTICE
-     * messages. Unfortunately, this rule is frequently violated by IRC 
-     * servers itself - for example, NICKSERV messages require reply, and 
-     * are NOTICEs.
+	 * message which means that someone has sent the client a public
+	 * notice. According to RFC 1459, the only difference between NOTICE 
+	 * and PRIVMSG is that you should NEVER automatically reply to NOTICE
+	 * messages. Unfortunately, this rule is frequently violated by IRC 
+	 * servers itself - for example, NICKSERV messages require reply, and 
+	 * are NOTICEs.
 	 *
 	 * \param origin the person, who generates the message.
 	 * \param params[0] mandatory, contains the channel name.
@@ -302,14 +302,14 @@ typedef struct
 
 	/*!
 	 * The "invite" event is triggered upon receipt of an INVITE message,
-     * which means that someone is permitting the client's entry into a +i
-     * channel.
-     *
+	 * which means that someone is permitting the client's entry into a +i
+	 * channel.
+	 *
 	 * \param origin the person, who INVITEs you.
 	 * \param params[0] mandatory, contains your nick.
 	 * \param params[1] mandatory, contains the channel name you're invited into.
-     *
-     * \sa irc_cmd_invite irc_cmd_chanmode_invite
+	 *
+	 * \sa irc_cmd_invite irc_cmd_chanmode_invite
 	 */
 	irc_event_callback_t	event_invite;
 
@@ -317,8 +317,8 @@ typedef struct
 	 * The "ctcp" event is triggered when the client receives the CTCP 
 	 * request. By default, the built-in CTCP request handler is used. The 
 	 * build-in handler automatically replies on most CTCP messages, so you
-     * will rarely need to override it.
-     *
+	 * will rarely need to override it.
+	 *
 	 * \param origin the person, who generates the message.
 	 * \param params[0] mandatory, the complete CTCP message, including its 
 	 *                  arguments.
@@ -332,7 +332,7 @@ typedef struct
 
 	/*!
 	 * The "ctcp" event is triggered when the client receives the CTCP reply.
-     *
+	 *
 	 * \param origin the person, who generates the message.
 	 * \param params[0] mandatory, the CTCP message itself with its arguments.
 	 */
@@ -341,10 +341,10 @@ typedef struct
 	/*!
 	 * The "action" event is triggered when the client receives the CTCP 
 	 * ACTION message. These messages usually looks like:\n
-     * \code
-     * [23:32:55] * Tim gonna sleep.
-     * \endcode
-     *
+	 * \code
+	 * [23:32:55] * Tim gonna sleep.
+	 * \endcode
+	 *
 	 * \param origin the person, who generates the message.
 	 * \param params[0] mandatory, the ACTION message.
 	 */
@@ -353,7 +353,7 @@ typedef struct
 	/*!
 	 * The "unknown" event is triggered upon receipt of any number of 
 	 * unclassifiable miscellaneous messages, which aren't handled by the
-     * library.
+	 * library.
 	 */
 	irc_event_callback_t	event_unknown;
           
@@ -361,24 +361,24 @@ typedef struct
 	 * The "numeric" event is triggered upon receipt of any numeric response
 	 * from the server. There is a lot of such responses, see the full list
 	 * here: \ref rfcnumbers.
-     *
-     * See the params in ::irc_eventcode_callback_t specification.
+	 *
+	 * See the params in ::irc_eventcode_callback_t specification.
 	 */
 	irc_eventcode_callback_t	event_numeric;
 
 	/*!
 	 * The "dcc chat" event is triggered when someone requests a DCC CHAT from 
 	 * you.
-     *
-     * See the params in ::irc_event_dcc_chat_t specification.
+	 *
+	 * See the params in ::irc_event_dcc_chat_t specification.
 	 */
 	irc_event_dcc_chat_t		event_dcc_chat_req;
 
 	/*!
 	 * The "dcc chat" event is triggered when someone wants to send a file 
 	 * to you via DCC SEND request.
-     *
-     * See the params in ::irc_event_dcc_send_t specification.
+	 *
+	 * See the params in ::irc_event_dcc_send_t specification.
 	 */
 	irc_event_dcc_send_t		event_dcc_send_req;
 

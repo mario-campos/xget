@@ -115,7 +115,7 @@
  * \sa LIBIRC_ERR_OPENFILE
  * \ingroup errorcodes
  */
-#define LIBIRC_ERR_NODCCSEND	9
+#define LIBIRC_ERR_NODCCSEND		9
 
 
 /*! \brief Could not read DCC file or socket
@@ -180,7 +180,7 @@
  *
  * \ingroup errorcodes
  */
-#define LIBIRC_ERR_TERMINATED	15
+#define LIBIRC_ERR_TERMINATED		15
 
 
 /*! \brief IPv6 not supported
@@ -199,7 +199,7 @@
  *
  * \ingroup errorcodes
  */
-#define LIBIRC_ERR_SSL_NOT_SUPPORTED		17
+#define LIBIRC_ERR_SSL_NOT_SUPPORTED	17
 
 
 /*! \brief SSL initialization failed
@@ -208,7 +208,7 @@
  *
  * \ingroup errorcodes
  */
-#define LIBIRC_ERR_SSL_INIT_FAILED			18
+#define LIBIRC_ERR_SSL_INIT_FAILED	18
 
 
 /*! \brief SSL connection failed
@@ -217,7 +217,7 @@
  * to use SSL but attempting to connect to a non-SSL port.
  * \ingroup errorcodes
  */
-#define LIBIRC_ERR_CONNECT_SSL_FAILED		19
+#define LIBIRC_ERR_CONNECT_SSL_FAILED	19
 
 
 /*! \brief SSL certificate verify failed
@@ -225,7 +225,7 @@
  * The server is using the self-signed certificate. Use LIBIRC_OPTION_SSL_NO_VERIFY option to connect to it.
  * \ingroup errorcodes
  */
-#define LIBIRC_ERR_SSL_CERT_VERIFY_FAILED	20
+#define LIBIRC_ERR_SSL_CERT_VERIFY_FAILED 20
 
 
 // Internal max error value count.

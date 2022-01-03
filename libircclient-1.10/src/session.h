@@ -25,51 +25,51 @@
 // Session flags
 #define SESSIONFL_MOTD_RECEIVED			(0x00000001)
 #define SESSIONFL_SSL_CONNECTION		(0x00000002)
-#define SESSIONFL_SSL_WRITE_WANTS_READ	(0x00000004)
-#define SESSIONFL_SSL_READ_WANTS_WRITE	(0x00000008)
-#define SESSIONFL_USES_IPV6				(0x00000010)
+#define SESSIONFL_SSL_WRITE_WANTS_READ		(0x00000004)
+#define SESSIONFL_SSL_READ_WANTS_WRITE		(0x00000008)
+#define SESSIONFL_USES_IPV6			(0x00000010)
 
 
 
 struct irc_session_s
 {
-	void		*	ctx;
-	int				dcc_timeout;
+	void		* ctx;
+	int		dcc_timeout;
 
-	int				options;
-	int				lasterror;
+	int		options;
+	int		lasterror;
 
-	char 			incoming_buf[LIBIRC_BUFFER_SIZE];
+	char 		incoming_buf[LIBIRC_BUFFER_SIZE];
 	unsigned int	incoming_offset;
 
-	char 			outgoing_buf[LIBIRC_BUFFER_SIZE];
+	char 		outgoing_buf[LIBIRC_BUFFER_SIZE];
 	unsigned int	outgoing_offset;
 	port_mutex_t	mutex_session;
 
-	socket_t		sock;
-	int				state;
-	int				flags;
+	socket_t	sock;
+	int		state;
+	int		flags;
 
-	char 		  *	server;
-	char		  * server_password;
-	char 		  *	realname;
-	char		  * username;
-	char		  *	nick;
-	char		  * ctcp_version;
+	char 	 	* server;
+	char		* server_password;
+	char 		* realname;
+	char		* username;
+	char		* nick;
+	char		* ctcp_version;
 
 #if defined( ENABLE_IPV6 )
 	struct in6_addr	local_addr6;
 #endif
 
 	struct in_addr	local_addr;
-	irc_dcc_t		dcc_last_id;
+	irc_dcc_t	dcc_last_id;
 	irc_dcc_session_t * dcc_sessions;
 	port_mutex_t	mutex_dcc;
 
 	irc_callbacks_t	callbacks;
 
 #if defined (ENABLE_SSL)
-	SSL 		 *	ssl;
+	SSL 		 * ssl;
 #endif
 
 	
