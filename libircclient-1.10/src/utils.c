@@ -38,7 +38,7 @@ static int libirc_findcrlf (const char * buf, int length)
 	int offset = 0;
 	for ( ; offset < length; offset++ )
 	{
-		if ( buf[offset] == 0x0D && offset < length - 1 && buf[offset+1] == 0x0A )
+		if ( offset < length - 1 && buf[offset] == 0x0D && buf[offset+1] == 0x0A )
 			return offset;
 		if ( buf[offset] == 0x0A)
 			return offset;
