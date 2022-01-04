@@ -2,7 +2,7 @@ PROG = xdccget
 SRCS = xdccget.c libircclient/src/libircclient.a
 
 LIBS = `pkg-config --silence-errors --libs libbsd-overlay`
-CPPFLAGS += -D_FILE_OFFSET_BITS=64 -I libircclient/include
+CPPFLAGS += -D_FILE_OFFSET_BITS=64
 CFLAGS += -std=gnu99 `pkg-config --silence-errors --cflags libbsd-overlay`
 
 $(PROG): $(SRCS)

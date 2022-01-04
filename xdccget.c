@@ -9,7 +9,7 @@
 #include <time.h>
 #include <assert.h>
 
-#include "libircclient.h"
+#include "libircclient/include/libircclient.h"
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
 #define IRC_NICK_MAX_SIZE 30
