@@ -339,7 +339,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 						{
 							// The order is big-endian
 							const unsigned char * bptr = (const unsigned char *) dcc->incoming_buf;
-							unsigned int received_size = (bptr[0] << 24) | (bptr[1] << 16) | (bptr[2] << 8)  | bptr[3];
+							uint64_t received_size = (bptr[0] << 24) | (bptr[1] << 16) | (bptr[2] << 8)  | bptr[3];
 
 							// Sent size confirmed
 							if ( dcc->file_confirm_offset == received_size )
@@ -377,7 +377,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 								dcc->file_confirm_offset += offset;
 
 								// Store as big endian
-								unsigned int file_confirm_offset = htonl(dcc->file_confirm_offset);
+								uint64_t file_confirm_offset = htonl(dcc->file_confirm_offset);
 								memcpy(dcc->outgoing_buf, &file_confirm_offset, sizeof(file_confirm_offset));
 								dcc->outgoing_offset = 4;
 							}
@@ -712,10 +712,11 @@ int irc_dcc_msg	(irc_session_t * session, irc_dcc_t dccid, const char * text)
 static void libirc_dcc_request (irc_session_t * session, const char * nick, const char * req)
 {
 	char filenamebuf[256];
-	unsigned long ip, size;
-	unsigned short port;
+	uint64_t size;
+	uint32_t ip;
+	uint16_t port;
 
-	if ( sscanf (req, "DCC CHAT chat %lu %hu", &ip, &port) == 2 )
+	if ( sscanf (req, "DCC CHAT chat %u %hu", &ip, &port) == 2 )
 	{
 		if ( session->callbacks.event_dcc_chat_req )
 		{
@@ -741,7 +742,7 @@ static void libirc_dcc_request (irc_session_t * session, const char * nick, cons
 	 * If the filename contains space characters, it will be delimited by double-quotes,
 	 * which won't be scanned with `%s`.
 	 */
-	else if (sscanf(req, "DCC SEND \"%[^\"]\" %lu %hu %lu", filenamebuf, &ip, &port, &size) == 4) {
+	else if (sscanf(req, "DCC SEND \"%[^\"]\" %u %hu %llu", filenamebuf, &ip, &port, &size) == 4) {
 		if ( session->callbacks.event_dcc_send_req )
 		{
 			irc_dcc_session_t * dcc;
@@ -759,7 +760,7 @@ static void libirc_dcc_request (irc_session_t * session, const char * nick, cons
 
 		return;
 	}
-	else if ( sscanf (req, "DCC SEND %s %lu %hu %lu", filenamebuf, &ip, &port, &size) == 4 )
+	else if ( sscanf (req, "DCC SEND %s %u %hu %llu", filenamebuf, &ip, &port, &size) == 4 )
 	{
 		if ( session->callbacks.event_dcc_send_req )
 		{

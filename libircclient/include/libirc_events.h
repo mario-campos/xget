@@ -127,7 +127,7 @@ typedef void (*irc_event_dcc_chat_t) (irc_session_t * session, const char * nick
  * \sa irc_dcc_accept or irc_dcc_decline
  * \ingroup events
  */
-typedef void (*irc_event_dcc_send_t) (irc_session_t * session, const char * nick, const char * addr, const char * filename, unsigned long size, irc_dcc_t dccid);
+typedef void (*irc_event_dcc_send_t) (irc_session_t * session, const char * nick, const char * addr, const char * filename, uint64_t size, irc_dcc_t dccid);
 
 
 /*! \brief Event callbacks structure.

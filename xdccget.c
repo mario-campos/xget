@@ -204,7 +204,7 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
 }
 
 void
-event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, const char *filename, unsigned long size, irc_dcc_t dccid)
+event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, const char *filename, uint64_t size, irc_dcc_t dccid)
 {
     assert(session);
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);

@@ -35,8 +35,8 @@ struct irc_dcc_session_s
 	time_t			timeout;
 
 	FILE			* dccsend_file_fp;
-	unsigned int		received_file_size;
-	unsigned int		file_confirm_offset;
+	uint64_t		received_file_size;
+	uint64_t		file_confirm_offset;
 
 	struct sockaddr_in	remote_addr;
 
