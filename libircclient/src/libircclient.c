@@ -814,7 +814,7 @@ static void libirc_process_incoming_data (irc_session_t * session, size_t proces
 
 int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_set *out_set)
 {
-	char buf[256], hname[256];
+	char hname[256];
 
 	if ( session->sock < 0 
 	|| session->state == LIBIRC_STATE_INIT
