@@ -20,7 +20,7 @@
 #	define NTOH16(x) ntohs(x)
 #	define NTOH32(x) ntohl(x)
 #	define NTOH64(x) ntohll(x)
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 #	include <sys/endian.h>
 #	define HTON32(x) htobe32(x)
 #	define HTON64(x) htobe64(x)
