@@ -12,15 +12,15 @@
  * License for more details.
  */
 
-#ifdef HAVE_ENDIAN_H
+#ifdef __APPLE__
+#	include <arpa/inet.h>
+#	define HTON64(x) htonll(x)
+#	define NTOH64(x) ntohll(x)
+#else
 #	include <endian.h>
 #	include <arpa/inet.h>
 #	define HTON64(x) htobe64(x)
 #	define NTOH64(x) betoh64(x)
-#else
-#	include <arpa/inet.h>
-#	define HTON64(x) htonll(x)
-#	define NTOH64(x) ntohll(x)
 #endif
 
 #define LIBIRC_DCC_CHAT			1
