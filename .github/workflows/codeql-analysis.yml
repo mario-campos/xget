@@ -56,7 +56,7 @@ jobs:
         queries: security-and-quality
 
     - name: Build
-    - run: |
+      run: |
         meson setup build
         ninja -C build
 
