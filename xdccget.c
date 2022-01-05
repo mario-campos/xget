@@ -222,11 +222,7 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
         return;
     }
 
-    if (irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file)) {
-        warnx("failed to accept DCC request: %s", irc_strerror(irc_errno(session)));
-        irc_cmd_quit(session, NULL);
-        return;
-    }
+    irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file);
 }
 
 static char* usage = "usage: xdccget [-p <port>] <server> <channel(s)> <XDCC command>";
