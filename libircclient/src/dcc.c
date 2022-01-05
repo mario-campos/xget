@@ -12,7 +12,16 @@
  * License for more details.
  */
 
-#include <arpa/inet.h>
+#include "config.h"
+
+#ifdef HAVE_ENDIAN_H
+#	include <endian.h>
+#	include <arpa/inet.h>
+#else
+#	include <arpa/inet.h>
+#	define htobe64(x) htonll(x)
+#	define betoh64(x) ntohll(x)
+#endif
 
 #define LIBIRC_DCC_CHAT			1
 #define LIBIRC_DCC_SENDFILE		2
@@ -335,11 +344,28 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 						if ( dcc->dccmode != LIBIRC_DCC_SENDFILE )
 							abort();
 
-						if ( dcc->incoming_offset == 4 )
+						if ( dcc->incoming_offset == sizeof(uint32_t) )
 						{
 							// The order is big-endian
-							const unsigned char * bptr = (const unsigned char *) dcc->incoming_buf;
-							uint64_t received_size = (bptr[0] << 24) | (bptr[1] << 16) | (bptr[2] << 8)  | bptr[3];
+							uint32_t received_size;
+							memcpy(&received_size, dcc->incoming_buf, sizeof(received_size));
+							received_size = ntohl(received_size);
+
+							// Sent size confirmed
+							if ( dcc->file_confirm_offset == received_size )
+							{
+								dcc->state = LIBIRC_STATE_CONNECTED;
+								dcc->incoming_offset = 0;
+							}
+							else
+								err = LIBIRC_ERR_WRITE;
+						}
+						else if ( dcc->incoming_offset == sizeof(uint64_t) )
+						{
+							// The order is big-endian
+							uint64_t received_size;
+							memcpy(&received_size, dcc->incoming_buf, sizeof(received_size));
+							received_size = betoh64(received_size);
 
 							// Sent size confirmed
 							if ( dcc->file_confirm_offset == received_size )
@@ -377,9 +403,9 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 								dcc->file_confirm_offset += offset;
 
 								// Store as big endian
-								uint64_t file_confirm_offset = htonl(dcc->file_confirm_offset);
+								uint64_t file_confirm_offset = htobe64(dcc->file_confirm_offset);
 								memcpy(dcc->outgoing_buf, &file_confirm_offset, sizeof(file_confirm_offset));
-								dcc->outgoing_offset = 4;
+								dcc->outgoing_offset = sizeof(file_confirm_offset);
 							}
 						}
 						else
