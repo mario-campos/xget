@@ -862,8 +862,8 @@ int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_
 		session->state = LIBIRC_STATE_CONNECTED;
 
 		// Get the hostname
-    	if ( gethostname (hname, sizeof(hname)) < 0 )
-    		strcpy (hname, "unknown");
+		if ( gethostname (hname, sizeof(hname)) < 0 )
+			strcpy (hname, "unknown");
 
 		// Prepare the data, which should be sent to the server
 		if ( session->server_password )

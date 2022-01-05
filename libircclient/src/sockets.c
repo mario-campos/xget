@@ -99,11 +99,10 @@ static int socket_connect (socket_t * sock, const struct sockaddr *saddr, sockle
 {
 	while ( 1 )
 	{
-	    if ( connect (*sock, saddr, len) < 0 )
-	    {
-	    	if ( socket_error() == EINTR )
-	    		continue;
-
+		if ( connect (*sock, saddr, len) < 0 )
+		{
+			if ( socket_error() == EINTR )
+				continue;
 			if ( socket_error() != EINPROGRESS && socket_error() != EWOULDBLOCK )
 				return 1;
 		}
@@ -117,8 +116,8 @@ static int socket_accept (socket_t * sock, socket_t * newsock, struct sockaddr *
 {
 	while ( IS_SOCKET_ERROR(*newsock = accept (*sock, saddr, len)) )
 	{
-    	if ( socket_error() == EINTR )
-    		continue;
+		if ( socket_error() == EINTR )
+			continue;
 
 		return 1;
 	}
