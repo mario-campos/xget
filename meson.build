@@ -4,11 +4,13 @@ config = configuration_data({
   '_FILE_OFFSET_BITS' : 64
 })
 
-if meson.get_compiler('c').has_header('endian.h')
+compiler = meson.get_compiler('c')
+
+if compiler.has_header('endian.h')
   config.set('HAVE_ENDIAN_H', true)
 endif
 
-if not meson.get_compiler('c').has_function('strlcpy', prefix : '#include <string.h>')
+if not compiler.has_function('strlcpy', prefix : '#include <string.h>')
   dependencies = dependency('libbsd-overlay', required : true)
 else
   dependencies = []
