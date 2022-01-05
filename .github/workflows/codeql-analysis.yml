@@ -43,8 +43,8 @@ jobs:
         language: [ 'cpp' ]
 
     steps:
-    - name: Install libbsd-dev
-      run: sudo apt install libbsd-dev
+    - name: Install dependencies
+      run: sudo apt install libbsd-dev meson
 
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -55,8 +55,10 @@ jobs:
         languages: ${{ matrix.language }}
         queries: security-and-quality
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v1
+    - name: Build
+    - run: |
+        meson setup build
+        ninja -C build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
