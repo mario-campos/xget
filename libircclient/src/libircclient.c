@@ -867,13 +867,9 @@ int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_
 
 		// Prepare the data, which should be sent to the server
 		if ( session->server_password )
-		{
-			snprintf (buf, sizeof(buf), "PASS %s", session->server_password);
-			irc_send_raw (session, buf);
-		}
+			irc_send_raw (session, "PASS %s", session->server_password);
 
-		snprintf (buf, sizeof(buf), "NICK %s", session->nick);
-		irc_send_raw (session, buf);
+		irc_send_raw (session, "NICK %s", session->nick);
 
 		/*
 		 * RFC 1459 states that "hostname and servername are normally 
@@ -881,10 +877,9 @@ int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_
 		 * a directly connected client (for security reasons)", therefore 
 		 * we don't need them.
 		 */
-		snprintf (buf, sizeof(buf), "USER %s unknown unknown :%s", 
-				session->username ? session->username : "nobody",
-				session->realname ? session->realname : "noname");
-		irc_send_raw (session, buf);
+		irc_send_raw (session, "USER %s unknown unknown :%s",
+			      session->username ? session->username : "nobody",
+			      session->realname ? session->realname : "noname");
 
 		return 0;
 	}
