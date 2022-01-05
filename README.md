@@ -1,15 +1,11 @@
 # xdccget
-This is a project that allows you to download files from IRC with XDCC with an easy and simple to use command line tool
-like wget or curl. It supports at the moment Linux and BSD-variants. Also OSX with some installed
-ports works.
+A minimal, secure, command-line tool for interfacing with XDCC.
 
-## Quick facts
-* it is free software licenced under the GPL
-* minimal usage of cpu and memory
-* runs under Linux, BSDs, MacOSX
-* support for IPv4 and IPv6 connections
-* supports connection with and without SSL/TLS
-* bots with support for ssend-command are supported
+#### Supported Operating Systems:
+* GNU/Linux
+* OpenBSD
+* FreeBSD
+* macOS
 
 ## Using xdccget
 In order to use xdccget properly i will provide some simple examples. You should be able to extract 
@@ -59,23 +55,13 @@ xdccget "irc.sampel.net" "#best-channel, #best-chat-channel" "super-duper-bot xd
 This is the basic usage of xdccget. You can call xdccget -h to understand all currently supported arguments.
 
 ## Compiling xdccget
-Compiling xdccget is just running make from the root folder of the repository. Please make sure, that you have installed
-the depended libraries (OpenSSL) and use the correct Makefile for your system.
 
-### Ubuntu and derivants
-To compile xdccget under Ubuntu and other distros like Linux Mint you have to install the package libssl-dev with apt-get.
-You also need the build-essential package. 
+If compiling for GNU/Linux, you'll need the compile-time dependency _libbsd_ (or _libbsd-dev_). 
 
+```shell
+meson setup build
+ninja -C build
 ```
-sudo apt-get install libssl-dev build-essential
-```
-
-### other linux distros
-You need to make sure, that you have the openssl-development packages for you favorite distribution installed.
-
-### OSX and BSD
-For osx and bsd systems you need to also install the development files for openssl.
-
 ---
 
 [![C/C++ CI](https://github.com/mario-campos/xdccget/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mario-campos/xdccget/actions/workflows/c-cpp.yml)
