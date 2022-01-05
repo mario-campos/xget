@@ -15,10 +15,12 @@
 #ifdef HAVE_ENDIAN_H
 #	include <endian.h>
 #	include <arpa/inet.h>
+#	define HTON64(x) htobe64(x)
+#	define NTOH64(x) betoh64(x)
 #else
 #	include <arpa/inet.h>
-#	define htobe64(x) htonll(x)
-#	define betoh64(x) ntohll(x)
+#	define HTON64(x) htonll(x)
+#	define NTOH64(x) ntohll(x)
 #endif
 
 #define LIBIRC_DCC_CHAT			1
@@ -363,7 +365,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 							// The order is big-endian
 							uint64_t received_size;
 							memcpy(&received_size, dcc->incoming_buf, sizeof(received_size));
-							received_size = betoh64(received_size);
+							received_size = NTOH64(received_size);
 
 							// Sent size confirmed
 							if ( dcc->file_confirm_offset == received_size )
@@ -401,7 +403,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 								dcc->file_confirm_offset += offset;
 
 								// Store as big endian
-								uint64_t file_confirm_offset = htobe64(dcc->file_confirm_offset);
+								uint64_t file_confirm_offset = HTON64(dcc->file_confirm_offset);
 								memcpy(dcc->outgoing_buf, &file_confirm_offset, sizeof(file_confirm_offset));
 								dcc->outgoing_offset = sizeof(file_confirm_offset);
 							}
