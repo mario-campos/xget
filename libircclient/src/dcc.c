@@ -12,8 +12,6 @@
  * License for more details.
  */
 
-#include "config.h"
-
 #ifdef HAVE_ENDIAN_H
 #	include <endian.h>
 #	include <arpa/inet.h>

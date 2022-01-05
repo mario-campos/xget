@@ -9,6 +9,7 @@
 #include <time.h>
 #include <assert.h>
 
+#include "config.h"
 #include "libircclient/include/libircclient.h"
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
