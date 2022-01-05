@@ -29,22 +29,26 @@ jobs:
   ubuntu:
     runs-on: ubuntu-latest
     steps:
-    - name: Install libbsd-dev
-      run: sudo apt install libbsd-dev
+    - name: Install dependencies
+      run: sudo apt install libbsd-dev meson
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: build
-      run: make
+      run: |
+        meson setup build
+        ninja -C build
   
   macOS:
     runs-on: macos-latest
     steps:
+    - name: Install dependencies
+      run: brew install meson
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: build
-      run: make
-      env:
-        PKG_CONFIG_PATH: /usr/local/Cellar/openssl@1.1/1.1.1l_1/lib/pkgconfig
+      run: |
+        meson setup build
+        ninja -C build
   
   openbsd:
     runs-on: macos-10.15
@@ -53,10 +57,14 @@ jobs:
       uses: mario-campos/emulate@v1
       with:
         operating-system: openbsd-latest
+    - name: Install dependencies
+      run: pkg_add meson
     - name: Checkout repository
       run: git clone --depth 1 https://github.com/mario-campos/xdccget.git
     - name: build
-      run: cd xdccget; make
+      run: |
+        meson setup build xdccget
+        ninja -C build
 
   freebsd:
     runs-on: macos-10.15
@@ -66,8 +74,10 @@ jobs:
       with:
         operating-system: freebsd-latest
     - name: Install dependencies
-      run: pkg install -y pkgconf openssl
+      run: pkg install -y pkgconf openssl meson
     - name: Checkout repository
       run: git clone --depth 1 https://github.com/mario-campos/xdccget.git
     - name: build
-      run: cd xdccget; make
+      run: |
+        meson setup build xdccget
+        ninja -C build
