@@ -20,7 +20,7 @@
 #	include <endian.h>
 #	include <arpa/inet.h>
 #	define HTON64(x) htobe64(x)
-#	define NTOH64(x) betoh64(x)
+#	define NTOH64(x) be64toh(x)
 #endif
 
 #define LIBIRC_DCC_CHAT			1
