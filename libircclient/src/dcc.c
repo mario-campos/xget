@@ -12,14 +12,27 @@
  * License for more details.
  */
 
-#ifdef __APPLE__
-#	include <arpa/inet.h>
+#include <arpa/inet.h>
+
+#if defined(__APPLE__)
+#	define HTON32(x) htonl(x)
 #	define HTON64(x) htonll(x)
+#	define NTOH16(x) ntohs(x)
+#	define NTOH32(x) ntohl(x)
 #	define NTOH64(x) ntohll(x)
+#elif defined(__FreeBSD__)
+#	include <sys/endian.h>
+#	define HTON32(x) htobe32(x)
+#	define HTON64(x) htobe64(x)
+#	define NTOH16(x) be16toh(x)
+#	define NTOH32(x) be32toh(x)
+#	define NTOH64(x) be64toh(x)
 #else
 #	include <endian.h>
-#	include <arpa/inet.h>
+#	define HTON32(x) htobe32(x)
 #	define HTON64(x) htobe64(x)
+#	define NTOH16(x) be16toh(x)
+#	define NTOH32(x) be32toh(x)
 #	define NTOH64(x) be64toh(x)
 #endif
 
@@ -349,7 +362,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 							// The order is big-endian
 							uint32_t received_size;
 							memcpy(&received_size, dcc->incoming_buf, sizeof(received_size));
-							received_size = ntohl(received_size);
+							received_size = NTOH32(received_size);
 
 							// Sent size confirmed
 							if ( dcc->file_confirm_offset == received_size )
@@ -603,7 +616,7 @@ static int libirc_new_dcc_session (irc_session_t * session, unsigned long ip, un
 
 		memset (&dcc->remote_addr, 0, sizeof(dcc->remote_addr));
 		dcc->remote_addr.sin_family = AF_INET;
-		dcc->remote_addr.sin_addr.s_addr = htonl (ip); // what idiot came up with idea to send IP address in host-byteorder?
+		dcc->remote_addr.sin_addr.s_addr = HTON32(ip); // what idiot came up with idea to send IP address in host-byteorder?
 		dcc->remote_addr.sin_port = htons(port);
 		dcc->state = LIBIRC_STATE_INIT;
 	}
@@ -683,7 +696,7 @@ int irc_dcc_chat (irc_session_t * session, void * ctx, const char * nick, irc_dc
 	}
 
 	sprintf (notbuf, "DCC Chat (%s)", inet_ntoa (saddr.sin_addr));
-	sprintf (cmdbuf, "DCC CHAT chat %lu %u", (unsigned long) ntohl (saddr.sin_addr.s_addr), ntohs (saddr.sin_port));
+	sprintf (cmdbuf, "DCC CHAT chat %lu %u", (unsigned long) NTOH32(saddr.sin_addr.s_addr), NTOH16(saddr.sin_port));
 
 	if ( irc_cmd_notice (session, nick, notbuf)
 	|| irc_cmd_ctcp_request (session, nick, cmdbuf) )
@@ -924,7 +937,7 @@ int irc_dcc_sendfile (irc_session_t * session, void * ctx, const char * nick, co
 		p++; // skip directory slash
 
 	sprintf (notbuf, "DCC Send %s (%s)", p, inet_ntoa (saddr.sin_addr));
-	sprintf (cmdbuf, "DCC SEND %s %lu %u %ld", p, (unsigned long) ntohl (saddr.sin_addr.s_addr), ntohs (saddr.sin_port), filesize);
+	sprintf (cmdbuf, "DCC SEND %s %lu %u %ld", p, (unsigned long) NTOH32(saddr.sin_addr.s_addr), NTOH16(saddr.sin_port), filesize);
 
 	if ( irc_cmd_notice (session, nick, notbuf)
 	|| irc_cmd_ctcp_request (session, nick, cmdbuf) )
