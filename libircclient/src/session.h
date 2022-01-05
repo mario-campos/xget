@@ -19,7 +19,7 @@
 
 #include "params.h"
 #include "dcc.h"
-#include "libirc_events.h"
+#include "../include/libirc_events.h"
 
 
 // Session flags

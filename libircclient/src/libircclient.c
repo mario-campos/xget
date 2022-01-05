@@ -17,7 +17,7 @@
 #include "portable.c"
 #include "sockets.c"
 
-#include "libircclient.h"
+#include "../include/libircclient.h"
 #include "session.h"
 
 #include "utils.c"
