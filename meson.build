@@ -7,7 +7,7 @@ configure_file(output : 'config.h',
 )
 
 if not meson.get_compiler('c').has_function('strlcpy', prefix : '#include <string.h>')
-  dependencies = dependency('libbsd', required : true)
+  dependencies = dependency('libbsd-overlay', required : true)
 else
   dependencies = []
 endif
