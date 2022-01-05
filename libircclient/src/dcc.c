@@ -459,7 +459,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 							libirc_mutex_lock (&dcc->mutex_outbuf);
 						}
 
-						if ( dcc->outgoing_offset - length > 0 )
+						if ( dcc->outgoing_offset - length != 0 )
 							memmove (dcc->outgoing_buf, dcc->outgoing_buf + length, dcc->outgoing_offset - length);
 
 						dcc->outgoing_offset -= length;

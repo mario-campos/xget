@@ -918,7 +918,7 @@ int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_
 
 			offset = libirc_findcrlf_offset(session->incoming_buf, offset, session->incoming_offset);
 			
-			if ( session->incoming_offset - offset > 0 )
+			if ( session->incoming_offset - offset != 0 )
 				memmove (session->incoming_buf, session->incoming_buf + offset, session->incoming_offset - offset);
 
 			session->incoming_offset -= offset;
@@ -950,7 +950,7 @@ int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_
 			libirc_dump_data ("SEND", session->outgoing_buf, length);
 #endif
 
-		if ( length > 0 && session->outgoing_offset - length > 0 )
+		if ( length > 0 && session->outgoing_offset - length != 0 )
 			memmove (session->outgoing_buf, session->outgoing_buf + length, session->outgoing_offset - length);
 
 		session->outgoing_offset -= length;
