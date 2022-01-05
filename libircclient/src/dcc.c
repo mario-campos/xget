@@ -742,7 +742,7 @@ static void libirc_dcc_request (irc_session_t * session, const char * nick, cons
 	 * If the filename contains space characters, it will be delimited by double-quotes,
 	 * which won't be scanned with `%s`.
 	 */
-	else if (sscanf(req, "DCC SEND \"%[^\"]\" %u %hu %llu", filenamebuf, &ip, &port, &size) == 4) {
+	else if (sscanf(req, "DCC SEND \"%[^\"]\" %u %hu %lu", filenamebuf, &ip, &port, &size) == 4) {
 		if ( session->callbacks.event_dcc_send_req )
 		{
 			irc_dcc_session_t * dcc;
@@ -760,7 +760,7 @@ static void libirc_dcc_request (irc_session_t * session, const char * nick, cons
 
 		return;
 	}
-	else if ( sscanf (req, "DCC SEND %s %u %hu %llu", filenamebuf, &ip, &port, &size) == 4 )
+	else if ( sscanf (req, "DCC SEND %s %u %hu %lu", filenamebuf, &ip, &port, &size) == 4 )
 	{
 		if ( session->callbacks.event_dcc_send_req )
 		{
