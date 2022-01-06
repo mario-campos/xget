@@ -8,6 +8,7 @@
 #include <err.h>
 #include <time.h>
 #include <assert.h>
+#include <limits.h>
 
 #include "config.h"
 #include "libircclient/include/libircclient.h"
@@ -55,6 +56,9 @@ struct xdccGetConfig {
     char xdccCmd[IRC_NICK_MAX_SIZE];
     char **channelsToJoin;
     uint32_t numChannels;
+    char filename[NAME_MAX];
+    uint64_t filesize;
+    uint64_t currsize;
 };
 
 void
@@ -186,6 +190,29 @@ event_connect(irc_session_t *session, const char *event, const char *origin, con
 }
 
 void
+print_progress(struct xdccGetConfig *cfg, unsigned int chunk_size_bytes)
+{
+    assert(cfg);
+
+    double delta;
+    static int this_or_that = 0;
+    static struct timespec that_time, this_time;
+
+    this_or_that = !this_or_that;
+    if (this_or_that) {
+	clock_gettime(CLOCK_MONOTONIC, &this_time);
+	delta = (double)(this_time.tv_nsec - that_time.tv_nsec) / 1.0e9;
+    } else {
+	clock_gettime(CLOCK_MONOTONIC, &that_time);
+	delta = (double)(that_time.tv_nsec - this_time.tv_nsec) / 1.0e9;
+    }
+
+    double percentage = (double)cfg->currsize / (double)cfg->filesize * 100.0;
+    double throughput = ((double)chunk_size_bytes / 1024.0) / (cfg->currsize == chunk_size_bytes ? 1.0 : delta);
+    printf("\r%s\t%3.f%%\t%6.1f KB/s", cfg->filename, percentage, throughput);
+}
+
+void
 callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *fstream, const char *data, unsigned int length)
 {
     assert(session);
@@ -202,6 +229,10 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
     }
 
     fwrite(data, sizeof(char), length, fstream);
+
+    struct xdccGetConfig *cfg = irc_get_ctx(session);
+    cfg->currsize += length;
+    print_progress(cfg, length);
 }
 
 void
@@ -224,6 +255,10 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     }
 
     irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file);
+
+    struct xdccGetConfig *cfg = irc_get_ctx(session);
+    strlcpy(&cfg->filename[0], filename, sizeof(cfg->filename));
+    cfg->filesize = size;
 }
 
 static char* usage = "usage: xdccget [-p <port>] <server> <channel(s)> <XDCC command>";
