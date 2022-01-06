@@ -34,7 +34,6 @@ struct irc_dcc_session_s
 	int			state;
 	time_t			timeout;
 
-	FILE			* dccsend_file_fp;
 	uint64_t		received_file_size;
 	uint64_t		file_confirm_offset;
 
