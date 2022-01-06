@@ -26,40 +26,9 @@
 #include "dcc.c"
 #include "ssl.c"
 
-
-#ifdef _MSC_VER
-	/*
-	 * The debugger of MSVC 2005 does not like strdup.
-	 * It complains about heap corruption when free is called.
-	 * Use _strdup instead.
-	 */
-	#undef strdup
-	#define strdup _strdup
-#endif
-
-#if defined (WIN32_DLL)
-static int winsock_refcount = 0;
-#endif
-
 irc_session_t * irc_create_session (irc_callbacks_t * callbacks)
 {
 	irc_session_t * session;
-    
-#if defined (WIN32_DLL)
-	// From MSDN: The WSAStartup function typically leads to protocol-specific helper 
-	// DLLs being loaded. As a result, the WSAStartup function should not be called 
-	// from the DllMain function in a application DLL. This can potentially cause deadlocks.
-	if ( winsock_refcount == 0 )
-	{
-		WORD wVersionRequested = MAKEWORD (1, 1);
-		WSADATA wsaData;
-
-		if ( WSAStartup (wVersionRequested, &wsaData) != 0 )
-			return 0;
-        
-		winsock_refcount++;
-	}
-#endif
     
 	session = malloc (sizeof(irc_session_t));
 
@@ -141,11 +110,6 @@ void irc_destroy_session (irc_session_t * session)
 	libirc_mutex_destroy (&session->mutex_dcc);
 
 	free (session);
-    
-#if defined (WIN32_DLL)
-	if ( --winsock_refcount == 0 )
-		WSACleanup();
-#endif
 }
 
 

@@ -12,50 +12,29 @@
  * License for more details.
  */
 
-#if !defined (_WIN32)
-	#include <stdio.h>
-	#include <stdarg.h>
-	#include <unistd.h>
-	#include <string.h>
-	#include <stdlib.h>
-	#include <sys/stat.h>
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <netdb.h>
-	#include <arpa/inet.h>	
-	#include <netinet/in.h>
-	#include <fcntl.h>
-	#include <errno.h>
-	#include <ctype.h>
-	#include <time.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <ctype.h>
+#include <time.h>
 
-	#if defined (ENABLE_THREADS)
-		#include <pthread.h>
-		typedef pthread_mutex_t		port_mutex_t;
+#if defined (ENABLE_THREADS)
+	#include <pthread.h>
+	typedef pthread_mutex_t		port_mutex_t;
 
-		#if !defined (PTHREAD_MUTEX_RECURSIVE) && defined (PTHREAD_MUTEX_RECURSIVE_NP)
-			#define PTHREAD_MUTEX_RECURSIVE		PTHREAD_MUTEX_RECURSIVE_NP
-		#endif
-	#endif 
-#else
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-	#include <windows.h>
-	#include <time.h>
-	#include <stdio.h>
-	#include <stdarg.h>
-	#include <string.h>
-	#include <stdlib.h>
-	#include <sys/stat.h>
-
-	#if defined (ENABLE_THREADS)
-		typedef CRITICAL_SECTION	port_mutex_t;
+	#if !defined (PTHREAD_MUTEX_RECURSIVE) && defined (PTHREAD_MUTEX_RECURSIVE_NP)
+		#define PTHREAD_MUTEX_RECURSIVE		PTHREAD_MUTEX_RECURSIVE_NP
 	#endif
-
-	#define inline
-	#define snprintf			_snprintf
-	#define vsnprintf			_vsnprintf
-	#define strncasecmp			_strnicmp
 #endif
 
 
@@ -124,25 +103,4 @@ static inline void libirc_mutex_unlock (port_mutex_t * mutex)
 	static inline void libirc_mutex_lock (port_mutex_t * mutex) {}
 	static inline void libirc_mutex_unlock (port_mutex_t * mutex) {}
 
-#endif
-
-
-/*
- * Stub for WIN32 dll to initialize winsock API
- */
-#if defined (WIN32_DLL)
-BOOL WINAPI DllMain (HINSTANCE hinstDll, DWORD fdwReason, LPVOID lpvReserved)
-{
-	switch(fdwReason)
-	{
-		case DLL_PROCESS_ATTACH:
-			DisableThreadLibraryCalls (hinstDll);
-			break;
-
-		case DLL_PROCESS_DETACH:
-			break;
-	}
-
-	return TRUE;
-}
 #endif

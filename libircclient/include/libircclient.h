@@ -45,17 +45,7 @@
 #define INCLUDE_LIBIRC_H
 
 #include <stdlib.h>
-
-#if !defined (_WIN32)
-	#include <sys/select.h>	/* fd_set */
-#else
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-	#if defined (ENABLE_IPV6)
-		typedef int  (WSAAPI * getaddrinfo_ptr_t)  (const char *, const char* , const struct addrinfo *, struct addrinfo **);
-		typedef void (WSAAPI * freeaddrinfo_ptr_t) (struct addrinfo*);
-	#endif
-#endif
+#include <sys/select.h>	/* fd_set */
 
 #ifdef	__cplusplus
 extern "C" {

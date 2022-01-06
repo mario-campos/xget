@@ -15,39 +15,14 @@
 /*
  * The sockets interface was moved out to simplify going OpenSSL integration.
  */
-#if !defined (_WIN32)
-	#include <sys/socket.h>
-	#include <netdb.h>
-	#include <arpa/inet.h>	
-	#include <netinet/in.h>
-	#include <fcntl.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <fcntl.h>
 
-	#define IS_SOCKET_ERROR(a)	((a)<0)
-	typedef int				socket_t;
-
-#else
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-	#include <windows.h>
-
-	#define IS_SOCKET_ERROR(a)	((a)==SOCKET_ERROR)
-
-#if !defined(EWOULDBLOCK)
-	#define EWOULDBLOCK		WSAEWOULDBLOCK
-#endif
-#if !defined(EINPROGRESS)
-	#define EINPROGRESS		WSAEINPROGRESS
-#endif
-#if !defined(EINTR)
-	#define EINTR			WSAEINTR
-#endif
-#if !defined(EAGAIN)
-	#define EAGAIN			EWOULDBLOCK
-#endif
-
-	typedef SOCKET			socket_t;
-
-#endif
+#define IS_SOCKET_ERROR(a)	((a)<0)
+typedef int			socket_t;
 
 #ifndef INADDR_NONE
 	#define INADDR_NONE 	0xFFFFFFFF
@@ -56,11 +31,7 @@
 
 static int socket_error()
 {
-#if !defined (_WIN32)
 	return errno;
-#else
-	return WSAGetLastError();
-#endif
 }
 
 
@@ -73,23 +44,13 @@ static int socket_create (int domain, int type, socket_t * sock)
 
 static int socket_make_nonblocking (socket_t * sock)
 {
-#if !defined (_WIN32)
 	return fcntl (*sock, F_SETFL, fcntl (*sock, F_GETFL,0 ) | O_NONBLOCK) != 0;
-#else
-	unsigned long mode = 1;
-	return ioctlsocket (*sock, FIONBIO, &mode) == SOCKET_ERROR;
-#endif
 }
 
 
 static int socket_close (socket_t * sock)
 {
-#if !defined (_WIN32)
 	close (*sock);
-#else
-	closesocket (*sock);
-#endif
-
 	*sock = -1;
 	return 0;
 }
