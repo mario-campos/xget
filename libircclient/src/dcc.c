@@ -36,9 +36,6 @@
 #	define NTOH64(x) be64toh(x)
 #endif
 
-#define LIBIRC_DCC_RECVFILE		3
-
-
 static irc_dcc_session_t * libirc_find_dcc_session (irc_session_t * session, irc_dcc_t dccid, int lock_list)
 {
 	irc_dcc_session_t * s, *found = 0;
@@ -188,7 +185,7 @@ static void libirc_dcc_add_descriptors (irc_session_t * ircsession, fd_set *in_s
 			 * We don't need to LOCK_DCC_OUTBUF - during file transfer, buffers
 			 * can't change asynchronously.
 			 */
-			if ( dcc->dccmode == LIBIRC_DCC_RECVFILE && dcc->outgoing_offset > 0 )
+			if ( dcc->outgoing_offset > 0 )
 				libirc_add_to_set (dcc->sock, out_set, maxfd);
 		}
 	}
@@ -278,51 +275,6 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 					dcc->incoming_offset += length;
 					offset = dcc->incoming_offset;
 
-					/*
-					 * In LIBIRC_STATE_CONFIRM_SIZE state we don't call any
-					 * callbacks (except there is an error). We just receive
-					 * the data, and compare it with the amount sent.
-					 */
-					if ( dcc->state == LIBIRC_STATE_CONFIRM_SIZE )
-					{
-						if ( dcc->dccmode == LIBIRC_DCC_RECVFILE )
-							abort();
-
-						if ( dcc->incoming_offset == sizeof(uint32_t) )
-						{
-							// The order is big-endian
-							uint32_t received_size;
-							memcpy(&received_size, dcc->incoming_buf, sizeof(received_size));
-							received_size = NTOH32(received_size);
-
-							// Sent size confirmed
-							if ( dcc->file_confirm_offset == received_size )
-							{
-								dcc->state = LIBIRC_STATE_CONNECTED;
-								dcc->incoming_offset = 0;
-							}
-							else
-								err = LIBIRC_ERR_WRITE;
-						}
-						else if ( dcc->incoming_offset == sizeof(uint64_t) )
-						{
-							// The order is big-endian
-							uint64_t received_size;
-							memcpy(&received_size, dcc->incoming_buf, sizeof(received_size));
-							received_size = NTOH64(received_size);
-
-							// Sent size confirmed
-							if ( dcc->file_confirm_offset == received_size )
-							{
-								dcc->state = LIBIRC_STATE_CONNECTED;
-								dcc->incoming_offset = 0;
-							}
-							else
-								err = LIBIRC_ERR_WRITE;
-						}
-					}
-					else
-					{
 						libirc_mutex_unlock (&ircsession->mutex_dcc);
 
 						(*dcc->cb)(ircsession, dcc->id, err, dcc->ctx, dcc->incoming_buf, offset);
@@ -348,7 +300,6 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 							memmove (dcc->incoming_buf, dcc->incoming_buf + offset, dcc->incoming_offset - offset);
 
 						dcc->incoming_offset -= offset;
-					}
 				}
 
 				/*
@@ -408,7 +359,6 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 						 * back.
 						 */
 						if ( dcc->state == LIBIRC_STATE_CONFIRM_SIZE
-						&& dcc->dccmode == LIBIRC_DCC_RECVFILE
 						&& dcc->outgoing_offset == 0 )
 						{
 							/*
@@ -452,7 +402,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 }
 
 
-static int libirc_new_dcc_session (irc_session_t * session, unsigned long ip, unsigned short port, int dccmode, void * ctx, irc_dcc_session_t ** pdcc)
+static int libirc_new_dcc_session (irc_session_t * session, unsigned long ip, unsigned short port, void * ctx, irc_dcc_session_t ** pdcc)
 {
 	irc_dcc_session_t * dcc = malloc (sizeof(irc_dcc_session_t));
 
@@ -518,7 +468,6 @@ static int libirc_new_dcc_session (irc_session_t * session, unsigned long ip, un
 		dcc->state = LIBIRC_STATE_INIT;
 	}
 
-	dcc->dccmode = dccmode;
 	dcc->ctx = ctx;
 	time (&dcc->timeout);
 
@@ -579,7 +528,7 @@ static void libirc_dcc_request (irc_session_t * session, const char * nick, cons
 		{
 			irc_dcc_session_t * dcc;
 
-			int err = libirc_new_dcc_session (session, ip, port, LIBIRC_DCC_RECVFILE, 0, &dcc);
+			int err = libirc_new_dcc_session (session, ip, port, 0, &dcc);
 			if ( err )
 			{
 				session->lasterror = err;
@@ -598,7 +547,7 @@ static void libirc_dcc_request (irc_session_t * session, const char * nick, cons
 		{
 			irc_dcc_session_t * dcc;
 
-			int err = libirc_new_dcc_session (session, ip, port, LIBIRC_DCC_RECVFILE, 0, &dcc);
+			int err = libirc_new_dcc_session (session, ip, port, 0, &dcc);
 			if ( err )
 			{
 				session->lasterror = err;

@@ -26,11 +26,7 @@ struct irc_dcc_session_s
 	irc_dcc_t		id;
 	void			* ctx;
 	socket_t		sock;		/*!< DCC socket */
-	int			dccmode;	/*!< Boolean value to differ chat vs send 
-	                             		requests. Changes the cb behavior - when
-	                             		it is chat, data is sent by lines with 
-	                             		stripped CRLFs. In file mode, the data
-	                             		is sent as-is */
+
 	int			state;
 	time_t			timeout;
 
