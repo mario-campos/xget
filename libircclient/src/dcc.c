@@ -277,7 +277,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 
 					libirc_mutex_unlock (&ircsession->mutex_dcc);
 
-					(*dcc->cb)(ircsession, dcc->id, err, dcc->ctx, dcc->incoming_buf, offset);
+					(*dcc->cb)(ircsession, dcc->id, 0, dcc->ctx, dcc->incoming_buf, offset);
 
 					/*
 					 * If the session is not terminated in callback,
