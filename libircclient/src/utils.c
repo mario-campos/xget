@@ -59,27 +59,6 @@ static int libirc_findcrlf_offset(const char *buf, int offset, const int length)
 	return offset;
 }
 
-static int libirc_findcrorlf (char * buf, int length)
-{
-	int offset = 0;
-	for ( ; offset < length; offset++ ) 
-	{
-		if ( buf[offset] == 0x0D || buf[offset] == 0x0A )
-		{
-			buf[offset++] = '\0';
-
-			if ( offset < (length - 1) 
-			&& (buf[offset] == 0x0D || buf[offset] == 0x0A) )
-				offset++;
-
-			return offset;
-		}
-	}
-
-	return 0;
-}
-
-
 static void libirc_event_ctcp_internal (irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
 	(void)event;
