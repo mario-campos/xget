@@ -38,7 +38,10 @@ struct irc_dcc_session_s
 	char 			incoming_buf[LIBIRC_DCC_BUFFER_SIZE];
 	unsigned int		incoming_offset;
 
-	char 			outgoing_buf[LIBIRC_DCC_BUFFER_SIZE];
+	union {
+		char		outgoing_buf[LIBIRC_DCC_BUFFER_SIZE];
+		uint32_t	outgoing_file_confirm_offset;
+	};
 	unsigned int		outgoing_offset;
 	port_mutex_t		mutex_outbuf;
 

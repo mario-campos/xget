@@ -267,9 +267,8 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 						dcc->file_confirm_offset += offset;
 
 						// Store as big endian
-						uint32_t file_confirm_offset = htonl(dcc->file_confirm_offset);
-						memcpy(dcc->outgoing_buf, &file_confirm_offset, sizeof(file_confirm_offset));
-						dcc->outgoing_offset = sizeof(file_confirm_offset);
+						dcc->outgoing_file_confirm_offset = htonl(dcc->file_confirm_offset);
+						dcc->outgoing_offset = sizeof(dcc->outgoing_file_confirm_offset);
 					}
 
 					libirc_mutex_lock (&ircsession->mutex_dcc);
