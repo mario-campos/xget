@@ -14,28 +14,6 @@
 #include <inttypes.h>
 #include <arpa/inet.h>
 
-#if defined(__APPLE__)
-#	define HTON32(x) htonl(x)
-#	define HTON64(x) htonll(x)
-#	define NTOH16(x) ntohs(x)
-#	define NTOH32(x) ntohl(x)
-#	define NTOH64(x) ntohll(x)
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
-#	include <sys/endian.h>
-#	define HTON32(x) htobe32(x)
-#	define HTON64(x) htobe64(x)
-#	define NTOH16(x) be16toh(x)
-#	define NTOH32(x) be32toh(x)
-#	define NTOH64(x) be64toh(x)
-#else
-#	include <endian.h>
-#	define HTON32(x) htobe32(x)
-#	define HTON64(x) htobe64(x)
-#	define NTOH16(x) be16toh(x)
-#	define NTOH32(x) be32toh(x)
-#	define NTOH64(x) be64toh(x)
-#endif
-
 static irc_dcc_session_t * libirc_find_dcc_session (irc_session_t * session, irc_dcc_t dccid, int lock_list)
 {
 	irc_dcc_session_t * s, *found = 0;
@@ -289,7 +267,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 						dcc->file_confirm_offset += offset;
 
 						// Store as big endian
-						uint64_t file_confirm_offset = HTON64(dcc->file_confirm_offset);
+						uint32_t file_confirm_offset = htonl(dcc->file_confirm_offset);
 						memcpy(dcc->outgoing_buf, &file_confirm_offset, sizeof(file_confirm_offset));
 						dcc->outgoing_offset = sizeof(file_confirm_offset);
 					}
@@ -463,7 +441,7 @@ static int libirc_new_dcc_session (irc_session_t * session, unsigned long ip, un
 
 		memset (&dcc->remote_addr, 0, sizeof(dcc->remote_addr));
 		dcc->remote_addr.sin_family = AF_INET;
-		dcc->remote_addr.sin_addr.s_addr = HTON32(ip); // what idiot came up with idea to send IP address in host-byteorder?
+		dcc->remote_addr.sin_addr.s_addr = htonl(ip); // what idiot came up with idea to send IP address in host-byteorder?
 		dcc->remote_addr.sin_port = htons(port);
 		dcc->state = LIBIRC_STATE_INIT;
 	}
