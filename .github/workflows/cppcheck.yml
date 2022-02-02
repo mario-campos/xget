@@ -9,11 +9,11 @@ on:
 
 jobs:
   analyze:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Install cppcheck
-      run: brew install cppcheck
+      run: sudo apt-get install -qq cppcheck
     - name: Run cppcheck
       run: cppcheck --error-exitcode=1 .
