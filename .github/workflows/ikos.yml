@@ -12,7 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     container: charlesdaniels/ikos_ubuntu
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Run IKOS
-        run: ikos xdccget.c
+    - name: Install dependencies
+      run: sudo apt install libbsd-dev meson
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Run IKOS
+      run: |
+        meson setup build
+        ikos-scan ninja -C build
