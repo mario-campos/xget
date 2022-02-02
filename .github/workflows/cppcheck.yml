@@ -3,6 +3,9 @@ name: Cppcheck
 on:
   push:
     branches: [ master ]
+    paths:
+    - .github/workflows/cppcheck.yml
+    - '**.[ch]'
   pull_request:
     branches: [ master ]
   workflow_dispatch:

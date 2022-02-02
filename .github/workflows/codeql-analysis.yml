@@ -3,18 +3,11 @@ name: "CodeQL"
 on:
   push:
     branches: [ master ]
-    paths-ignore:
-      - '.github/workflows/**'
-      - .gitignore
-      - README.md
-      - LICENSE
+    paths:
+    - .github/workflows/codeql-analysis.yml
+    - '**.[ch]'
   pull_request:
     branches: [ master ]
-    paths-ignore:
-      - '.github/workflows/**'
-      - .gitignore
-      - README.md
-      - LICENSE
   schedule:
     - cron: '44 18 * * 3'
 

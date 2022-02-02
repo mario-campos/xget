@@ -3,11 +3,9 @@ name: C/C++ CI
 on:
   push:
     branches: [ master ]
-    paths-ignore:
-      - '.github/workflows/**'
-      - .gitignore
-      - README.md
-      - LICENSE
+    paths:
+    - .github/workflows/c-cpp.yml
+    - '**.[ch]'
   pull_request:
     branches: [ master ]
 

@@ -3,6 +3,9 @@ name: NASA's IKOS Analyzer
 on:
   push:
     branches: [ master ]
+    paths:
+    - .github/workflows/ikos.yml
+    - '**.[ch]'
   pull_request:
     branches: [ master ]
   workflow_dispatch:
