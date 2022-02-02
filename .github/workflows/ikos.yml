@@ -50,6 +50,7 @@ jobs:
     - name: Bundle and Export IKOS
       uses: actions/upload-artifact@v2
       with:
+        name: ikos
         path: ${{ runner.temp }}/ikos
 
   analyze:
@@ -62,6 +63,7 @@ jobs:
     - name: Install IKOS
       uses: actions/download-artifact@v2
       with:
+        name: ikos
         path: ${{ runner.temp }}/ikos
       
     - name: Checkout repository
