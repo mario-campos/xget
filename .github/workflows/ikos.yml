@@ -37,7 +37,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DLLVM_CONFIG_EXECUTABLE=$(command -v llvm-config) ..
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DLLVM_CONFIG_EXECUTABLE=$(command -v llvm-config-10) ..
         make
 
     - name: Test IKOS
