@@ -15,17 +15,12 @@ jobs:
       run: >
         sudo apt-get install -qq 
         libgmp-dev
-        libboost-dev
-        libboost-filesystem-dev
-        libboost-thread-dev
-        libboost-test-dev
+        libboost-{dev,filesystem-dev,thread-dev,test-dev}
         python3-pygments
         libtbb-dev
         libz-dev
         libedit-dev
-        llvm-10
-        llvm-10-dev
-        llvm-10-tools
+        llvm-10{,-dev,-tools}
         
     - name: Checkout repository
       uses: actions/checkout@v2
