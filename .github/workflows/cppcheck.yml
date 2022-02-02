@@ -16,4 +16,4 @@ jobs:
     - name: Install cppcheck
       run: brew install cppcheck
     - name: Run cppcheck
-      run: cppcheck .
+      run: cppcheck --error-exitcode=1 .
