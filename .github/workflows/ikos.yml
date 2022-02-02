@@ -13,7 +13,7 @@ jobs:
     container: charlesdaniels/ikos_ubuntu
     steps:
     - name: Install dependencies
-      run: apt install libbsd-dev meson
+      run: apt install --yes libbsd-dev meson
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Run IKOS
