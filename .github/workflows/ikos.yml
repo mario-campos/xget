@@ -20,7 +20,8 @@ jobs:
         libtbb-dev
         libz-dev
         libedit-dev
-        llvm-10{,-dev,-tools}
+        llvm-9{,-dev,-tools}
+        clang-9
         
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -32,7 +33,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DLLVM_CONFIG_EXECUTABLE=$(command -v llvm-config-10) ..
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DLLVM_CONFIG_EXECUTABLE=$(command -v llvm-config-9) ..
         make
 
     - name: Test IKOS
