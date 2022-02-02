@@ -8,14 +8,56 @@ on:
   workflow_dispatch:
 
 jobs:
-  analyze:
+  build-ikos:
     runs-on: ubuntu-latest
-    container: charlesdaniels/ikos_ubuntu
     steps:
     - name: Install dependencies
-      run: apt install --yes libbsd-dev meson
+      run: >
+        sudo apt-get install -qq 
+        libgmp-dev
+        libboost-dev
+        libboost-filesystem-dev
+        libboost-thread-dev
+        libboost-test-dev
+        python3-pygments
+        libtbb-dev
+        libz-dev
+        libedit-dev
+        llvm-10
+        llvm-10-dev
+        llvm-10-tools
+        
     - name: Checkout repository
       uses: actions/checkout@v2
+      with:
+        repository: NASA-SW-VnV/ikos
+        ref: v3.0
+  
+    - name: Build IKOS
+      run: |
+        mkdir build
+        cd build
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+        make
+
+    - name: Test IKOS
+      run: make check
+      working-directory: ${{ github.workspace }}/build
+
+    - name: Install IKOS
+      run: sudo make install
+      working-directory: ${{ github.workspace }}/build
+
+  analyze:
+    runs-on: ubuntu-latest
+    needs: build-ikos
+    steps:
+    - name: Install dependencies
+      run: sudo apt-get install -qq libbsd-dev meson
+      
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
     - name: Run IKOS
       run: |
         meson setup build
