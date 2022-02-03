@@ -271,6 +271,7 @@ char * irc_color_convert_to_mirc (const char * source)
 		cur = source;
 		while ( (p1 = strchr (cur, '[')) != 0 )
 		{
+			char tagbuf[32];
 			const char * replacedval = 0;
 			p2 = 0;
 
@@ -282,7 +283,6 @@ char * irc_color_convert_to_mirc (const char * source)
 			&& (p2 - p1) < 31 )
 			{
 				// Get the tag
-				char tagbuf[32];
 				int taglen = p2 - p1 - 1;
 
 				memcpy (tagbuf, p1 + 1, taglen);
