@@ -28,4 +28,5 @@ jobs:
         --suppress=ctunullpointer:libircclient/src/colors.c:49
         --suppress=invalidLifetime:libircclient/src/libircclient.c:709
         --suppress=invalidLifetime:libircclient/src/libircclient.c:746
+        --suppress=variableScope:libircclient/src/libircclient.c:255
         .
