@@ -18,5 +18,18 @@ jobs:
       uses: actions/checkout@v2
     - name: Install cppcheck
       run: sudo apt-get install -qq cppcheck
+    - name: Build
+      run: |
+        meson setup build
+        ninja -C build
     - name: Run cppcheck
-      run: cppcheck --force --enable=all --error-exitcode=1 .
+      run: >
+        cppcheck
+        --quiet
+        --force
+        --enable=all
+        --error-exitcode=1
+        --project=build/compile_commands.json
+        --suppress=ctunullpointer:libircclient/src/colors.c:49
+        --suppress=invalidLifetime:libircclient/src/libircclient.c:709
+        --suppress=invalidLifetime:libircclient/src/libircclient.c:746
