@@ -305,7 +305,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 			 */
 			if ( FD_ISSET (dcc->sock, out_set) )
 			{
-				int length, offset, err = 0;
+				int offset, err = 0;
 
 				/*
 				 * Because in some cases outgoing_buf could be changed 
@@ -318,7 +318,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 		
 				if ( offset > 0 )
 				{
-					length = socket_send (&dcc->sock, dcc->outgoing_buf, offset);
+					int length = socket_send (&dcc->sock, dcc->outgoing_buf, offset);
 
 					if ( length < 0 )
 						err = LIBIRC_ERR_WRITE;

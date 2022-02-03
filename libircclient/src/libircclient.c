@@ -778,8 +778,6 @@ static void libirc_process_incoming_data (irc_session_t * session, size_t proces
 
 int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_set *out_set)
 {
-	char hname[256];
-
 	if ( session->sock < 0 
 	|| session->state == LIBIRC_STATE_INIT
 	|| session->state == LIBIRC_STATE_DISCONNECTED )
@@ -794,6 +792,8 @@ int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_
 	// Handle "connection succeed" / "connection failed"
 	if ( session->state == LIBIRC_STATE_CONNECTING )
 	{
+		char hname[256];
+
         // If the socket is not connected yet, wait longer - it is not an error
         if ( !FD_ISSET (session->sock, out_set) )
             return 0;

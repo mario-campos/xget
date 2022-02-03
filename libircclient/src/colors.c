@@ -79,7 +79,6 @@ static void libirc_colorparser_applycolor (unsigned int * mask,
 		char ** destline, unsigned int * destlen,
 		unsigned int colorid, unsigned int bgcolorid)
 {
-	const char * end = "[/COLOR]";
 	char startbuf[64];
 
 	if ( bgcolorid != 0 )
@@ -88,7 +87,7 @@ static void libirc_colorparser_applycolor (unsigned int * mask,
 		sprintf (startbuf, "[COLOR=%s]", color_replacement_table[colorid]);
 
 	if ( (*mask & LIBIRC_COLORPARSER_COLOR) != 0 )
-		libirc_colorparser_addorcat (destline, destlen, end);
+		libirc_colorparser_addorcat (destline, destlen, "[/COLOR]");
 
 	*mask |= LIBIRC_COLORPARSER_COLOR;
 	libirc_colorparser_addorcat (destline, destlen, startbuf);
