@@ -19,4 +19,4 @@ jobs:
     - name: Install cppcheck
       run: sudo apt-get install -qq cppcheck
     - name: Run cppcheck
-      run: cppcheck --error-exitcode=1 .
+      run: cppcheck --force --enable=all --error-exitcode=1 .
