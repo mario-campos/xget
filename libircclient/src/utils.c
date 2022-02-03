@@ -78,7 +78,7 @@ static void libirc_event_ctcp_internal (irc_session_t * session, const char * ev
 				unsigned int high, low;
 				irc_get_version (&high, &low);
 
-				snprintf (textbuf, sizeof (textbuf), "VERSION libircclient by Georgy Yunaev ver.%d.%d", high, low);
+				snprintf (textbuf, sizeof (textbuf), "VERSION libircclient by Georgy Yunaev ver.%u.%u", high, low);
 			}
 			else
 				snprintf (textbuf, sizeof (textbuf), "VERSION %s", session->ctcp_version);
