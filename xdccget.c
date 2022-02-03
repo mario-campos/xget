@@ -275,7 +275,7 @@ main(int argc, char **argv)
             case 'V': {
                 unsigned int major, minor;
                 irc_get_version(&major, &minor);
-                printf("xdccget-0.0.0\nlibircclient-%d.%02d\n", major, minor);
+                printf("xdccget-0.0.0\nlibircclient-%u.%02u\n", major, minor);
                 return EXIT_SUCCESS;
             }
             case 'h':
