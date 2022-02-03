@@ -794,9 +794,9 @@ int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_
 	{
 		char hname[256];
 
-        // If the socket is not connected yet, wait longer - it is not an error
-        if ( !FD_ISSET (session->sock, out_set) )
-            return 0;
+		// If the socket is not connected yet, wait longer - it is not an error
+		if ( !FD_ISSET (session->sock, out_set) )
+			return 0;
         
 		// Now we have to determine whether the socket is connected 
 		// or the connect is failed
