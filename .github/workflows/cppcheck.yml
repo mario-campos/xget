@@ -31,5 +31,4 @@ jobs:
         --suppress=invalidLifetime:libircclient/src/libircclient.c:746
         --suppress=nullPointerRedundantCheck:libircclient/src/libircclient.c:610
         --suppress=unusedFunction:libircclient/src/*.c
-        --suppress=variableScope:libircclient/src/libircclient.c:255
         .
