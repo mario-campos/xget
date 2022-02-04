@@ -25,6 +25,7 @@ jobs:
         --force
         --enable=all
         --error-exitcode=1
+        -UENABLE_THREADS
         --suppress=ctunullpointer:libircclient/src/colors.c:49
         --suppress=invalidLifetime:libircclient/src/libircclient.c:709
         --suppress=invalidLifetime:libircclient/src/libircclient.c:746
