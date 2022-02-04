@@ -16,7 +16,7 @@ jobs:
     container: ghcr.io/mario-campos/ikos-dockerfile:3.0-1
     steps:
     - name: Install dependencies
-      run: sudo apt-get install -qq libbsd-dev meson
+      run: apt-get install -qq libbsd-dev meson
       
     - name: Checkout repository
       uses: actions/checkout@v2
