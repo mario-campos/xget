@@ -16,13 +16,13 @@ jobs:
     container: ghcr.io/mario-campos/ikos-dockerfile:3.0-1
     steps:
     - name: Install dependencies
-      run: apt-get install -qq libbsd-dev pkg-config
+      run: apt-get install -qq libbsd-dev
       
     - name: Checkout repository
       uses: actions/checkout@v2
       
-    - name: IKOS usage
-      run: ikos --help     
-      
     - name: Run IKOS
-      run: ikos --format text -D_FILE_OFFSET_BITS=64 -DLIBBSD_OVERLAY -I/usr/include/bsd xdccget.c
+      run: ikos -D_FILE_OFFSET_BITS=64 -DLIBBSD_OVERLAY -I/usr/include/bsd xdccget.c
+      
+    - name: Show IKOS findings
+      run: ikos-report output.db
