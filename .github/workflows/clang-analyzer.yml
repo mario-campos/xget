@@ -21,6 +21,10 @@ jobs:
       run: |
         meson setup build
         ninja -C build
+    
+    - run: pkg-config libbsd-overlay
+    - run: pkg-config --libs libbsd-overlay
+    - run: pkg-config --cflags libbsd-overlay
 
     - name: Run clang-tidy
       run: >
@@ -29,5 +33,5 @@ jobs:
         --checks 'clang-analyzer-*'
         xdccget.c
         --
-        -I/usr/include/bsd
         -D_FILE_OFFSET_BITS=64
+        $(pkg-config libbsd-overlay)
