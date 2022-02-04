@@ -25,4 +25,4 @@ jobs:
       run: ikos --help
       
     - name: Run IKOS
-      run: ikos xdccget.c
+      run: ikos -D_FILE_OFFSET_BITS=64 xdccget.c
