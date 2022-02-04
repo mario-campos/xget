@@ -21,10 +21,6 @@ jobs:
       run: |
         meson setup build
         ninja -C build
-    
-    - run: pkg-config libbsd-overlay
-    - run: pkg-config --libs libbsd-overlay
-    - run: pkg-config --cflags libbsd-overlay
 
     - name: Run clang-tidy
       run: >
