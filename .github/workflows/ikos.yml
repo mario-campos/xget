@@ -21,7 +21,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
       
+    - name: IKOS usage
+      run: ikos --help
+      
     - name: Run IKOS
-      run: |
-        meson setup build
-        ikos-scan ninja -C build
+      run: ikos xdccget.c
