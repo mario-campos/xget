@@ -27,8 +27,8 @@ jobs:
         --error-exitcode=1
         -UENABLE_THREADS
         --suppress=ctunullpointer:libircclient/src/colors.c:49
-        --suppress=invalidLifetime:libircclient/src/libircclient.c:709
-        --suppress=invalidLifetime:libircclient/src/libircclient.c:746
-        --suppress=nullPointerRedundantCheck:libircclient/src/libircclient.c:610
+        --suppress=invalidLifetime:libircclient/src/libircclient.c:666
+        --suppress=invalidLifetime:libircclient/src/libircclient.c:703
+        --suppress=nullPointerRedundantCheck:libircclient/src/libircclient.c:567
         --suppress=unusedFunction:libircclient/src/*.c
         .
