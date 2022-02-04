@@ -34,4 +34,4 @@ jobs:
         xdccget.c
         --
         -D_FILE_OFFSET_BITS=64
-        $(pkg-config libbsd-overlay)
+        $(pkg-config --cflags libbsd-overlay)
