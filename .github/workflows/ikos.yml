@@ -22,22 +22,7 @@ jobs:
       uses: actions/checkout@v2
       
     - name: IKOS usage
-      run: ikos --help
-      
-    - name: ikos-report usage
-      run: ikos-report --help
-      
-    - name: pkg-config libbsd
-      run: |
-        echo '>>> pkg-config libbsd-overlay'
-        pkg-config libbsd-overlay
-        echo '>>> pkg-config --libs libbsd-overlay'
-        pkg-config --libs libbsd-overlay
-        echo '>>> pkg-config --cflags libbsd-overlay'
-        pkg-config --cflags libbsd-overlay
+      run: ikos --help     
       
     - name: Run IKOS
-      run: ikos -D_FILE_OFFSET_BITS=64 xdccget.c
-
-    - name: Show IKOS report
-      run: ikos-report output.db
+      run: ikos --format text -D_FILE_OFFSET_BITS=64 -DLIBBSD_OVERLAY -I/usr/include/bsd xdccget.c
