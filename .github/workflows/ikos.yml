@@ -16,7 +16,7 @@ jobs:
     container: ghcr.io/mario-campos/ikos-dockerfile:3.0-1
     steps:
     - name: Install dependencies
-      run: apt-get install -qq libbsd-dev meson pkg-config
+      run: apt-get install -qq libbsd-dev pkg-config
       
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -24,5 +24,11 @@ jobs:
     - name: IKOS usage
       run: ikos --help
       
+    - name: ikos-report usage
+      run: ikos-report --help
+      
     - name: Run IKOS
-      run: ikos -D_FILE_OFFSET_BITS=64 xdccget.c
+      run: ikos -D_FILE_OFFSET_BITS=64 "$(pkg-config libbsd-overlay)" xdccget.c
+
+    - name: Show IKOS report
+      run: ikos-report output.db
