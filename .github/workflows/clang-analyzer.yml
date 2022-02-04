@@ -29,5 +29,5 @@ jobs:
         --checks 'clang-analyzer-*'
         xdccget.c
         --
-        $(pkg-config --libs libbsd-overlay)
+        -I/usr/include/bsd
         -D_FILE_OFFSET_BITS=64
