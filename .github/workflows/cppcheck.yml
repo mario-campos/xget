@@ -31,4 +31,4 @@ jobs:
         --suppress=invalidLifetime:libircclient/src/libircclient.c:703
         --suppress=nullPointerRedundantCheck:libircclient/src/libircclient.c:567
         --suppress=unusedFunction:libircclient/src/*.c
-        xdccget.c libircclient
+        xdccget.c compats.c libircclient
