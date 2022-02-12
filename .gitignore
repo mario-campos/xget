@@ -1,5 +1,10 @@
 xdccget
 
+# configure files
+config.h
+config.log
+Makefile.configure
+
 # Object files
 *.o
 *.ko

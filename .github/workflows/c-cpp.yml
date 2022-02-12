@@ -28,25 +28,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install dependencies
-      run: sudo apt install libbsd-dev meson
+      run: sudo apt install libbsd-dev
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: build
       run: |
-        meson setup build
-        ninja -C build
+        CFLAGS=$(pkg-config --cflags libbsd-overlay) ./configure LDFLAGS=$(pkg-config --libs libbsd-overlay)
+        make
   
   macOS:
     runs-on: macos-latest
     steps:
-    - name: Install dependencies
-      run: brew install meson
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: build
-      run: |
-        meson setup build
-        ninja -C build
+      run: ./configure && make
   
   openbsd:
     runs-on: macos-10.15
@@ -55,14 +51,10 @@ jobs:
       uses: mario-campos/emulate@v1
       with:
         operating-system: openbsd-latest
-    - name: Install dependencies
-      run: pkg_add meson
     - name: Checkout repository
       run: git clone --depth 1 https://github.com/mario-campos/xdccget.git
     - name: build
-      run: |
-        meson setup build xdccget
-        ninja -C build
+      run: ./configure && make
 
   freebsd:
     runs-on: macos-10.15
@@ -76,6 +68,4 @@ jobs:
     - name: Checkout repository
       run: git clone --depth 1 https://github.com/mario-campos/xdccget.git
     - name: build
-      run: |
-        meson setup build xdccget
-        ninja -C build
+      run: ./configure && make

@@ -37,7 +37,7 @@ jobs:
 
     steps:
     - name: Install dependencies
-      run: sudo apt install libbsd-dev meson
+      run: sudo apt install libbsd-dev
 
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -50,8 +50,8 @@ jobs:
 
     - name: Build
       run: |
-        meson setup build
-        ninja -C build
+        CFLAGS=$(pkg-config --cflags libbsd-overlay) ./configure LDFLAGS=$(pkg-config --libs libbsd-overlay)
+        make
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
