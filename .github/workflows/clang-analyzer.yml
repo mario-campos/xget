@@ -12,20 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install dependencies
-      run: sudo apt-get install -qq libbsd-dev meson clang-tidy
+      run: sudo apt-get install -qq libbsd-dev clang-tidy
 
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Build
-      run: |
-        meson setup build
-        ninja -C build
-
     - name: Run clang-tidy
       run: >
         clang-tidy
-        -p build
         --checks 'clang-analyzer-*'
         xdccget.c
         --
