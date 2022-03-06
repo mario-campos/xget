@@ -251,7 +251,7 @@ main(int argc, char **argv)
     if (matches[3].rm_so < 0)
 	cfg.port = cfg.is_ircs ? 6697 : 6667;
     else
-	sscanf(&argv[0][matches[3].rm_so], ":%hu", &cfg.port);
+    	cfg.port = atoi(&argv[0][matches[3].rm_so + 1]); // skip the ':'/NUL byte.
 
     // Capture the first IRC channel to join.
     cfg.channelsToJoin[0] = &argv[0][matches[4].rm_so];
