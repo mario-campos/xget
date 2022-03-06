@@ -9,6 +9,8 @@
 #include <time.h>
 #include <assert.h>
 #include <limits.h>
+#include <regex.h>
+#include <stdbool.h>
 
 #include "libircclient/include/libircclient.h"
 
@@ -51,91 +53,15 @@ struct xdccGetConfig {
     char *host;
     uint16_t port;
     char nick[IRC_NICK_MAX_SIZE];
-    char botNick[IRC_NICK_MAX_SIZE];
+    char *botNick;
     char xdccCmd[IRC_NICK_MAX_SIZE];
-    char **channelsToJoin;
+    char *channelsToJoin[5];
     uint32_t numChannels;
     char filename[NAME_MAX];
     uint64_t filesize;
     uint64_t currsize;
+    bool is_ircs;
 };
-
-void
-parseDccDownload(char *xdcc_nick_command, char *nick, size_t nick_size, char *xdcc_command, size_t xdcc_cmd_size)
-{
-    assert(xdcc_nick_command);
-    assert(nick);
-    assert(xdcc_command);
-
-    char *space;
-    if (!(space = strchr(xdcc_nick_command, ' '))) {
-        *nick = '\0';
-        *xdcc_command = '\0';
-        return;
-    }
-
-    *space = '\0';
-    strlcpy(nick, xdcc_nick_command, nick_size);
-    strlcpy(xdcc_command, space+1, xdcc_cmd_size);
-}
-
-char*
-strip(char *s)
-{
-    assert(s);
-
-    char *it;
-    char *separated = s;
-    while ((it = strsep(&separated, " \t")) != NULL) {
-        if (*it != '\0') {
-            s = strdup(it);
-            break;
-        }
-    }
-    return s;
-}
-
-char**
-split(char *s, int *count)
-{
-    assert(s);
-
-    char *it, **parts, **head;
-    *count = 0;
-    head = parts = calloc(10, sizeof(char*));
-    while ((it = strsep(&s, ",")) != NULL) {
-        if (*it != '\0') {
-            *parts = strdup(it);
-            parts++;
-            (*count)++;
-        }
-    }
-    *parts = NULL;
-    return head;
-}
-
-char**
-parseChannels(char *channelString, uint32_t *numChannels)
-{
-    assert(channelString);
-
-    int numFound = 0;
-    char **splittedString = split(channelString, &numFound);
-    if (splittedString == NULL) {
-        DBG_ERR("splittedString = NULL, cant continue from here.");
-    }
-
-    for (int i = 0; i < numFound; i++) {
-        char *tmp = splittedString[i];
-        splittedString[i] = strip(splittedString[i]);
-        free(tmp);
-        DBG_OK("%d: '%s'", i, splittedString[i]);
-    }
-
-    *numChannels = numFound;
-
-    return splittedString;
-}
 
 void
 invent_nick(char *dst, size_t dst_size)
@@ -260,16 +186,19 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     cfg->filesize = size;
 }
 
-static char* usage = "usage: xdccget [-p <port>] <server> <channel(s)> <XDCC command>";
+__dead
+void usage(int exit_status) {
+    fputs("usage: xdccget <URI> <NICK> send <PACK>\n", stderr);
+    exit(exit_status);
+}
 
 int
 main(int argc, char **argv)
 {
     struct xdccGetConfig cfg = {0};
-    cfg.port = 6667;
 
     int opt;
-    while ((opt = getopt(argc, argv, "Vhp:")) != -1) {
+    while ((opt = getopt(argc, argv, "Vh")) != -1) {
         switch (opt) {
             case 'V': {
                 unsigned int major, minor;
@@ -278,33 +207,71 @@ main(int argc, char **argv)
                 return EXIT_SUCCESS;
             }
             case 'h':
-                puts(usage);
-                return EXIT_SUCCESS;
-
-            case 'p':
-                cfg.port = (uint16_t)strtoul(optarg, NULL, 0);
-                DBG_OK("Port number: %u", cfg.port);
-                break;
-
+                usage(EXIT_SUCCESS);
             case '?':
             default:
-                fputs(usage, stderr);
-                return EXIT_FAILURE;
+                usage(EXIT_FAILURE);
         }
     }
     argc -= optind;
     argv += optind;
 
-    if (argc != 3) {
-        fputs(usage, stderr);
-        return EXIT_FAILURE;
+    if (argc != 4) usage(EXIT_FAILURE);
+
+    regex_t re;
+    int regex_errno;
+    if ((regex_errno = regcomp(&re, "(ircs?)://([[:alnum:]\\.-]{3,})(:[0-9]{1,5})?/(#[[:alnum:]_-]+(,#[[:alnum:]_-]+){0,4})", REG_EXTENDED)))
+        assert(!regex_errno);
+
+    /*
+     * There are six match groups (but we only need 2-5):
+     * 1. The entire matched string.
+     * 2. The scheme ("irc" or "ircs").
+     * 3. The hostname or IP address.
+     * 4. The port number (optional).
+     * 5. Between one and five channels.
+     * 6. The last channel (if more than one).
+     */
+    regmatch_t matches[5];
+
+    if ((regex_errno = regexec(&re, argv[0], sizeof(matches) / sizeof(matches[0]), matches, 0))) {
+	assert(regex_errno == REG_NOMATCH);
+        usage(EXIT_FAILURE);
     }
 
-    cfg.host = argv[0];
+    // Capture whether to use TLS.
+    cfg.is_ircs = matches[1].rm_eo == 4;
 
-    cfg.channelsToJoin = parseChannels(argv[1], &cfg.numChannels);
-    parseDccDownload(argv[2], cfg.botNick, sizeof(cfg.botNick), cfg.xdccCmd, sizeof(cfg.xdccCmd));
-    DBG_OK("Parsed XDCC sender as \"%s\" and XDCC command as \"%s\"", cfg.botNick, cfg.xdccCmd);
+    // Capture the IRC server hostname or IP address. If TLS is to be used, libircclient
+    // requires the hostname to be prepended with a '#' character.
+    if (cfg.is_ircs) argv[0][--matches[2].rm_so] = '#';
+    argv[0][matches[2].rm_eo] = '\0';
+    cfg.host = &argv[0][matches[2].rm_so];
+
+    // Capture the port number. If one is not supplied, use a popular default.
+    if (matches[3].rm_so < 0)
+	cfg.port = cfg.is_ircs ? 6697 : 6667;
+    else
+	sscanf(&argv[0][matches[3].rm_so], ":%hu", &cfg.port);
+
+    // Capture the first IRC channel to join.
+    cfg.channelsToJoin[0] = &argv[0][matches[4].rm_so];
+    cfg.numChannels = 1;
+
+    // If other IRC channels were supplied, capture those as well.
+    char *sep = cfg.channelsToJoin[0];
+    while ((sep = strchr(sep, ','))) {
+	if (cfg.numChannels >= sizeof(cfg.channelsToJoin) / sizeof(cfg.channelsToJoin[0])) break;
+	*sep = '\0';
+	cfg.channelsToJoin[cfg.numChannels++] = ++sep;
+    }
+
+    cfg.botNick = argv[1];
+
+    if (strcmp(argv[2], "send"))
+	usage(EXIT_FAILURE);
+
+    snprintf(cfg.xdccCmd, sizeof(cfg.xdccCmd), "XDCC SEND #%u", atoi(argv[3]));
 
     irc_callbacks_t callbacks = {0};
     callbacks.event_connect = event_connect;
