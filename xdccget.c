@@ -233,7 +233,6 @@ main(int argc, char **argv)
      * 6. The last channel (if more than one).
      */
     regmatch_t matches[5];
-
     if ((regex_errno = regexec(&re, argv[0], sizeof(matches) / sizeof(matches[0]), matches, 0))) {
 	assert(regex_errno == REG_NOMATCH);
         usage(EXIT_FAILURE);
