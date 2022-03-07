@@ -49,6 +49,16 @@
 #define DBG_ERR(format, ...) do {} while(0)
 #endif
 
+/*
+ * These are the match groups:
+ * 1. The entire matched string.
+ * 2. The scheme ("irc" or "ircs").
+ * 3. The hostname or IP address.
+ * 4. [optional] The ':' and port number.
+ * 5. [optional] The port number.
+ * 6. Between one and five channels.
+ * 7. The last channel (if more than one).
+ */
 #define IRC_URI_REGEX \
     "(ircs?)://([[:alnum:]\\.-]{3,})" \
     "(:([0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?" \
@@ -228,16 +238,6 @@ main(int argc, char **argv)
     if ((regex_errno = regcomp(&re, IRC_URI_REGEX, REG_EXTENDED)))
         assert(!regex_errno);
 
-    /*
-     * These are the match groups:
-     * 1. The entire matched string.
-     * 2. The scheme ("irc" or "ircs").
-     * 3. The hostname or IP address.
-     * 4. [optional] The ':' and port number.
-     * 5. [optional] The port number.
-     * 6. Between one and five channels.
-     * 7. The last channel (if more than one).
-     */
     regmatch_t matches[6];
     if ((regex_errno = regexec(&re, argv[0], sizeof(matches) / sizeof(matches[0]), matches, 0))) {
 	assert(regex_errno == REG_NOMATCH);
