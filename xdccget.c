@@ -50,7 +50,7 @@
 #endif
 
 /*
- * These are the match groups:
+ * Match Groups:
  * 1. The entire matched string.
  * 2. The scheme ("irc" or "ircs").
  * 3. The hostname or IP address.
