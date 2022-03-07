@@ -244,7 +244,6 @@ main(int argc, char **argv)
         usage(EXIT_FAILURE);
     }
 
-    // Capture whether to use TLS.
     cfg.is_ircs = matches[1].rm_eo == 4;
 
     // Capture the IRC server hostname or IP address. If TLS is to be used, libircclient
@@ -253,13 +252,11 @@ main(int argc, char **argv)
     argv[0][matches[2].rm_eo] = '\0';
     cfg.host = &argv[0][matches[2].rm_so];
 
-    // Capture the port number. If one is not supplied, use a popular default.
     if (matches[3].rm_so < 0)
 	cfg.port = cfg.is_ircs ? 6697 : 6667;
     else
     	cfg.port = atoi(&argv[0][matches[4].rm_so]);
 
-    // Capture the first IRC channel to join.
     cfg.channelsToJoin[0] = &argv[0][matches[5].rm_so];
     cfg.numChannels = 1;
 
