@@ -49,13 +49,10 @@
 #define DBG_ERR(format, ...) do {} while(0)
 #endif
 
-const char *irc_uri_regex =
-    "(ircs?)" // scheme
-    "://"
-    "([[:alnum:]\\.-]{3,})" // hostname
-    "(:([0-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?" // port number
-    "/"
-    "(#[[:alnum:]_-]+(,#[[:alnum:]_-]+){0,4})"; // channels
+#define IRC_URI_REGEX \
+    "(ircs?)://([[:alnum:]\\.-]{3,})" \
+    "(:([0-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?" \
+    "/(#[[:alnum:]_-]+(,#[[:alnum:]_-]+){0,4})"
 
 struct xdccGetConfig {
     char *host;
@@ -228,7 +225,7 @@ main(int argc, char **argv)
 
     regex_t re;
     int regex_errno;
-    if ((regex_errno = regcomp(&re, irc_uri_regex, REG_EXTENDED)))
+    if ((regex_errno = regcomp(&re, IRC_URI_REGEX, REG_EXTENDED)))
         assert(!regex_errno);
 
     /*
