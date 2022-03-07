@@ -49,6 +49,14 @@
 #define DBG_ERR(format, ...) do {} while(0)
 #endif
 
+const char *irc_uri_regex =
+    "(ircs?)" // scheme
+    "://"
+    "([[:alnum:]\\.-]{3,})" // hostname
+    "(:([0-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?" // port number
+    "/"
+    "(#[[:alnum:]_-]+(,#[[:alnum:]_-]+){0,4})"; // channels
+
 struct xdccGetConfig {
     char *host;
     uint16_t port;
@@ -220,19 +228,20 @@ main(int argc, char **argv)
 
     regex_t re;
     int regex_errno;
-    if ((regex_errno = regcomp(&re, "(ircs?)://([[:alnum:]\\.-]{3,})(:[0-9]{1,5})?/(#[[:alnum:]_-]+(,#[[:alnum:]_-]+){0,4})", REG_EXTENDED)))
+    if ((regex_errno = regcomp(&re, irc_uri_regex, REG_EXTENDED)))
         assert(!regex_errno);
 
     /*
-     * There are six match groups (but we only need 2-5):
+     * These are the match groups:
      * 1. The entire matched string.
      * 2. The scheme ("irc" or "ircs").
      * 3. The hostname or IP address.
-     * 4. The port number (optional).
-     * 5. Between one and five channels.
-     * 6. The last channel (if more than one).
+     * 4. [optional] The ':' and port number.
+     * 5. [optional] The port number.
+     * 6. Between one and five channels.
+     * 7. The last channel (if more than one).
      */
-    regmatch_t matches[5];
+    regmatch_t matches[6];
     if ((regex_errno = regexec(&re, argv[0], sizeof(matches) / sizeof(matches[0]), matches, 0))) {
 	assert(regex_errno == REG_NOMATCH);
         usage(EXIT_FAILURE);
@@ -251,10 +260,10 @@ main(int argc, char **argv)
     if (matches[3].rm_so < 0)
 	cfg.port = cfg.is_ircs ? 6697 : 6667;
     else
-    	cfg.port = atoi(&argv[0][matches[3].rm_so + 1]); // skip the ':'/NUL byte.
+    	cfg.port = atoi(&argv[0][matches[4].rm_so]);
 
     // Capture the first IRC channel to join.
-    cfg.channelsToJoin[0] = &argv[0][matches[4].rm_so];
+    cfg.channelsToJoin[0] = &argv[0][matches[5].rm_so];
     cfg.numChannels = 1;
 
     // If other IRC channels were supplied, capture those as well.
