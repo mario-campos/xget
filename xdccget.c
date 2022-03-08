@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <regex.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #include "libircclient/include/libircclient.h"
 
@@ -69,12 +70,12 @@ struct xdccGetConfig {
     uint16_t port;
     char nick[IRC_NICK_MAX_SIZE];
     char *botNick;
-    char xdccCmd[IRC_NICK_MAX_SIZE];
     char *channelsToJoin[5];
     uint32_t numChannels;
     char filename[NAME_MAX];
     uint64_t filesize;
     uint64_t currsize;
+    uint32_t pack;
     bool is_ircs;
 };
 
@@ -110,9 +111,13 @@ event_join(irc_session_t *session, const char *event, const char *origin, const 
     assert(session);
 
     struct xdccGetConfig *state = irc_get_ctx(session);
-    DBG_OK("Sending XDCC command '%s' to nick '%s'", state->xdccCmd, state->botNick);
-    if (irc_cmd_msg(session, state->botNick, state->xdccCmd)) {
-        warnx("failed to send XDCC command '%s' to nick '%s': %s", state->xdccCmd, state->botNick, irc_strerror(irc_errno(session)));
+
+    char xdcc_command[24];
+    snprintf(xdcc_command, sizeof(xdcc_command), "XDCC SEND #%u", state->pack);
+
+    DBG_OK("Sending XDCC command '%s' to nick '%s'", xdcc_command, state->botNick);
+    if (irc_cmd_msg(session, state->botNick, xdcc_command)) {
+        warnx("failed to send XDCC command '%s' to nick '%s': %s", xdcc_command, state->botNick, irc_strerror(irc_errno(session)));
         irc_cmd_quit(session, NULL);
     }
 }
@@ -231,7 +236,9 @@ main(int argc, char **argv)
     argc -= optind;
     argv += optind;
 
-    if (argc != 4) usage(EXIT_FAILURE);
+    // At the moment, only the XDCC "send" command is supported.
+    if (argc != 4 || strcmp(argv[2], "send"))
+	usage(EXIT_FAILURE);
 
     regex_t re;
     int regex_errno;
@@ -271,11 +278,9 @@ main(int argc, char **argv)
     }
 
     cfg.botNick = argv[1];
-
-    if (strcmp(argv[2], "send"))
-	usage(EXIT_FAILURE);
-
-    snprintf(cfg.xdccCmd, sizeof(cfg.xdccCmd), "XDCC SEND #%u", atoi(argv[3]));
+    cfg.pack = strtonum(argv[3], 1, UINT32_MAX, NULL);
+    if (errno)
+	errx(EXIT_FAILURE, "invalid pack number: %s", argv[3]);
 
     irc_callbacks_t callbacks = {0};
     callbacks.event_connect = event_connect;
