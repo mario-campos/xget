@@ -244,6 +244,8 @@ main(int argc, char **argv)
         usage(EXIT_FAILURE);
     }
 
+    regfree(&re);
+
     cfg.is_ircs = matches[1].rm_eo == 4;
 
     // Capture the IRC server hostname or IP address. If TLS is to be used, libircclient
