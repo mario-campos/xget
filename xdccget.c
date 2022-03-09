@@ -241,13 +241,12 @@ main(int argc, char **argv)
 	usage(EXIT_FAILURE);
 
     regex_t re;
-    int regex_errno;
-    if ((regex_errno = regcomp(&re, IRC_URI_REGEX, REG_EXTENDED)))
-        assert(!regex_errno);
+    int regex_errno = regcomp(&re, IRC_URI_REGEX, REG_EXTENDED);
+    assert(0 == regex_errno);
 
     regmatch_t matches[6];
     if ((regex_errno = regexec(&re, argv[0], sizeof(matches) / sizeof(matches[0]), matches, 0))) {
-	assert(regex_errno == REG_NOMATCH);
+	assert(REG_NOMATCH == regex_errno);
         usage(EXIT_FAILURE);
     }
 
