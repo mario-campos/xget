@@ -206,8 +206,8 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     cfg->filesize = size;
 }
 
-__dead
-void usage(int exit_status) {
+void
+usage(int exit_status) {
     fputs("usage: xdccget <uri> <nick> send <pack>\n", stderr);
     exit(exit_status);
 }
