@@ -264,6 +264,9 @@ main(int argc, char **argv)
     if (matches[3].rm_so < 0)
 	cfg.port = cfg.is_ircs ? 6697 : 6667;
     else
+	// atoi(3) is no longer recommended, but, in this case, I think it's appropriate
+	// because the string has been validated by the regular-expression pattern
+	// and atoi(3) handles mixed-text, like '6667/', better than strtonum(3).
     	cfg.port = atoi(&argv[0][matches[4].rm_so]);
 
     cfg.channelsToJoin[0] = &argv[0][matches[5].rm_so];
