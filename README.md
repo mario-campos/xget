@@ -17,7 +17,7 @@ at the channel *best-channel* from the irc-server
 Then the command line argument for xdccget would be:
 
 ``` 
-xdccget "irc.sampel.net" "#best-channel" "super-duper-bot xdcc send #34"
+xdccget irc://irc.sampel.net/#best-channel super-duper-bot send 34
 ``` 
 
 This would download the package *34* from *super-duper-bot* without using ssl. You can also specifiy a 
@@ -25,22 +25,21 @@ special port, so lets assume that the *irc.sampel.net* server would use the port
 be like this:
 
 ``` 
-xdccget -p 1337 "irc.sampel.net" "#best-channel" "super-duper-bot xdcc send #34"
+xdccget irc://irc.sampel.net:1337/#best-channel super-duper-bot send 34
 ``` 
 
 If your irc-network supports ssl you can even use an secure ssl-connection with xdccget. So lets imagine that 
 *irc.sampel.net* uses ssl on port 1338. Then we would call xdccget like this to use ssl:
 
 ``` 
-xdccget -p 1338 "#irc.sampel.net" "#best-channel" "super-duper-bot xdcc send #34"
+xdccget ircs://irc.sampel.net:1338/#best-channel super-duper-bot send 34
 ``` 
 
-Notice the #-character in front of irc.sampel.net. This tells xdccget to use ssl/tls on the connection to the irc-server.
 If the bot even supports ssl than you can use the ssend-command to use an ssl-encrypted connection with the bot.
 So for example if the *super-duper-bot* would support ssl-connection, then we could call xdccget like:
 
 ``` 
-xdccget -p 1338 "#irc.sampel.net" "#best-channel" "super-duper-bot xdcc ssend #34"
+xdccget ircs://irc.sampel.net:1338/#best-channel super-duper-bot ssend 34
 ``` 
 
 Notice the *xdcc ssend* command instead of *xdcc send*. This tells the bot that we want connect to him with ssl 
@@ -49,7 +48,7 @@ enabled.
 You can also join multiple channels, so if you also have to join #best-chat-channel in order to download packages from #best-channel, then you can call xdccget like:
 
 ``` 
-xdccget "irc.sampel.net" "#best-channel, #best-chat-channel" "super-duper-bot xdcc send #34"
+xdccget irc://irc.sampel.net/#best-channel,#best-chat-channel super-duper-bot send 34
 ``` 
 
 This is the basic usage of xdccget. You can call xdccget -h to understand all currently supported arguments.
