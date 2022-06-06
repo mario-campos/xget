@@ -3,8 +3,16 @@ name: FlawFinder
 on:
   push:
     branches: [ "master" ]
+    paths:
+    - .github/workflows/flawfinder.yml
+    - meson.build
+    - '**.[ch]'
   pull_request:
     branches: [ "master" ]
+    paths:
+    - .github/workflows/flawfinder.yml
+    - meson.build
+    - '**.[ch]'
   workflow_dispatch:
 
 jobs:
