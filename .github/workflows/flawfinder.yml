@@ -1,0 +1,17 @@
+name: FlawFinder
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  flawfinder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: sudo apt install flawfinder
+      - run: flawfinder --quiet --columns .
