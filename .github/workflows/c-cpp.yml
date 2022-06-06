@@ -5,9 +5,14 @@ on:
     branches: [ master ]
     paths:
     - .github/workflows/c-cpp.yml
+    - meson.build
     - '**.[ch]'
   pull_request:
     branches: [ master ]
+    paths:
+    - .github/workflows/c-cpp.yml
+    - meson.build
+    - '**.[ch]'
 
 permissions: {}
 

@@ -5,9 +5,14 @@ on:
     branches: [ master ]
     paths:
     - .github/workflows/ikos.yml
+    - meson.build
     - '**.[ch]'
   pull_request:
     branches: [ master ]
+    paths:
+    - .github/workflows/ikos.yml
+    - meson.build
+    - '**.[ch]'
   workflow_dispatch:
 
 jobs:
