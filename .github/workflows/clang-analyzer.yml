@@ -2,13 +2,13 @@ name: Clang Analyzer
 
 on:
   push:
-    branches: [ master ]
+    branches: master
     paths:
     - .github/workflows/clang-analyzer.yml
     - meson.build
     - '**.[ch]'
   pull_request:
-    branches: [ master ]
+    branches: master
     paths:
     - .github/workflows/clang-analyzer.yml
     - meson.build

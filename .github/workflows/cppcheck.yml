@@ -2,13 +2,13 @@ name: Cppcheck
 
 on:
   push:
-    branches: [ master ]
+    branches: master
     paths:
     - .github/workflows/cppcheck.yml
     - meson.build
     - '**.[ch]'
   pull_request:
-    branches: [ master ]
+    branches: master
     paths:
     - .github/workflows/cppcheck.yml
     - meson.build

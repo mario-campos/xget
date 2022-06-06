@@ -2,13 +2,13 @@ name: NASA's IKOS Analyzer
 
 on:
   push:
-    branches: [ master ]
+    branches: master
     paths:
     - .github/workflows/ikos.yml
     - meson.build
     - '**.[ch]'
   pull_request:
-    branches: [ master ]
+    branches: master
     paths:
     - .github/workflows/ikos.yml
     - meson.build
