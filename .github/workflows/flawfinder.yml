@@ -24,8 +24,8 @@ jobs:
       - name: flawfinder_scan
         uses: david-a-wheeler/flawfinder@2.0.19
         with:
-          # The --regexp flag is a workaround for https://github.com/david-a-wheeler/flawfinder/issues/71.
-          arguments: --regexp='CWE-\d+' --sarif ./
+          # The --regex flag is a workaround for https://github.com/david-a-wheeler/flawfinder/issues/71.
+          arguments: --regex='CWE-\d+' --sarif ./
           output: flawfinder.sarif
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v2
