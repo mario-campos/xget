@@ -168,16 +168,21 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
         irc_cmd_quit(session, NULL);
         return;
     }
-    if (!data) {
-        irc_cmd_quit(session, NULL);
-        return;
-    }
 
     fwrite(data, sizeof(char), length, fstream);
 
     struct xdccGetConfig *cfg = irc_get_ctx(session);
     cfg->currsize += length;
     print_progress(cfg, length);
+}
+
+void
+callback_dcc_close(irc_session_t *session, irc_dcc_t id, int status, void *fstream, const char *data, unsigned int length)
+{
+    assert(session);
+    assert(fstream);
+
+    irc_cmd_quit(session, NULL);
 }
 
 void
@@ -199,7 +204,7 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
         return;
     }
 
-    irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file);
+    irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file, callback_dcc_close);
 
     struct xdccGetConfig *cfg = irc_get_ctx(session);
     strlcpy(&cfg->filename[0], filename, sizeof(cfg->filename));

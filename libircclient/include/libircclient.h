@@ -1080,15 +1080,18 @@ void irc_target_get_host (const char * target, char *nick, size_t size);
 
 
 /*!
- * \fn int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t callback)
+ * \fn int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t cb_datum, irc_dcc_callback_t cb_close)
  * \brief Accepts a remote DCC CHAT or DCC RECVFILE request.
  *
  * \param session An initiated and connected session.
  * \param dccid   A DCC session ID, returned by appropriate callback.
  * \param ctx     A user-supplied DCC session context, which will be passed 
  *                to the DCC callback function. May be NULL.
- * \param callback A DCC callback function, which will be called when 
+ * \param cb_datum A DCC callback function, which will be called when
  *                anything is said by other party. Must not be NULL.
+ * \param cb_close A DCC callback function, which will be called when
+ *                 the DCC transmission has been fully received or sent.
+ *                 May be NULL.
  *
  * \return Return code 0 means success. Other value means error, the error 
  *  code may be obtained through irc_errno().
@@ -1107,7 +1110,7 @@ void irc_target_get_host (const char * target, char *nick, size_t size);
  * \sa irc_dcc_decline event_dcc_chat_req event_dcc_send_req
  * \ingroup dccstuff
  */
-int	irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t callback);
+int	irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t cb_datum, irc_dcc_callback_t cb_close);
 
 
 /*!

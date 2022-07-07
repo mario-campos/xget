@@ -110,8 +110,8 @@ static void libirc_dcc_add_descriptors (irc_session_t * ircsession, fd_set *in_s
 			{
 				libirc_mutex_unlock (&ircsession->mutex_dcc);
 
-				if ( dcc->cb )
-					(*dcc->cb)(ircsession, dcc->id, LIBIRC_ERR_TIMEOUT, dcc->ctx, 0, 0);
+				if ( dcc->cb_datum )
+					(*dcc->cb_datum)(ircsession, dcc->id, LIBIRC_ERR_TIMEOUT, dcc->ctx, 0, 0);
 
 				libirc_mutex_lock (&ircsession->mutex_dcc);
 			}
@@ -255,7 +255,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 
 					libirc_mutex_unlock (&ircsession->mutex_dcc);
 
-					(*dcc->cb)(ircsession, dcc->id, 0, dcc->ctx, dcc->incoming_buf, offset);
+					(*dcc->cb_datum)(ircsession, dcc->id, 0, dcc->ctx, dcc->incoming_buf, offset);
 
 					/*
 					 * If the session is not terminated in callback,
@@ -286,7 +286,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 				if ( err )
 				{
 					libirc_mutex_unlock (&ircsession->mutex_dcc);
-					(*dcc->cb)(ircsession, dcc->id, err, dcc->ctx, 0, 0);
+					(*dcc->cb_datum)(ircsession, dcc->id, err, dcc->ctx, 0, 0);
 					libirc_mutex_lock (&ircsession->mutex_dcc);
 					libirc_dcc_destroy_nolock (ircsession, dcc->id);
 				}
@@ -346,7 +346,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 							{
 								libirc_mutex_unlock (&ircsession->mutex_dcc);
 								libirc_mutex_unlock (&dcc->mutex_outbuf);
-								(*dcc->cb)(ircsession, dcc->id, 0, dcc->ctx, 0, 0);
+								(*dcc->cb_close)(ircsession, dcc->id, 0, dcc->ctx, 0, 0);
 								libirc_dcc_destroy_nolock (ircsession, dcc->id);
 							}
 							else
@@ -367,7 +367,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 				if ( err )
 				{
 					libirc_mutex_unlock (&ircsession->mutex_dcc);
-					(*dcc->cb)(ircsession, dcc->id, err, dcc->ctx, 0, 0);
+					(*dcc->cb_datum)(ircsession, dcc->id, err, dcc->ctx, 0, 0);
 					libirc_mutex_lock (&ircsession->mutex_dcc);
 					libirc_dcc_destroy_nolock (ircsession, dcc->id);
 				}
@@ -544,7 +544,7 @@ static void libirc_dcc_request (irc_session_t * session, const char * nick, cons
 }
 
 
-int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t callback)
+int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t cb_datum, irc_dcc_callback_t cb_close)
 {
 	irc_dcc_session_t * dcc = libirc_find_dcc_session (session, dccid, 1);
 
@@ -558,7 +558,8 @@ int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dc
 		return 1;
 	}
 
-	dcc->cb = callback;
+	dcc->cb_datum = cb_datum;
+	dcc->cb_close = cb_close;
 	dcc->ctx = ctx;
 
 	// Initiate the connect

@@ -45,7 +45,8 @@ struct irc_dcc_session_s
 	unsigned int		outgoing_offset;
 	port_mutex_t		mutex_outbuf;
 
-	irc_dcc_callback_t	cb;
+	irc_dcc_callback_t	cb_datum;
+	irc_dcc_callback_t	cb_close;
 };
 
 
