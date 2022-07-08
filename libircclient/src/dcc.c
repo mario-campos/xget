@@ -594,3 +594,23 @@ int irc_dcc_decline (irc_session_t * session, irc_dcc_t dccid)
 	libirc_mutex_unlock (&session->mutex_dcc);
 	return 0;
 }
+
+int irc_dcc_read (irc_session_t * session, irc_dcc_t dccid, char * buffer, size_t capacity)
+{
+	irc_dcc_session_t * dcc = libirc_find_dcc_session (session, dccid, 1);
+
+	if ( !dcc )
+		return -LIBIRC_ERR_INVAL;
+
+	int length = socket_recv (&dcc->sock, buffer, capacity);
+
+	if ( length < 0 )
+	{
+		return -LIBIRC_ERR_READ;
+	}
+	else
+	{
+	    dcc->file_confirm_offset += length;
+	    return length;
+	}
+}
