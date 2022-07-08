@@ -163,6 +163,10 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
     assert(session);
     assert(fstream);
 
+    int nread;
+    char buf[1024];
+    struct xdccGetConfig *cfg = irc_get_ctx(session);
+
     if (status) {
         warnx("failed to download file: %s", irc_strerror(status));
         irc_cmd_quit(session, NULL);
@@ -172,12 +176,20 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
         irc_cmd_quit(session, NULL);
         return;
     }
+    if (cfg->currsize == cfg->filesize) {
+	irc_cmd_quit(session, NULL);
+	return;
+    }
 
-    fwrite(data, sizeof(char), length, fstream);
+    if ((nread = irc_dcc_read(session, id, buf, sizeof(buf))) < 0) {
+	warnx("irc_dcc_read: socket read error");
+	return;
+    }
 
-    struct xdccGetConfig *cfg = irc_get_ctx(session);
-    cfg->currsize += length;
-    print_progress(cfg, length);
+    fwrite(buf, sizeof(char), nread, fstream);
+
+    cfg->currsize += nread;
+    print_progress(cfg, nread);
 }
 
 void
