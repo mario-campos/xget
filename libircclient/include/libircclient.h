@@ -82,8 +82,6 @@ typedef unsigned int			irc_dcc_t;
  * \param id  A DCC session id.
  * \param status An error status. 0 means no error, otherwise error code.
  * \param ctx A user-supplied context.
- * \param data Data supplied (if available)
- * \param length data length (if available)
  *
  * This callback is called for all DCC functions when state change occurs.
  *
@@ -116,7 +114,7 @@ typedef unsigned int			irc_dcc_t;
  *
  * \ingroup dccstuff
  */
-typedef void (*irc_dcc_callback_t) (irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, unsigned int length);
+typedef void (*irc_dcc_callback_t) (irc_session_t * session, irc_dcc_t id, int status, void * ctx);
 
 
 #define IN_INCLUDE_LIBIRC_H

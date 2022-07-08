@@ -158,7 +158,7 @@ print_progress(struct xdccGetConfig *cfg, unsigned int chunk_size_bytes)
 }
 
 void
-callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *fstream, const char *data, unsigned int length)
+callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *fstream)
 {
     assert(session);
     assert(fstream);
@@ -169,10 +169,6 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
 
     if (status) {
         warnx("failed to download file: %s", irc_strerror(status));
-        irc_cmd_quit(session, NULL);
-        return;
-    }
-    if (!data) {
         irc_cmd_quit(session, NULL);
         return;
     }
