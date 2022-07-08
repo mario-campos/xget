@@ -234,62 +234,24 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 		{
 			if ( FD_ISSET (dcc->sock, in_set) )
 			{
-				int length, offset = 0, err = 0;
-		
-				unsigned int amount = sizeof (dcc->incoming_buf) - dcc->incoming_offset;
+				libirc_mutex_unlock (&ircsession->mutex_dcc);
 
-				length = socket_recv (&dcc->sock, dcc->incoming_buf + dcc->incoming_offset, amount);
-
-				if ( length < 0 )
-				{
-					err = LIBIRC_ERR_READ;
-				}	
-				else if ( length == 0 )
-				{
-					err = LIBIRC_ERR_CLOSED;
-				}
-				else
-				{
-					dcc->incoming_offset += length;
-					offset = dcc->incoming_offset;
-
-					libirc_mutex_unlock (&ircsession->mutex_dcc);
-
-					(*dcc->cb)(ircsession, dcc->id, LIBIRC_ERR_OK, dcc->ctx, dcc->incoming_buf, offset);
-
-					/*
-					 * If the session is not terminated in callback,
-					 * put the sent amount into the sent_packet_size_net_byteorder
-					 */
-					if ( dcc->state != LIBIRC_STATE_REMOVED )
-					{
-						dcc->state = LIBIRC_STATE_CONFIRM_SIZE;
-						dcc->file_confirm_offset += offset;
-
-						// Store as big endian
-						dcc->outgoing_file_confirm_offset = htonl(dcc->file_confirm_offset);
-						dcc->outgoing_offset = sizeof(dcc->outgoing_file_confirm_offset);
-					}
-
-					libirc_mutex_lock (&ircsession->mutex_dcc);
-
-					if ( dcc->incoming_offset - offset > 0 )
-						memmove (dcc->incoming_buf, dcc->incoming_buf + offset, dcc->incoming_offset - offset);
-
-					dcc->incoming_offset -= offset;
-				}
+				(*dcc->cb)(ircsession, dcc->id, LIBIRC_ERR_OK, dcc->ctx, dcc->incoming_buf, 0);
 
 				/*
-				 * If error arises somewhere above, we inform the caller 
-				 * of failure, and destroy this session.
+				 * If the session is not terminated in callback,
+				 * put the sent amount into the sent_packet_size_net_byteorder
 				 */
-				if ( err )
+				if ( dcc->state != LIBIRC_STATE_REMOVED )
 				{
-					libirc_mutex_unlock (&ircsession->mutex_dcc);
-					(*dcc->cb)(ircsession, dcc->id, err, dcc->ctx, 0, 0);
-					libirc_mutex_lock (&ircsession->mutex_dcc);
-					libirc_dcc_destroy_nolock (ircsession, dcc->id);
+					dcc->state = LIBIRC_STATE_CONFIRM_SIZE;
+
+					// Store as big endian
+					dcc->outgoing_file_confirm_offset = htonl(dcc->file_confirm_offset);
+					dcc->outgoing_offset = sizeof(dcc->outgoing_file_confirm_offset);
 				}
+
+				libirc_mutex_lock (&ircsession->mutex_dcc);
 			}
 
 			/*
