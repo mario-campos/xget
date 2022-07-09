@@ -172,10 +172,6 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
         irc_cmd_quit(session, NULL);
         return;
     }
-    if (cfg->currsize == cfg->filesize) {
-	irc_cmd_quit(session, NULL);
-	return;
-    }
 
     if ((nread = irc_dcc_read(session, id, buf, sizeof(buf))) < 0) {
 	warnx("irc_dcc_read: socket read error");
@@ -186,6 +182,15 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
 
     cfg->currsize += nread;
     print_progress(cfg, nread);
+}
+
+void
+callback_dcc_close(irc_session_t *session, irc_dcc_t id, int status, void *fstream)
+{
+    assert(session);
+    assert(fstream);
+
+    irc_cmd_quit(session, NULL);
 }
 
 void
@@ -207,7 +212,7 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
         return;
     }
 
-    irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file);
+    irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file, callback_dcc_close);
 
     struct xdccGetConfig *cfg = irc_get_ctx(session);
     strlcpy(&cfg->filename[0], filename, sizeof(cfg->filename));
