@@ -185,7 +185,7 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
 }
 
 void
-callback_dcc_close(irc_session_t *session, irc_dcc_t id, int status, void *fstream, const char *data, unsigned int length)
+callback_dcc_close(irc_session_t *session, irc_dcc_t id, int status, void *fstream)
 {
     assert(session);
     assert(fstream);
