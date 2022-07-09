@@ -111,7 +111,7 @@ static void libirc_dcc_add_descriptors (irc_session_t * ircsession, fd_set *in_s
 				libirc_mutex_unlock (&ircsession->mutex_dcc);
 
 				if ( dcc->cb_datum )
-					(*dcc->cb_datum)(ircsession, dcc->id, LIBIRC_ERR_TIMEOUT, dcc->ctx, 0, 0);
+					(*dcc->cb_datum)(ircsession, dcc->id, LIBIRC_ERR_TIMEOUT, dcc->ctx);
 
 				libirc_mutex_lock (&ircsession->mutex_dcc);
 			}
@@ -234,62 +234,24 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 		{
 			if ( FD_ISSET (dcc->sock, in_set) )
 			{
-				int length, offset = 0, err = 0;
-		
-				unsigned int amount = sizeof (dcc->incoming_buf) - dcc->incoming_offset;
+				libirc_mutex_unlock (&ircsession->mutex_dcc);
 
-				length = socket_recv (&dcc->sock, dcc->incoming_buf + dcc->incoming_offset, amount);
-
-				if ( length < 0 )
-				{
-					err = LIBIRC_ERR_READ;
-				}	
-				else if ( length == 0 )
-				{
-					err = LIBIRC_ERR_CLOSED;
-				}
-				else
-				{
-					dcc->incoming_offset += length;
-					offset = dcc->incoming_offset;
-
-					libirc_mutex_unlock (&ircsession->mutex_dcc);
-
-					(*dcc->cb_datum)(ircsession, dcc->id, 0, dcc->ctx, dcc->incoming_buf, offset);
-
-					/*
-					 * If the session is not terminated in callback,
-					 * put the sent amount into the sent_packet_size_net_byteorder
-					 */
-					if ( dcc->state != LIBIRC_STATE_REMOVED )
-					{
-						dcc->state = LIBIRC_STATE_CONFIRM_SIZE;
-						dcc->file_confirm_offset += offset;
-
-						// Store as big endian
-						dcc->outgoing_file_confirm_offset = htonl(dcc->file_confirm_offset);
-						dcc->outgoing_offset = sizeof(dcc->outgoing_file_confirm_offset);
-					}
-
-					libirc_mutex_lock (&ircsession->mutex_dcc);
-
-					if ( dcc->incoming_offset - offset > 0 )
-						memmove (dcc->incoming_buf, dcc->incoming_buf + offset, dcc->incoming_offset - offset);
-
-					dcc->incoming_offset -= offset;
-				}
+				(*dcc->cb_datum)(ircsession, dcc->id, LIBIRC_ERR_OK, dcc->ctx);
 
 				/*
-				 * If error arises somewhere above, we inform the caller 
-				 * of failure, and destroy this session.
+				 * If the session is not terminated in callback,
+				 * put the sent amount into the sent_packet_size_net_byteorder
 				 */
-				if ( err )
+				if ( dcc->state != LIBIRC_STATE_REMOVED )
 				{
-					libirc_mutex_unlock (&ircsession->mutex_dcc);
-					(*dcc->cb_datum)(ircsession, dcc->id, err, dcc->ctx, 0, 0);
-					libirc_mutex_lock (&ircsession->mutex_dcc);
-					libirc_dcc_destroy_nolock (ircsession, dcc->id);
+					dcc->state = LIBIRC_STATE_CONFIRM_SIZE;
+
+					// Store as big endian
+					dcc->outgoing_file_confirm_offset = htonl(dcc->file_confirm_offset);
+					dcc->outgoing_offset = sizeof(dcc->outgoing_file_confirm_offset);
 				}
+
+				libirc_mutex_lock (&ircsession->mutex_dcc);
 			}
 
 			/*
@@ -346,7 +308,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 							{
 								libirc_mutex_unlock (&ircsession->mutex_dcc);
 								libirc_mutex_unlock (&dcc->mutex_outbuf);
-								(*dcc->cb_close)(ircsession, dcc->id, 0, dcc->ctx, 0, 0);
+								(*dcc->cb_close)(ircsession, dcc->id, LIBIRC_ERR_OK, dcc->ctx);
 								libirc_dcc_destroy_nolock (ircsession, dcc->id);
 							}
 							else
@@ -367,7 +329,7 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 				if ( err )
 				{
 					libirc_mutex_unlock (&ircsession->mutex_dcc);
-					(*dcc->cb_datum)(ircsession, dcc->id, err, dcc->ctx, 0, 0);
+					(*dcc->cb_datum)(ircsession, dcc->id, err, dcc->ctx);
 					libirc_mutex_lock (&ircsession->mutex_dcc);
 					libirc_dcc_destroy_nolock (ircsession, dcc->id);
 				}
@@ -594,4 +556,24 @@ int irc_dcc_decline (irc_session_t * session, irc_dcc_t dccid)
 	libirc_dcc_destroy_nolock (session, dccid);
 	libirc_mutex_unlock (&session->mutex_dcc);
 	return 0;
+}
+
+int irc_dcc_read (irc_session_t * session, irc_dcc_t dccid, char * buffer, size_t capacity)
+{
+	irc_dcc_session_t * dcc = libirc_find_dcc_session (session, dccid, 1);
+
+	if ( !dcc )
+		return -LIBIRC_ERR_INVAL;
+
+	int length = socket_recv (&dcc->sock, buffer, capacity);
+
+	if ( length < 0 )
+	{
+		return -LIBIRC_ERR_READ;
+	}
+	else
+	{
+	    dcc->file_confirm_offset += length;
+	    return length;
+	}
 }

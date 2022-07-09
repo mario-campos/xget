@@ -82,8 +82,6 @@ typedef unsigned int			irc_dcc_t;
  * \param id  A DCC session id.
  * \param status An error status. 0 means no error, otherwise error code.
  * \param ctx A user-supplied context.
- * \param data Data supplied (if available)
- * \param length data length (if available)
  *
  * This callback is called for all DCC functions when state change occurs.
  *
@@ -116,7 +114,7 @@ typedef unsigned int			irc_dcc_t;
  *
  * \ingroup dccstuff
  */
-typedef void (*irc_dcc_callback_t) (irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, unsigned int length);
+typedef void (*irc_dcc_callback_t) (irc_session_t * session, irc_dcc_t id, int status, void * ctx);
 
 
 #define IN_INCLUDE_LIBIRC_H
@@ -1112,6 +1110,30 @@ void irc_target_get_host (const char * target, char *nick, size_t size);
  */
 int	irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t cb_datum, irc_dcc_callback_t cb_close);
 
+/*!
+ * \fn int irc_dcc_read (irc_session_t * session, irc_dcc_t dccid, char * buffer, size_t capacity)
+ * \brief Read DCC data from the socket to a buffer.
+ *
+ * \param session An initiated and connected session.
+ * \param dccid   A DCC session ID, returned by appropriate callback.
+ * \param buffer  A pointer to a user-supplied buffer into which to copy
+ *                the DCC file data.
+ * \param capacity A user-supplied size of the buffer, indicating how
+ *                 much libircclient may store at the given buffer.
+ *
+ * \return The number of bytes that libircclient has writen to the supplied buffer if
+ *         the return value is non-negative. Otherwise, an error.
+ *
+ * This function reads data from the DCC socket and writes it into the supplied
+ * buffer, up to (and inclusing) the maximum number of bytes as specified by the
+ * capacity.
+ *
+ * This function should be called only during an active DCC session, but primarily
+ * during the `cb_datum` callback that is supplied to irc_dcc_accept.
+ *
+ * \ingroup dccstuff
+ */
+int irc_dcc_read (irc_session_t * session, irc_dcc_t dccid, char * buffer, size_t capacity);
 
 /*!
  * \fn int irc_dcc_decline (irc_session_t * session, irc_dcc_t dccid)
