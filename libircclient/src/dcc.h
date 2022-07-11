@@ -15,6 +15,7 @@
 #ifndef INCLUDE_IRC_DCC_H
 #define INCLUDE_IRC_DCC_H
 
+#include <stdbool.h>
 
 /*
  * This structure keeps the state of a single DCC connection.
@@ -29,6 +30,8 @@ struct irc_dcc_session_s
 
 	int			state;
 	time_t			timeout;
+
+	bool			acknowledge;
 
 	uint64_t		received_file_size;
 	uint64_t		file_confirm_offset;

@@ -44,6 +44,7 @@
 #ifndef INCLUDE_LIBIRC_H
 #define INCLUDE_LIBIRC_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <sys/select.h>	/* fd_set */
 
@@ -1078,7 +1079,7 @@ void irc_target_get_host (const char * target, char *nick, size_t size);
 
 
 /*!
- * \fn int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t cb_datum, irc_dcc_callback_t cb_close)
+ * \fn int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t cb_datum, irc_dcc_callback_t cb_close, bool acknowledge)
  * \brief Accepts a remote DCC CHAT or DCC RECVFILE request.
  *
  * \param session An initiated and connected session.
@@ -1090,6 +1091,9 @@ void irc_target_get_host (const char * target, char *nick, size_t size);
  * \param cb_close A DCC callback function, which will be called when
  *                 the DCC transmission has been fully received or sent.
  *                 May be NULL.
+ * \param acknowledge A boolean flag to indicate whether libircclient should
+ *                    send file offsets as acknowledgements. Although it is protocol,
+ *                    to send file offsets, some DCC senders do not require them.
  *
  * \return Return code 0 means success. Other value means error, the error 
  *  code may be obtained through irc_errno().
@@ -1108,7 +1112,7 @@ void irc_target_get_host (const char * target, char *nick, size_t size);
  * \sa irc_dcc_decline event_dcc_chat_req event_dcc_send_req
  * \ingroup dccstuff
  */
-int	irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t cb_datum, irc_dcc_callback_t cb_close);
+int	irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t cb_datum, irc_dcc_callback_t cb_close, bool acknowledge);
 
 /*!
  * \fn int irc_dcc_read (irc_session_t * session, irc_dcc_t dccid, char * buffer, size_t capacity)
