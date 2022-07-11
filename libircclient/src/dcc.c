@@ -13,6 +13,7 @@
  */
 #include <inttypes.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
 
 static irc_dcc_session_t * libirc_find_dcc_session (irc_session_t * session, irc_dcc_t dccid, int lock_list)
 {
@@ -239,16 +240,19 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 				(*dcc->cb_datum)(ircsession, dcc->id, LIBIRC_ERR_OK, dcc->ctx);
 
 				/*
-				 * If the session is not terminated in callback,
-				 * put the sent amount into the sent_packet_size_net_byteorder
+				 * If the session is not terminated in callback and file-offset
+				 * acknowledgements are not disabled, send the file offsets in
+				 * network-byte order (big endian).
 				 */
 				if ( dcc->state != LIBIRC_STATE_REMOVED )
 				{
 					dcc->state = LIBIRC_STATE_CONFIRM_SIZE;
 
-					// Store as big endian
-					dcc->outgoing_file_confirm_offset = htonl(dcc->file_confirm_offset);
-					dcc->outgoing_offset = sizeof(dcc->outgoing_file_confirm_offset);
+					if ( dcc->acknowledge )
+					{
+						dcc->outgoing_file_confirm_offset = htonl(dcc->file_confirm_offset);
+						dcc->outgoing_offset = sizeof(dcc->outgoing_file_confirm_offset);
+					}
 				}
 
 				libirc_mutex_lock (&ircsession->mutex_dcc);
@@ -261,6 +265,30 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 			 */
 			if ( dcc->state == LIBIRC_STATE_REMOVED )
 				continue;
+
+			/*
+			 * If we just sent the confirmation data, change state
+			 * back.
+			 */
+			if ( dcc->state == LIBIRC_STATE_CONFIRM_SIZE )
+			{
+				/*
+				 * If the file is already received, we should inform
+				 * the caller, and close the session.
+				 */
+				if ( dcc->received_file_size == dcc->file_confirm_offset )
+				{
+					libirc_mutex_unlock (&ircsession->mutex_dcc);
+					libirc_mutex_unlock (&dcc->mutex_outbuf);
+					(*dcc->cb_close)(ircsession, dcc->id, LIBIRC_ERR_OK, dcc->ctx);
+					libirc_dcc_destroy_nolock (ircsession, dcc->id);
+				}
+				else
+				{
+					/* Continue to receive the file */
+					dcc->state = LIBIRC_STATE_CONNECTED;
+				}
+			}
 
 			/*
 			 * Write bit set - we can send() something, and it won't block.
@@ -292,31 +320,6 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 							memmove (dcc->outgoing_buf, dcc->outgoing_buf + length, dcc->outgoing_offset - length);
 
 						dcc->outgoing_offset -= length;
-
-						/*
-						 * If we just sent the confirmation data, change state 
-						 * back.
-						 */
-						if ( dcc->state == LIBIRC_STATE_CONFIRM_SIZE
-						&& dcc->outgoing_offset == 0 )
-						{
-							/*
-							 * If the file is already received, we should inform
-							 * the caller, and close the session.
-							 */
-							if ( dcc->received_file_size == dcc->file_confirm_offset )
-							{
-								libirc_mutex_unlock (&ircsession->mutex_dcc);
-								libirc_mutex_unlock (&dcc->mutex_outbuf);
-								(*dcc->cb_close)(ircsession, dcc->id, LIBIRC_ERR_OK, dcc->ctx);
-								libirc_dcc_destroy_nolock (ircsession, dcc->id);
-							}
-							else
-							{
-								/* Continue to receive the file */
-								dcc->state = LIBIRC_STATE_CONNECTED;
-							}
-						}
 					}
 				}
 
@@ -506,7 +509,7 @@ static void libirc_dcc_request (irc_session_t * session, const char * nick, cons
 }
 
 
-int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t cb_datum, irc_dcc_callback_t cb_close)
+int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t cb_datum, irc_dcc_callback_t cb_close, bool acknowledge)
 {
 	irc_dcc_session_t * dcc = libirc_find_dcc_session (session, dccid, 1);
 
@@ -523,6 +526,7 @@ int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dc
 	dcc->cb_datum = cb_datum;
 	dcc->cb_close = cb_close;
 	dcc->ctx = ctx;
+	dcc->acknowledge = acknowledge;
 
 	// Initiate the connect
 	if ( socket_connect (&dcc->sock, (struct sockaddr *) &dcc->remote_addr, sizeof(dcc->remote_addr)) )

@@ -77,6 +77,7 @@ struct xdccGetConfig {
     uint64_t currsize;
     uint32_t pack;
     bool is_ircs;
+    bool no_ack;
 };
 
 void
@@ -212,16 +213,16 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
         return;
     }
 
-    irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file, callback_dcc_close);
-
     struct xdccGetConfig *cfg = irc_get_ctx(session);
     strlcpy(&cfg->filename[0], filename, sizeof(cfg->filename));
     cfg->filesize = size;
+
+    irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file, callback_dcc_close, !cfg->no_ack);
 }
 
 void
 usage(int exit_status) {
-    fputs("usage: xdccget <uri> <nick> send <pack>\n", stderr);
+    fputs("usage: xdccget [-A] <uri> <nick> send <pack>\n", stderr);
     exit(exit_status);
 }
 
@@ -231,8 +232,11 @@ main(int argc, char **argv)
     struct xdccGetConfig cfg = {0};
 
     int opt;
-    while ((opt = getopt(argc, argv, "Vh")) != -1) {
+    while ((opt = getopt(argc, argv, "AVh")) != -1) {
         switch (opt) {
+	    case 'A':
+		cfg.no_ack = true;
+		break;
             case 'V': {
                 unsigned int major, minor;
                 irc_get_version(&major, &minor);
