@@ -145,7 +145,7 @@ callback_dcc_close(irc_session_t *session, irc_dcc_t id, int status, void *fstre
 }
 
 void
-event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, const char *filename, uint64_t size, irc_dcc_t dccid)
+event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, const char *filename, irc_dcc_size_t size, irc_dcc_t dccid)
 {
     assert(session);
 

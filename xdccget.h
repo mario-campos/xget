@@ -4,6 +4,8 @@
 #include <limits.h>
 #include <stdbool.h>
 
+#include "libircclient/include/libircclient.h"
+
 #define IRC_NICK_MAX_SIZE 30
 
 struct xdccGetConfig {
@@ -29,10 +31,10 @@ struct xdccGetConfig {
 	char filename[NAME_MAX];
 
 	// The size of the DCC file to be sent.
-	uint64_t filesize;
+	irc_dcc_size_t filesize;
 
 	// The current size of the DCC file (as it is being sent).
-	uint64_t currsize;
+	irc_dcc_size_t currsize;
 
 	// The requested pack number.
 	uint32_t pack;
