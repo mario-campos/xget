@@ -8,16 +8,14 @@
 #include <err.h>
 #include <time.h>
 #include <assert.h>
-#include <limits.h>
 #include <regex.h>
-#include <stdbool.h>
 #include <errno.h>
 #include <getopt.h>
 
 #include "libircclient/include/libircclient.h"
+#include "xdccget.h"
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
-#define IRC_NICK_MAX_SIZE 30
 
 /*
  * Match Groups:
@@ -33,21 +31,6 @@
     "(ircs?)://([[:alnum:]\\.-]{3,})" \
     "(:([0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?" \
     "/(#[[:alnum:]_-]+(,#[[:alnum:]_-]+){0,4})"
-
-struct xdccGetConfig {
-    char *host;
-    uint16_t port;
-    char nick[IRC_NICK_MAX_SIZE];
-    char *botNick;
-    char *channelsToJoin[5];
-    uint32_t numChannels;
-    char filename[NAME_MAX];
-    uint64_t filesize;
-    uint64_t currsize;
-    uint32_t pack;
-    bool is_ircs;
-    bool no_ack;
-};
 
 void
 invent_nick(char *dst, size_t dst_size)
