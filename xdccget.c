@@ -12,6 +12,7 @@
 #include <regex.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <getopt.h>
 
 #include "libircclient/include/libircclient.h"
 
@@ -222,9 +223,16 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
 
 void
 usage(int exit_status) {
-    fputs("usage: xdccget [-A] <uri> <nick> send <pack>\n", stderr);
+    fputs("usage: xdccget [-A|--no-acknowledge] <uri> <nick> send <pack>\n", stderr);
     exit(exit_status);
 }
+
+static const struct option long_options[] = {
+    {"no-acknowledge", no_argument, 0, 'A'},
+    {"version",        no_argument, 0, 'V'},
+    {"help",           no_argument, 0, 'h'},
+    {NULL,             0,           0,  0 },
+};
 
 int
 main(int argc, char **argv)
@@ -232,7 +240,7 @@ main(int argc, char **argv)
     struct xdccGetConfig cfg = {0};
 
     int opt;
-    while ((opt = getopt(argc, argv, "AVh")) != -1) {
+    while ((opt = getopt_long(argc, argv, "AVh", long_options, NULL)) != -1) {
         switch (opt) {
 	    case 'A':
 		cfg.no_ack = true;
