@@ -164,7 +164,8 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
 }
 
 void
-usage(int exit_status) {
+usage(int exit_status)
+{
     fputs("usage: xdccget [-A|--no-acknowledge] <uri> <nick> send <pack>\n", stderr);
     exit(exit_status);
 }
