@@ -201,12 +201,6 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     assert(session);
     DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
 
-    // The forward-slash (/) and backslash (\) characters are invalid in file names.
-    // If they are present, replace each one with an underscore (_).
-    char *c;
-    while ((c = strchr(filename, '/')) || (c = strchr(filename, '\\')))
-        *c = '_';
-
     FILE *fstream = fopen(filename, "wb");
     if (!fstream) {
         warn("fopen");
