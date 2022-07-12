@@ -19,38 +19,6 @@
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
 #define IRC_NICK_MAX_SIZE 30
 
-/* ansi color codes used at the dbg macros for coloured output. */
-
-#define KNRM  "\x1B[0m"
-#define KRED  "\x1B[31m"
-#define KGRN  "\x1B[32m"
-#define KYEL  "\x1B[33m"
-
-/* define DBG-macros for debugging purposes if DEBUG is defined...*/
-
-#ifdef DEBUG
-#define DBG_MSG(color, stream, format, ...) do {\
-		    fprintf(stream, "%sDBG:%s \"", color, KNRM);\
-		    fprintf(stream, format, ##__VA_ARGS__);\
-		    fprintf(stream, "\" function: %s file: %s line: %d\n",(char*) __func__, (char*)__FILE__, __LINE__);} while(0)
-
-	#define DBG_OK(format, ...) do {\
-				DBG_MSG(KGRN, stdout, format, ##__VA_ARGS__);\
-		    } while(0)
-	#define DBG_WARN(format, ...) do {\
-				DBG_MSG(KYEL, stderr, format, ##__VA_ARGS__);\
-		    } while(0)
-	#define DBG_ERR(format, ...) do {\
-		    	DBG_MSG(KRED, stderr, format, ##__VA_ARGS__);\
-                exit(EXIT_FAILURE);\
-			} while(0)
-#else
-#define DBG_MSG(color, stream, format, ...) do {} while(0)
-#define DBG_OK(format, ...) do {} while(0)
-#define DBG_WARN(format, ...) do {} while(0)
-#define DBG_ERR(format, ...) do {} while(0)
-#endif
-
 /*
  * Match Groups:
  * 1. The entire matched string.
@@ -117,7 +85,6 @@ event_join(irc_session_t *session, const char *event, const char *origin, const 
     char xdcc_command[24];
     snprintf(xdcc_command, sizeof(xdcc_command), "XDCC SEND #%u", state->pack);
 
-    DBG_OK("Sending XDCC command '%s' to nick '%s'", xdcc_command, state->botNick);
     if (irc_cmd_msg(session, state->botNick, xdcc_command)) {
         warnx("failed to send XDCC command '%s' to nick '%s': %s", xdcc_command, state->botNick, irc_strerror(irc_errno(session)));
         irc_cmd_quit(session, NULL);
@@ -131,7 +98,6 @@ event_connect(irc_session_t *session, const char *event, const char *origin, con
 
     struct xdccGetConfig *state = irc_get_ctx(session);
     for (uint32_t i = 0; i < state->numChannels; i++) {
-        DBG_OK("Joining channel '%s'", state->channelsToJoin[i]);
         irc_cmd_join(session, state->channelsToJoin[i], 0);
     }
 }
@@ -199,7 +165,6 @@ void
 event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, const char *filename, uint64_t size, irc_dcc_t dccid)
 {
     assert(session);
-    DBG_OK("DCC send [%d] requested from '%s' (%s): %s (%" IRC_DCC_SIZE_T_FORMAT " bytes)", dccid, nick, addr, filename, size);
 
     FILE *fstream = fopen(filename, "wb");
     if (!fstream) {
@@ -314,7 +279,6 @@ main(int argc, char **argv)
     irc_set_ctx(session, &cfg);
 
     invent_nick(cfg.nick, sizeof(cfg.nick));
-    DBG_OK("IRC nick: '%s'", cfg.nick);
 
     if (irc_connect(session, cfg.host, cfg.port, 0, cfg.nick, 0, 0)) {
         irc_destroy_session(session);
