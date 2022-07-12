@@ -74,6 +74,12 @@ typedef struct irc_dcc_session_s	irc_dcc_session_t;
  */
 typedef unsigned int			irc_dcc_t;
 
+/*! \brief A DCC file size type.
+ *
+ * The irc_dcc_size_t type is an integer type used to contain the size of
+ * DCC files.
+ */
+typedef uint64_t			irc_dcc_size_t;
 
 /*!
  * \fn typedef void (*irc_dcc_callback_t) (irc_session_t * session, irc_dcc_t id, int status, void * ctx, const char * data, unsigned int length)
