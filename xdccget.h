@@ -6,17 +6,12 @@
 
 #include "libircclient/include/libircclient.h"
 
-#define IRC_NICK_MAX_SIZE 30
-
 struct xdccGetConfig {
 	// The hostname of the IRC network to connect to.
 	char *host;
 
 	// The port number of the IRC network to connect to.
 	uint16_t port;
-
-	// The nick of this xdccget's IRC client.
-	char nick[IRC_NICK_MAX_SIZE];
 
 	// The nick of the DCC sender.
 	char *botNick;

@@ -33,32 +33,6 @@
     "/(#[[:alnum:]_-]+(,#[[:alnum:]_-]+){0,4})"
 
 void
-invent_nick(char *dst, size_t dst_size)
-{
-    assert(dst);
-    assert(dst_size);
-
-    size_t new_size;
-    char *adjectives[] = {"Pandering", "Foul", "Decrepit", "Sanguine","Illustrious",
-                          "Cantankerous", "Dubious", "Auspicious", "Valorous", "Venal",
-                          "Virulent", "Voracious", "Votive", "Voluptuous"};
-    char *nouns[] = {"Buffoon", "Vixen", "Nincompoop", "Lad", "Phantom", "Banshee", "Jollux",
-                     "Lark", "Wench", "Sobriquet", "Vexation","Violation", "Volition",
-                     "Vendetta", "Veracity", "Vim"};
-
-    // This is a weak form of entropy, but we don't need much --
-    // just enough to choose a "unique" nick.
-    srand(getpid());
-
-    do {
-        size_t i = rand() % (sizeof(adjectives) / sizeof(adjectives[0]));
-        size_t j = rand() % (sizeof(nouns) / sizeof(nouns[0]));
-        new_size = strlcpy(dst, adjectives[i], dst_size);
-        new_size += strlcat(dst, nouns[j], dst_size);
-    } while (new_size >= dst_size);
-}
-
-void
 event_join(irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
 {
     assert(session);
@@ -262,9 +236,10 @@ main(int argc, char **argv)
 
     irc_set_ctx(session, &cfg);
 
-    invent_nick(cfg.nick, sizeof(cfg.nick));
+    char nick[20];
+    snprintf(nick, sizeof(nick), "xdccget!%d", getpid());
 
-    if (irc_connect(session, cfg.host, cfg.port, 0, cfg.nick, 0, 0)) {
+    if (irc_connect(session, cfg.host, cfg.port, 0, nick, 0, 0)) {
         irc_destroy_session(session);
         errx(EXIT_FAILURE, "failed to establish TCP connection to %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
     }
