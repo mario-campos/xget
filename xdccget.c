@@ -237,7 +237,7 @@ main(int argc, char **argv)
     irc_set_ctx(session, &cfg);
 
     char nick[20];
-    snprintf(nick, sizeof(nick), "xdccget!%d", getpid());
+    snprintf(nick, sizeof(nick), "xdccget[%d]", getpid());
 
     if (irc_connect(session, cfg.host, cfg.port, 0, nick, 0, 0)) {
         irc_destroy_session(session);
