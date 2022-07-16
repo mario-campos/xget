@@ -6,9 +6,9 @@ config = configuration_data({
 
 compiler = meson.get_compiler('c')
 if not compiler.has_function('strlcpy', prefix : '#include <string.h>')
-  dependencies = dependency('libbsd-overlay')
+  dependencies = [ dependency('threads'), dependency('libbsd-overlay') ]
 else
-  dependencies = []
+  dependencies = [ dependency('threads') ]
 endif
 
 configure_file(output : 'config.h', configuration : config)
