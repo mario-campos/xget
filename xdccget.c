@@ -17,6 +17,11 @@
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
 
+#define ANSI_TEXT_INVERT "\x1b[7m"
+#define ANSI_TEXT_NORMAL "\x1b[m"
+#define ANSI_CURSOR_SHOW "\x1b[?25h"
+#define ANSI_CURSOR_HIDE "\x1b[?25l"
+
 /*
  * Match Groups:
  * 1. The entire matched string.
@@ -57,29 +62,6 @@ event_connect(irc_session_t *session, const char *event, const char *origin, con
     for (uint32_t i = 0; i < state->numChannels; i++) {
         irc_cmd_join(session, state->channelsToJoin[i], 0);
     }
-}
-
-void
-print_progress(struct xdccGetConfig *cfg, unsigned int chunk_size_bytes)
-{
-    assert(cfg);
-
-    double delta;
-    static int this_or_that = 0;
-    static struct timespec that_time, this_time;
-
-    this_or_that = !this_or_that;
-    if (this_or_that) {
-	clock_gettime(CLOCK_MONOTONIC, &this_time);
-	delta = (double)(this_time.tv_nsec - that_time.tv_nsec) / 1.0e9;
-    } else {
-	clock_gettime(CLOCK_MONOTONIC, &that_time);
-	delta = (double)(that_time.tv_nsec - this_time.tv_nsec) / 1.0e9;
-    }
-
-    double percentage = (double)cfg->currsize / (double)cfg->filesize * 100.0;
-    double throughput = ((double)chunk_size_bytes / 1024.0) / (cfg->currsize == chunk_size_bytes ? 1.0 : delta);
-    printf("\r%s\t%3.f%%\t%6.1f KB/s", cfg->filename, percentage, throughput);
 }
 
 void
@@ -142,6 +124,117 @@ usage(int exit_status)
 {
     fputs("usage: xdccget [-A|--no-acknowledge] <uri> <nick> send <pack>\n", stderr);
     exit(exit_status);
+}
+
+char *
+unit(size_t size)
+{
+    if (size < 1024)
+        return "B";
+    if (size < 1024 * 1024)
+        return "KiB";
+    if (size < 1024 * 1024 * 1024)
+        return "MiB";
+    return "GiB";
+}
+
+void *
+thread_progress(void *arg)
+{
+    struct xdccGetConfig *cfg = arg;
+
+    size_t stat_len;
+    char line_buffer[1024], stat_buffer[60];
+
+    // Get a timestamp to calculate the Time To Download (TTD) and average throughput.
+    time_t start_time = time(NULL);
+
+    // Get terminal's dimensions (rows, columns).
+    struct winsize ws;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
+
+    // Wait until the download size is known.
+    pthread_mutex_lock(&cfg->mutex);
+    if (!cfg->filesize) pthread_cond_wait(&cfg->cv, &cfg->mutex);
+    irc_dcc_size_t total_size = cfg->filesize;
+    pthread_mutex_unlock(&cfg->mutex);
+
+    size_t name_len = strlen(cfg->filename);
+
+    double humanscaled_total_size = total_size;
+    while (humanscaled_total_size > 1024) humanscaled_total_size /= 1024;
+
+    irc_dcc_size_t this_size = 0;
+    while (this_size != total_size) {
+	sleep(1);
+
+	pthread_mutex_lock(&cfg->mutex);
+	irc_dcc_size_t size_delta = cfg->currsize - this_size;
+	this_size = cfg->currsize;
+	pthread_mutex_unlock(&cfg->mutex);
+
+	int progress_percentage = (this_size * 100) / total_size;
+
+	// Translate the progress percentage relative to the terminal's width (in columns).
+	// This percentage will be used for displaying the "progress bar" across the line.
+	int percentage_width = (progress_percentage * ws.ws_col) / 100;
+
+	double humanscaled_this_size = this_size;
+	while (humanscaled_this_size > 1024) humanscaled_this_size /= 1024;
+
+	double humanscaled_size_delta = size_delta;
+	while (humanscaled_size_delta > 1024) humanscaled_size_delta /= 1024;
+
+	int eta = (total_size - this_size) / size_delta;
+	int eta_hours = eta / 3600;
+	int eta_minutes = (eta - eta_hours * 3600) / 60;
+	int eta_seconds = (eta - eta_hours * 3600) % 60;
+
+	stat_len = snprintf(stat_buffer, sizeof(stat_buffer), "%d%%   %.1f %s / %.1f %s   %.1f %s/s   %02d:%02d:%02d",
+			    progress_percentage, humanscaled_this_size, unit(this_size), humanscaled_total_size,
+			    unit(total_size), humanscaled_size_delta, unit(size_delta), eta_hours,
+			    eta_minutes, eta_seconds);
+
+	if (name_len + stat_len + 1 > ws.ws_col) {
+            int limit = ws.ws_col - stat_len - 4;
+	    snprintf(line_buffer, sizeof(line_buffer), "%.*s... ", limit, cfg->filename);
+        } else {
+            int limit = ws.ws_col - stat_len - name_len;
+            snprintf(line_buffer, sizeof(line_buffer), "%s%.*s", cfg->filename, limit,
+	    "                                                                                                     ");
+	}
+
+	strlcat(line_buffer, stat_buffer, sizeof(line_buffer));
+	printf(ANSI_CURSOR_HIDE ANSI_TEXT_INVERT "\r%.*s" ANSI_TEXT_NORMAL "%s", percentage_width, line_buffer, line_buffer + percentage_width);
+	fflush(stdout);
+    }
+
+    time_t ttd = time(NULL) - start_time;
+    int ttd_hours = ttd / 3600;
+    int ttd_minutes = (ttd - ttd_hours * 3600) / 60;
+    int ttd_seconds = (ttd - ttd_hours * 3600) % 60;
+
+    size_t avg_throughput = total_size / ttd;
+    double humanscaled_avg_throughput = avg_throughput;
+    while (humanscaled_avg_throughput > 1024) humanscaled_avg_throughput /= 1024;
+
+    stat_len = snprintf(stat_buffer, sizeof(stat_buffer), "100%%   %.1f %s   %.1f %s/s   %02d:%02d:%02d",
+			humanscaled_total_size, unit(total_size), humanscaled_avg_throughput, unit(avg_throughput),
+			ttd_hours, ttd_minutes, ttd_seconds);
+
+    if (name_len + stat_len + 1 > ws.ws_col) {
+	int limit = ws.ws_col - stat_len - 4;
+	snprintf(line_buffer, sizeof(line_buffer), "%.*s... ", limit, cfg->filename);
+    } else {
+	int limit = ws.ws_col - stat_len - name_len;
+	snprintf(line_buffer, sizeof(line_buffer), "%s%.*s", cfg->filename, limit,
+	"                                                                                                     ");
+    }
+
+    printf(ANSI_TEXT_NORMAL "\r%s%s\n" ANSI_CURSOR_SHOW, line_buffer, stat_buffer);
+    fflush(stdout);
+
+    return NULL;
 }
 
 static const struct option long_options[] = {
