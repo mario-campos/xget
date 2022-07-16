@@ -11,6 +11,8 @@
 #include <regex.h>
 #include <errno.h>
 #include <getopt.h>
+#include <pthread.h>
+#include <sys/ioctl.h>
 
 #include "libircclient/include/libircclient.h"
 #include "xdccget.h"
@@ -87,8 +89,9 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
 
     fwrite(buf, sizeof(char), nread, fstream);
 
+    pthread_mutex_lock(&cfg->mutex);
     cfg->currsize += nread;
-    print_progress(cfg, nread);
+    pthread_mutex_unlock(&cfg->mutex);
 }
 
 void
@@ -113,8 +116,12 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     }
 
     struct xdccGetConfig *cfg = irc_get_ctx(session);
+
+    pthread_mutex_lock(&cfg->mutex);
     strlcpy(&cfg->filename[0], filename, sizeof(cfg->filename));
     cfg->filesize = size;
+    pthread_mutex_unlock(&cfg->mutex);
+    pthread_cond_signal(&cfg->cv);
 
     irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file, callback_dcc_close, !cfg->no_ack);
 }
@@ -247,7 +254,10 @@ static const struct option long_options[] = {
 int
 main(int argc, char **argv)
 {
-    struct xdccGetConfig cfg = {0};
+    struct xdccGetConfig cfg = {
+	    .mutex = PTHREAD_MUTEX_INITIALIZER,
+	    .cv = PTHREAD_COND_INITIALIZER,
+    };
 
     int opt;
     while ((opt = getopt_long(argc, argv, "AVh", long_options, NULL)) != -1) {
@@ -337,6 +347,9 @@ main(int argc, char **argv)
         errx(EXIT_FAILURE, "failed to establish TCP connection to %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
     }
 
+    pthread_t display_thread;
+    pthread_create(&display_thread, NULL, thread_progress, &cfg);
+
     if (irc_run(session)) {
         if (irc_errno(session) != LIBIRC_ERR_TERMINATED && irc_errno(session) != LIBIRC_ERR_CLOSED) {
             irc_destroy_session(session);
@@ -345,4 +358,6 @@ main(int argc, char **argv)
     }
 
     irc_destroy_session(session);
+
+    pthread_join(display_thread, NULL);
 }
