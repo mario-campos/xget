@@ -3,6 +3,7 @@
 
 #include <limits.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 #include "libircclient/include/libircclient.h"
 
@@ -39,6 +40,10 @@ struct xdccGetConfig {
 
 	// True if -A/--no-acknowledge (i.e. whether to send DCC acknowledgements).
 	bool no_ack;
+
+	// Synchronization primitives to safely share this struct between threads.
+	pthread_mutex_t mutex;
+	pthread_cond_t cv;
 };
 
 #endif //XDCCGET_H
