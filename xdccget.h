@@ -32,6 +32,9 @@ struct xdccGetConfig {
 	// The current size of the DCC file (as it is being sent).
 	irc_dcc_size_t currsize;
 
+	// The file descriptor of the file to be downloaded.
+	int fd;
+
 	// The requested pack number.
 	uint32_t pack;
 
