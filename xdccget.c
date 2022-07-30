@@ -13,6 +13,8 @@
 #include <getopt.h>
 #include <pthread.h>
 #include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 
 #include "libircclient/include/libircclient.h"
 #include "xdccget.h"
@@ -67,13 +69,11 @@ event_connect(irc_session_t *session, const char *event, const char *origin, con
 }
 
 void
-callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *fstream)
+callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *addr)
 {
     assert(session);
-    assert(fstream);
 
     int nread;
-    char buf[1024];
     struct xdccGetConfig *cfg = irc_get_ctx(session);
 
     if (status) {
@@ -82,12 +82,10 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
         return;
     }
 
-    if ((nread = irc_dcc_read(session, id, buf, sizeof(buf))) < 0) {
+    if ((nread = irc_dcc_read(session, id, addr + cfg->currsize, cfg->filesize - cfg->currsize)) < 0) {
 	warnx("irc_dcc_read: socket read error");
 	return;
     }
-
-    fwrite(buf, sizeof(char), nread, fstream);
 
     pthread_mutex_lock(&cfg->mutex);
     cfg->currsize += nread;
@@ -95,12 +93,17 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *f
 }
 
 void
-callback_dcc_close(irc_session_t *session, irc_dcc_t id, int status, void *fstream)
+callback_dcc_close(irc_session_t *session, irc_dcc_t id, int status, void *addr)
 {
     assert(session);
-    assert(fstream);
 
     irc_cmd_quit(session, NULL);
+
+    struct xdccGetConfig *cfg = irc_get_ctx(session);
+
+    if (munmap(addr, cfg->filesize))
+	warn("munmap");
+    close(cfg->fd);
 }
 
 void
@@ -108,22 +111,34 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
 {
     assert(session);
 
-    FILE *fstream = fopen(filename, "wb");
-    if (!fstream) {
-        warn("fopen");
+    int fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
+    if (fd < 0) {
+        warn("open");
         irc_cmd_quit(session, NULL);
         return;
+    }
+
+    // The file must be allocated to its final size in order for the mmap(2) below to succeed.
+    lseek(fd, size - 1, SEEK_SET);
+    write(fd, "", 1);
+
+    void *maddr = mmap(NULL, size, PROT_WRITE, MAP_SHARED, fd, 0);
+    if (maddr == MAP_FAILED) {
+	warn("mmap");
+	irc_cmd_quit(session, NULL);
+	return;
     }
 
     struct xdccGetConfig *cfg = irc_get_ctx(session);
 
     pthread_mutex_lock(&cfg->mutex);
+    cfg->fd = fd;
     strlcpy(&cfg->filename[0], filename, sizeof(cfg->filename));
     cfg->filesize = size;
     pthread_mutex_unlock(&cfg->mutex);
     pthread_cond_signal(&cfg->cv);
 
-    irc_dcc_accept(session, dccid, fstream, callback_dcc_recv_file, callback_dcc_close, !cfg->no_ack);
+    irc_dcc_accept(session, dccid, maddr, callback_dcc_recv_file, callback_dcc_close, !cfg->no_ack);
 }
 
 void
