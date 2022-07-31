@@ -27,6 +27,7 @@ struct irc_dcc_session_s
 	irc_dcc_t		id;
 	void			* ctx;
 	socket_t		sock;		/*!< DCC socket */
+	int			sock_rcvbuf_size;
 
 	int			state;
 	time_t			timeout;
