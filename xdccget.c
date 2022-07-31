@@ -82,7 +82,7 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *a
         return;
     }
 
-    if ((nread = irc_dcc_read(session, id, addr + cfg->currsize, cfg->filesize - cfg->currsize)) < 0) {
+    if ((nread = irc_dcc_read(session, id, (char *)addr + cfg->currsize, cfg->filesize - cfg->currsize)) < 0) {
 	warnx("irc_dcc_read: socket read error");
 	return;
     }
