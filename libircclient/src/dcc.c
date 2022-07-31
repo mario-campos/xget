@@ -538,6 +538,14 @@ int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dc
 		return 1;
 	}
 
+	socklen_t sizeof_sock_rcvbuf_size = sizeof dcc->sock_rcvbuf_size;
+	if (getsockopt(dcc->sock, SOL_SOCKET, SO_RCVBUF, &dcc->sock_rcvbuf_size, &sizeof_sock_rcvbuf_size) < 0)
+	{
+		// In the case of error, use a small, safe limit of 4,192 bytes,
+		// which is what older BSD implementations used for their TCP buffer sizes.
+		dcc->sock_rcvbuf_size = 4192;
+	}
+
 	dcc->state = LIBIRC_STATE_CONNECTING;
 	libirc_mutex_unlock (&session->mutex_dcc);
 	return 0;
@@ -572,12 +580,10 @@ int irc_dcc_read (irc_session_t * session, irc_dcc_t dccid, char * buffer, size_
 
 	size_t recv_limit;
 
-	// Unfortunately, we cannot simply pass `capacity` to recv(2), as `capacity`
-	// may be too large for recv(2).
-	if ( capacity > 8192 )
+	// Unfortunately, we cannot simply pass `capacity` to recv(2), since very large values may result in EINVAL.
+	if ( capacity > dcc->sock_rcvbuf_size )
 	{
-		// TODO: limit recv(2) to the socket's buffer size, which can be obtained from getsockopt(2).
-		recv_limit = 8192;
+		recv_limit = dcc->sock_rcvbuf_size;
 	}
 	else
 	{
