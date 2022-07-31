@@ -7,7 +7,8 @@
 
 #include "libircclient/include/libircclient.h"
 
-struct xdccGetConfig {
+struct xdccGetConfig
+{
 	// The hostname of the IRC network to connect to.
 	char *host;
 

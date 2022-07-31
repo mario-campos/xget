@@ -51,7 +51,8 @@ event_join(irc_session_t *session, const char *event, const char *origin, const 
     char xdcc_command[24];
     snprintf(xdcc_command, sizeof(xdcc_command), "XDCC SEND #%u", state->pack);
 
-    if (irc_cmd_msg(session, state->botNick, xdcc_command)) {
+    if (irc_cmd_msg(session, state->botNick, xdcc_command))
+    {
         warnx("failed to send XDCC command '%s' to nick '%s': %s", xdcc_command, state->botNick, irc_strerror(irc_errno(session)));
         irc_cmd_quit(session, NULL);
     }
@@ -63,7 +64,8 @@ event_connect(irc_session_t *session, const char *event, const char *origin, con
     assert(session);
 
     struct xdccGetConfig *state = irc_get_ctx(session);
-    for (uint32_t i = 0; i < state->numChannels; i++) {
+    for (uint32_t i = 0; i < state->numChannels; i++)
+    {
         irc_cmd_join(session, state->channelsToJoin[i], 0);
     }
 }
@@ -76,13 +78,15 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *a
     int nread;
     struct xdccGetConfig *cfg = irc_get_ctx(session);
 
-    if (status) {
+    if (status)
+    {
         warnx("failed to download file: %s", irc_strerror(status));
         irc_cmd_quit(session, NULL);
         return;
     }
 
-    if ((nread = irc_dcc_read(session, id, (char *)addr + cfg->currsize, cfg->filesize - cfg->currsize)) < 0) {
+    if ((nread = irc_dcc_read(session, id, (char *)addr + cfg->currsize, cfg->filesize - cfg->currsize)) < 0)
+    {
 	warnx("irc_dcc_read: socket read error");
 	return;
     }
@@ -112,7 +116,8 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     assert(session);
 
     int fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
-    if (fd < 0) {
+    if (fd < 0)
+    {
         warn("open");
         irc_cmd_quit(session, NULL);
         return;
@@ -123,7 +128,8 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     write(fd, "", 1);
 
     void *maddr = mmap(NULL, size, PROT_WRITE, MAP_SHARED, fd, 0);
-    if (maddr == MAP_FAILED) {
+    if (maddr == MAP_FAILED)
+    {
 	warn("mmap");
 	irc_cmd_quit(session, NULL);
 	return;
@@ -187,7 +193,8 @@ thread_progress(void *arg)
     while (humanscaled_total_size > 1024) humanscaled_total_size /= 1024;
 
     irc_dcc_size_t this_size = 0;
-    while (this_size != total_size) {
+    while (this_size != total_size)
+    {
 	sleep(1);
 
 	pthread_mutex_lock(&cfg->mutex);
@@ -217,10 +224,13 @@ thread_progress(void *arg)
 			    unit(total_size), humanscaled_size_delta, unit(size_delta), eta_hours,
 			    eta_minutes, eta_seconds);
 
-	if (name_len + stat_len + 1 > ws.ws_col) {
+	if (name_len + stat_len + 1 > ws.ws_col)
+	{
             int limit = ws.ws_col - stat_len - 4;
 	    snprintf(line_buffer, sizeof(line_buffer), "%.*s... ", limit, cfg->filename);
-        } else {
+        }
+	else
+	{
             int limit = ws.ws_col - stat_len - name_len;
             snprintf(line_buffer, sizeof(line_buffer), "%s%.*s", cfg->filename, limit,
 	    "                                                                                                     ");
@@ -244,10 +254,13 @@ thread_progress(void *arg)
 			humanscaled_total_size, unit(total_size), humanscaled_avg_throughput, unit(avg_throughput),
 			ttd_hours, ttd_minutes, ttd_seconds);
 
-    if (name_len + stat_len + 1 > ws.ws_col) {
+    if (name_len + stat_len + 1 > ws.ws_col)
+    {
 	int limit = ws.ws_col - stat_len - 4;
 	snprintf(line_buffer, sizeof(line_buffer), "%.*s... ", limit, cfg->filename);
-    } else {
+    }
+    else
+    {
 	int limit = ws.ws_col - stat_len - name_len;
 	snprintf(line_buffer, sizeof(line_buffer), "%s%.*s", cfg->filename, limit,
 	"                                                                                                     ");
@@ -275,8 +288,10 @@ main(int argc, char **argv)
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AVh", long_options, NULL)) != -1) {
-        switch (opt) {
+    while ((opt = getopt_long(argc, argv, "AVh", long_options, NULL)) != -1)
+    {
+        switch (opt)
+	{
 	    case 'A':
 		cfg.no_ack = true;
 		break;
@@ -305,7 +320,8 @@ main(int argc, char **argv)
     assert(0 == regex_errno);
 
     regmatch_t matches[6];
-    if ((regex_errno = regexec(&re, argv[0], sizeof(matches) / sizeof(matches[0]), matches, 0))) {
+    if ((regex_errno = regexec(&re, argv[0], sizeof(matches) / sizeof(matches[0]), matches, 0)))
+    {
 	assert(REG_NOMATCH == regex_errno);
         usage(EXIT_FAILURE);
     }
@@ -333,7 +349,8 @@ main(int argc, char **argv)
 
     // If other IRC channels were supplied, capture those as well.
     char *sep = cfg.channelsToJoin[0];
-    while ((sep = strchr(sep, ','))) {
+    while ((sep = strchr(sep, ',')))
+    {
 	if (cfg.numChannels >= sizeof(cfg.channelsToJoin) / sizeof(cfg.channelsToJoin[0])) break;
 	*sep = '\0';
 	cfg.channelsToJoin[cfg.numChannels++] = ++sep;
@@ -357,7 +374,8 @@ main(int argc, char **argv)
     char nick[20];
     snprintf(nick, sizeof(nick), "xdccget[%d]", getpid());
 
-    if (irc_connect(session, cfg.host, cfg.port, 0, nick, 0, 0)) {
+    if (irc_connect(session, cfg.host, cfg.port, 0, nick, 0, 0))
+    {
         irc_destroy_session(session);
         errx(EXIT_FAILURE, "failed to establish TCP connection to %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
     }
@@ -365,8 +383,10 @@ main(int argc, char **argv)
     pthread_t display_thread;
     pthread_create(&display_thread, NULL, thread_progress, &cfg);
 
-    if (irc_run(session)) {
-        if (irc_errno(session) != LIBIRC_ERR_TERMINATED && irc_errno(session) != LIBIRC_ERR_CLOSED) {
+    if (irc_run(session))
+    {
+        if (irc_errno(session) != LIBIRC_ERR_TERMINATED && irc_errno(session) != LIBIRC_ERR_CLOSED)
+	{
             irc_destroy_session(session);
             errx(EXIT_FAILURE, "failed to start IRC session: %s", irc_strerror(irc_errno(session)));
         }
