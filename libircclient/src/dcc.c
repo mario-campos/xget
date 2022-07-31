@@ -539,7 +539,7 @@ int irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dc
 	}
 
 	socklen_t sizeof_sock_rcvbuf_size = sizeof dcc->sock_rcvbuf_size;
-	if (getsockopt(dcc->sock, SOL_SOCKET, SO_RCVBUF, &dcc->sock_rcvbuf_size, &sizeof_sock_rcvbuf_size) < 0)
+	if ( getsockopt(dcc->sock, SOL_SOCKET, SO_RCVBUF, &dcc->sock_rcvbuf_size, &sizeof_sock_rcvbuf_size) < 0 )
 	{
 		// In the case of error, use a small, safe limit of 4,192 bytes,
 		// which is what older BSD implementations used for their TCP buffer sizes.
