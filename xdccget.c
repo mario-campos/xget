@@ -41,8 +41,7 @@
     "(:([0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?" \
     "/(#[[:alnum:]_-]+(,#[[:alnum:]_-]+){0,4})"
 
-void
-event_join(irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
+void event_join (irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
 {
     assert (session);
 
@@ -58,8 +57,7 @@ event_join(irc_session_t *session, const char *event, const char *origin, const 
     }
 }
 
-void
-event_connect(irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
+void event_connect (irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
 {
     assert (session);
 
@@ -70,8 +68,7 @@ event_connect(irc_session_t *session, const char *event, const char *origin, con
     }
 }
 
-void
-callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *addr)
+void callback_dcc_recv_file (irc_session_t *session, irc_dcc_t id, int status, void *addr)
 {
     assert (session);
 
@@ -96,8 +93,7 @@ callback_dcc_recv_file(irc_session_t *session, irc_dcc_t id, int status, void *a
     pthread_mutex_unlock (&cfg->mutex);
 }
 
-void
-callback_dcc_close(irc_session_t *session, irc_dcc_t id, int status, void *addr)
+void callback_dcc_close (irc_session_t *session, irc_dcc_t id, int status, void *addr)
 {
     assert (session);
 
@@ -110,8 +106,7 @@ callback_dcc_close(irc_session_t *session, irc_dcc_t id, int status, void *addr)
     close (cfg->fd);
 }
 
-void
-event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, const char *filename, irc_dcc_size_t size, irc_dcc_t dccid)
+void event_dcc_send_req (irc_session_t *session, const char *nick, const char *addr, const char *filename, irc_dcc_size_t size, irc_dcc_t dccid)
 {
     assert (session);
 
@@ -147,15 +142,13 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
     irc_dcc_accept (session, dccid, maddr, callback_dcc_recv_file, callback_dcc_close, !cfg->no_ack);
 }
 
-void
-usage(int exit_status)
+void usage (int exit_status)
 {
     fputs ("usage: xdccget [-A|--no-acknowledge] <uri> <nick> send <pack>\n", stderr);
     exit (exit_status);
 }
 
-char *
-unit(size_t size)
+char * unit (size_t size)
 {
     if ( size < 1024 )
         return "B";
@@ -166,8 +159,7 @@ unit(size_t size)
     return "GiB";
 }
 
-void *
-thread_progress(void *arg)
+void * thread_progress (void *arg)
 {
     struct xdccGetConfig *cfg = arg;
 
@@ -279,8 +271,7 @@ static const struct option long_options[] = {
     {NULL,             0,           0,  0 },
 };
 
-int
-main(int argc, char **argv)
+int main (int argc, char **argv)
 {
     struct xdccGetConfig cfg = {
 	    .mutex = PTHREAD_MUTEX_INITIALIZER,
