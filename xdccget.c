@@ -49,7 +49,7 @@ event_join(irc_session_t *session, const char *event, const char *origin, const 
     struct xdccGetConfig *state = irc_get_ctx (session);
 
     char xdcc_command[24];
-    snprintf (xdcc_command, sizeof (xdcc_command), "XDCC SEND #%u", state->pack);
+    snprintf (xdcc_command, sizeof xdcc_command, "XDCC SEND #%u", state->pack);
 
     if ( irc_cmd_msg (session, state->botNick, xdcc_command) )
     {
@@ -139,7 +139,7 @@ event_dcc_send_req(irc_session_t *session, const char *nick, const char *addr, c
 
     pthread_mutex_lock (&cfg->mutex);
     cfg->fd = fd;
-    strlcpy (&cfg->filename[0], filename, sizeof (cfg->filename));
+    strlcpy (&cfg->filename[0], filename, sizeof cfg->filename);
     cfg->filesize = size;
     pthread_mutex_unlock (&cfg->mutex);
     pthread_cond_signal (&cfg->cv);
@@ -219,7 +219,7 @@ thread_progress(void *arg)
 	int eta_minutes = (eta - eta_hours * 3600) / 60;
 	int eta_seconds = (eta - eta_hours * 3600) % 60;
 
-	stat_len = snprintf (stat_buffer, sizeof (stat_buffer), "%d%%   %.1f %s / %.1f %s   %.1f %s/s   %02d:%02d:%02d",
+	stat_len = snprintf (stat_buffer, sizeof stat_buffer, "%d%%   %.1f %s / %.1f %s   %.1f %s/s   %02d:%02d:%02d",
 			    progress_percentage, humanscaled_this_size, unit (this_size), humanscaled_total_size,
 			    unit (total_size), humanscaled_size_delta, unit (size_delta), eta_hours,
 			    eta_minutes, eta_seconds);
@@ -227,16 +227,16 @@ thread_progress(void *arg)
 	if ( name_len + stat_len + 1 > ws.ws_col )
 	{
             int limit = ws.ws_col - stat_len - 4;
-	    snprintf (line_buffer, sizeof (line_buffer), "%.*s... ", limit, cfg->filename);
+	    snprintf (line_buffer, sizeof line_buffer, "%.*s... ", limit, cfg->filename);
         }
 	else
 	{
             int limit = ws.ws_col - stat_len - name_len;
-            snprintf (line_buffer, sizeof (line_buffer), "%s%.*s", cfg->filename, limit,
+            snprintf (line_buffer, sizeof line_buffer, "%s%.*s", cfg->filename, limit,
 	    "                                                                                                     ");
 	}
 
-	strlcat (line_buffer, stat_buffer, sizeof (line_buffer));
+	strlcat (line_buffer, stat_buffer, sizeof line_buffer);
 	printf (ANSI_CURSOR_HIDE ANSI_TEXT_INVERT "\r%.*s" ANSI_TEXT_NORMAL "%s", percentage_width, line_buffer, line_buffer + percentage_width);
 	fflush (stdout);
     }
@@ -250,19 +250,19 @@ thread_progress(void *arg)
     double humanscaled_avg_throughput = avg_throughput;
     while ( humanscaled_avg_throughput > 1024 ) humanscaled_avg_throughput /= 1024;
 
-    stat_len = snprintf (stat_buffer, sizeof (stat_buffer), "100%%   %.1f %s   %.1f %s/s   %02d:%02d:%02d",
+    stat_len = snprintf (stat_buffer, sizeof stat_buffer, "100%%   %.1f %s   %.1f %s/s   %02d:%02d:%02d",
 			humanscaled_total_size, unit (total_size), humanscaled_avg_throughput, unit (avg_throughput),
 			ttd_hours, ttd_minutes, ttd_seconds);
 
     if ( name_len + stat_len + 1 > ws.ws_col )
     {
 	int limit = ws.ws_col - stat_len - 4;
-	snprintf (line_buffer, sizeof (line_buffer), "%.*s... ", limit, cfg->filename);
+	snprintf (line_buffer, sizeof line_buffer, "%.*s... ", limit, cfg->filename);
     }
     else
     {
 	int limit = ws.ws_col - stat_len - name_len;
-	snprintf (line_buffer, sizeof (line_buffer), "%s%.*s", cfg->filename, limit,
+	snprintf (line_buffer, sizeof line_buffer, "%s%.*s", cfg->filename, limit,
 	"                                                                                                     ");
     }
 
@@ -320,7 +320,7 @@ main(int argc, char **argv)
     assert (0 == regex_errno);
 
     regmatch_t matches[6];
-    if ( (regex_errno = regexec (&re, argv[0], sizeof (matches) / sizeof (matches[0]), matches, 0)) )
+    if ( (regex_errno = regexec (&re, argv[0], sizeof matches / sizeof matches[0], matches, 0)) )
     {
 	assert (REG_NOMATCH == regex_errno);
         usage (EXIT_FAILURE);
@@ -351,7 +351,7 @@ main(int argc, char **argv)
     char *sep = cfg.channelsToJoin[0];
     while ( (sep = strchr (sep, ',')) )
     {
-	if ( cfg.numChannels >= sizeof (cfg.channelsToJoin) / sizeof (cfg.channelsToJoin[0]) ) break;
+	if ( cfg.numChannels >= sizeof cfg.channelsToJoin / sizeof cfg.channelsToJoin[0] ) break;
 	*sep = '\0';
 	cfg.channelsToJoin[cfg.numChannels++] = ++sep;
     }
@@ -372,7 +372,7 @@ main(int argc, char **argv)
     irc_set_ctx (session, &cfg);
 
     char nick[20];
-    snprintf (nick, sizeof (nick), "xdccget[%d]", getpid());
+    snprintf (nick, sizeof nick, "xdccget[%d]", getpid());
 
     if ( irc_connect (session, cfg.host, cfg.port, 0, nick, 0, 0) )
     {
