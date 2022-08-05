@@ -51,10 +51,10 @@ jobs:
     - name: Install dependencies
       run: pkg_add meson
     - name: Checkout repository
-      run: git clone --depth 1 https://github.com/mario-campos/xdccget.git
+      run: git clone --depth 1 https://github.com/mario-campos/xget.git
     - name: build
       run: |
-        meson setup build xdccget
+        meson setup build xget
         ninja -C build
 
   freebsd:
@@ -67,8 +67,8 @@ jobs:
     - name: Install dependencies
       run: pkg install -y pkgconf openssl meson
     - name: Checkout repository
-      run: git clone --depth 1 https://github.com/mario-campos/xdccget.git
+      run: git clone --depth 1 https://github.com/mario-campos/xget.git
     - name: build
       run: |
-        meson setup build xdccget
+        meson setup build xget
         ninja -C build

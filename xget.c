@@ -17,7 +17,7 @@
 #include <fcntl.h>
 
 #include "libircclient/include/libircclient.h"
-#include "xdccget.h"
+#include "xget.h"
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
 
@@ -144,7 +144,7 @@ void event_dcc_send_req (irc_session_t *session, const char *nick, const char *a
 
 void usage (int exit_status)
 {
-    fputs ("usage: xdccget [-A|--no-acknowledge] <uri> <nick> send <pack>\n", stderr);
+    fputs ("usage: xget [-A|--no-acknowledge] <uri> <nick> send <pack>\n", stderr);
     exit (exit_status);
 }
 
@@ -289,7 +289,7 @@ int main (int argc, char **argv)
             case 'V': {
                 unsigned int major, minor;
                 irc_get_version (&major, &minor);
-                printf ("xdccget-0.0.0\nlibircclient-%u.%02u\n", major, minor);
+                printf ("xget-0.0.0\nlibircclient-%u.%02u\n", major, minor);
                 return EXIT_SUCCESS;
             }
             case 'h':
@@ -363,7 +363,7 @@ int main (int argc, char **argv)
     irc_set_ctx (session, &cfg);
 
     char nick[20];
-    snprintf (nick, sizeof nick, "xdccget[%d]", getpid());
+    snprintf (nick, sizeof nick, "xget[%d]", getpid());
 
     if ( irc_connect (session, cfg.host, cfg.port, 0, nick, 0, 0) )
     {

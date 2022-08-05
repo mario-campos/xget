@@ -1,4 +1,4 @@
-project('xdccget', 'c')
+project('xget', 'c')
 
 config = configuration_data({
   '_FILE_OFFSET_BITS' : 64
@@ -12,4 +12,4 @@ else
 endif
 
 configure_file(output : 'config.h', configuration : config)
-executable('xdccget', ['xdccget.c', 'libircclient/src/libircclient.c'], dependencies : dependencies)
+executable('xget', ['xget.c', 'libircclient/src/libircclient.c'], dependencies : dependencies)

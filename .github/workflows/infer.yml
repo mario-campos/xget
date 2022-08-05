@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: brew install meson infer
 
-      - name: Build xdccget
+      - name: Build xget
         run: |
           meson setup build
           ninja -C build

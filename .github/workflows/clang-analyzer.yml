@@ -40,7 +40,7 @@ jobs:
 
     - name: Run clang-tidy
       run: |
-        clang-tidy -p build --checks 'clang-analyzer-*' xdccget.c -- -D_FILE_OFFSET_BITS=64 $(pkg-config --cflags libbsd-overlay) \
+        clang-tidy -p build --checks 'clang-analyzer-*' xget.c -- -D_FILE_OFFSET_BITS=64 $(pkg-config --cflags libbsd-overlay) \
         | "$RUNNER_TEMP/clang-tidy-sarif" \
         | jq ".runs[].results[].locations[].physicalLocation.artifactLocation.uri |= sub(\"$GITHUB_WORKSPACE/\"; \"\")" \
         > clang-results.sarif

@@ -1,5 +1,5 @@
-#ifndef XDCCGET_H
-#define XDCCGET_H
+#ifndef XGET_H
+#define XGET_H
 
 #include <limits.h>
 #include <stdbool.h>
@@ -50,4 +50,4 @@ struct xdccGetConfig
 	pthread_cond_t cv;
 };
 
-#endif //XDCCGET_H
+#endif //XGET_H

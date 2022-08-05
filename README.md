@@ -1,35 +1,35 @@
-# xdccget
+# xget
 A minimal, secure, command-line tool for interfacing with XDCC senders.
 
 ## Usage
 ```
-usage: xdccget [-A|--no-acknowledge] <uri> <nick> send <pack>
+usage: xget [-A|--no-acknowledge] <uri> <nick> send <pack>
 ```
 
-In its most basic form, xdccget accepts a number of arguments: an IRC URI, which denotes the hostname, scheme, port number, and IRC channels to join; the XDCC-sending nick name; `send`, the XDCC command; and the pack number to request.
+In its most basic form, xget accepts a number of arguments: an IRC URI, which denotes the hostname, scheme, port number, and IRC channels to join; the XDCC-sending nick name; `send`, the XDCC command; and the pack number to request.
 
 The URI format is `irc://HOSTNAME[:PORT]/[#]CHANNEL[,[#]CHANNEL...]`. If the port number is not specified, the port number TCP/6667 will be used. The URI may contain one or more IRC channels&mdash;optionally prefixed with an octothorpe (`#`)&mdash;each of which will be joined.
 
-The `-A`, `--no-acknowledge` flag may be used to suppress xdccget from returning file offsets as acknowledgements. Although it is DCC protocol to send these acknowledgements, many DCC senders don't require them&mdash;some will even abort the DCC transfer if too many acknowledgements are sent.
+The `-A`, `--no-acknowledge` flag may be used to suppress xget from returning file offsets as acknowledgements. Although it is DCC protocol to send these acknowledgements, many DCC senders don't require them&mdash;some will even abort the DCC transfer if too many acknowledgements are sent.
 
 ### Examples
 
 Request pack #34 from nick _super-duper-bot_ with `XDCC SEND` on the IRC network irc.sampel.net, after joining the IRC channel _#best-channel_.
 
 ``` 
-xdccget irc://irc.sampel.net/#best-channel super-duper-bot send 34
+xget irc://irc.sampel.net/#best-channel super-duper-bot send 34
 ``` 
 
 Request pack #34 from nick _super-duper-bot_ with `XDCC SEND` on the IRC network irc.sampel.net, connected via port TCP/1337, after joining the IRC channel _#best-channel_.
 
 ``` 
-xdccget irc://irc.sampel.net:1337/#best-channel super-duper-bot send 34
+xget irc://irc.sampel.net:1337/#best-channel super-duper-bot send 34
 ```
 
 Request pack #34 from nick _super-duper-bot_ with `XDCC SEND` on the IRC network irc.sampel.net, after joining the IRC channels _#best-channel_ and _#best-chat-channel_.
 
 ``` 
-xdccget irc://irc.sampel.net/#best-channel,#best-chat-channel super-duper-bot send 34
+xget irc://irc.sampel.net/#best-channel,#best-chat-channel super-duper-bot send 34
 ``` 
 
 #### Supported Operating Systems:
