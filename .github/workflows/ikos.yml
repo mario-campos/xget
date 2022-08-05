@@ -24,7 +24,7 @@ jobs:
       run: apt-get install -qq libbsd-dev
       
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       
     - name: Run IKOS
       run: ikos -D_FILE_OFFSET_BITS=64 -DLIBBSD_OVERLAY -I/usr/include/bsd xget.c
