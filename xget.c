@@ -119,8 +119,7 @@ void event_dcc_send_req (irc_session_t *session, const char *nick, const char *a
     }
 
     // The file must be allocated to its final size in order for the mmap(2) below to succeed.
-    lseek (fd, size - 1, SEEK_SET);
-    write (fd, "", 1);
+    ftruncate (fd, size);
 
     void *maddr = mmap (NULL, size, PROT_WRITE, MAP_SHARED, fd, 0);
     if ( maddr == MAP_FAILED )
