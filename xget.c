@@ -263,18 +263,18 @@ void * thread_progress (void *arg)
     return NULL;
 }
 
-static const struct option long_options[] = {
-    {"no-acknowledge", no_argument, 0, 'A'},
-    {"version",        no_argument, 0, 'V'},
-    {"help",           no_argument, 0, 'h'},
-    {NULL,             0,           0,  0 },
-};
-
 int main (int argc, char **argv)
 {
     struct xdccGetConfig cfg = {
 	    .mutex = PTHREAD_MUTEX_INITIALIZER,
 	    .cv = PTHREAD_COND_INITIALIZER,
+    };
+
+    const struct option long_options[] = {
+	{"no-acknowledge", no_argument, 0, 'A'},
+	{"version",        no_argument, 0, 'V'},
+	{"help",           no_argument, 0, 'h'},
+	{NULL,             0,           0,  0 },
     };
 
     int opt;
