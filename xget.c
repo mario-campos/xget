@@ -15,6 +15,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <libgen.h>
 
 #include "libircclient/include/libircclient.h"
 #include "xget.h"
@@ -109,6 +110,16 @@ void callback_dcc_close (irc_session_t *session, irc_dcc_t id, int status, void 
 void event_dcc_send_req (irc_session_t *session, const char *nick, const char *addr, const char *filename, irc_dcc_size_t size, irc_dcc_t dccid)
 {
     assert (session);
+
+    // Check that the file's name is only a file name and not a path. DCC senders
+    // should not be sending file paths as file names, and we should not be opening
+    // untrusted files outside the current working directory.
+    if ( strcmp (basename((char *)filename), filename) )
+    {
+	warn ("DCC sender sent a file path as the name: '%s'", filename);
+	irc_cmd_quit (session, NULL);
+	return;
+    }
 
     int fd = open (filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
     if ( fd < 0 )
