@@ -125,7 +125,7 @@ void event_dcc_send_req (irc_session_t *session, const char *nick, const char *a
 	}
 	else
 	{
-	    strlcpy (&cfg->filename[0], filename, sizeof cfg->filename);
+	    cfg->filename = strdup(filename);
 	}
     }
 
@@ -301,7 +301,7 @@ int main (int argc, char **argv)
 	{
 	    case 'O':
 		cfg.has_opt_output_document = true;
-		strlcpy (cfg.filename, optarg, sizeof cfg.filename);
+		cfg.filename = optarg;
 		break;
 	    case 'A':
 		cfg.no_ack = true;
