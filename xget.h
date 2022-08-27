@@ -1,7 +1,6 @@
 #ifndef XGET_H
 #define XGET_H
 
-#include <limits.h>
 #include <stdbool.h>
 #include <pthread.h>
 
@@ -25,7 +24,7 @@ struct xdccGetConfig
 	uint32_t numChannels;
 
 	// The name of the DCC file.
-	char filename[NAME_MAX];
+	char *filename;
 
 	// The size of the DCC file to be sent.
 	irc_dcc_size_t filesize;
