@@ -110,18 +110,26 @@ void callback_dcc_close (irc_session_t *session, irc_dcc_t id, int status, void 
 void event_dcc_send_req (irc_session_t *session, const char *nick, const char *addr, const char *filename, irc_dcc_size_t size, irc_dcc_t dccid)
 {
     assert (session);
+    struct xdccGetConfig *cfg = irc_get_ctx (session);
 
-    // Check that the file's name is only a file name and not a path. DCC senders
-    // should not be sending file paths as file names, and we should not be opening
-    // untrusted files outside the current working directory.
-    if ( strcmp (basename((char *)filename), filename) )
+    if ( !cfg->has_opt_output_document )
     {
-	warn ("DCC sender sent a file path as the name: '%s'", filename);
-	irc_cmd_quit (session, NULL);
-	return;
+	// Check that the file's name is only a file name and not a path. DCC senders
+	// should not be sending file paths as file names, and we should not be opening
+	// untrusted files outside the current working directory.
+	if ( strcmp (basename((char *)filename), filename) )
+	{
+	    warn ("DCC sender sent a file path as the name: '%s'", filename);
+	    irc_cmd_quit (session, NULL);
+	    return;
+	}
+	else
+	{
+	    strlcpy (&cfg->filename[0], filename, sizeof cfg->filename);
+	}
     }
 
-    int fd = open (filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
+    int fd = open (cfg->filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
     if ( fd < 0 )
     {
         warn ("open");
@@ -140,11 +148,8 @@ void event_dcc_send_req (irc_session_t *session, const char *nick, const char *a
 	return;
     }
 
-    struct xdccGetConfig *cfg = irc_get_ctx (session);
-
     pthread_mutex_lock (&cfg->mutex);
     cfg->fd = fd;
-    strlcpy (&cfg->filename[0], filename, sizeof cfg->filename);
     cfg->filesize = size;
     pthread_mutex_unlock (&cfg->mutex);
     pthread_cond_signal (&cfg->cv);
@@ -154,7 +159,7 @@ void event_dcc_send_req (irc_session_t *session, const char *nick, const char *a
 
 void usage (int exit_status)
 {
-    fputs ("usage: xget [-A|--no-acknowledge] <uri> <nick> send <pack>\n", stderr);
+    fputs ("usage: xget [-A|--no-acknowledge] [-O|--output-document] <uri> <nick> send <pack>\n", stderr);
     exit (exit_status);
 }
 
@@ -282,17 +287,22 @@ int main (int argc, char **argv)
     };
 
     const struct option long_options[] = {
-	{"no-acknowledge", no_argument, 0, 'A'},
-	{"version",        no_argument, 0, 'V'},
-	{"help",           no_argument, 0, 'h'},
-	{NULL,             0,           0,  0 },
+	{"output-document", required_argument, 0, 'O'},
+	{"no-acknowledge",  no_argument,       0, 'A'},
+	{"version",         no_argument,       0, 'V'},
+	{"help",            no_argument,       0, 'h'},
+	{NULL,              0,                 0,  0 },
     };
 
     int opt;
-    while ( (opt = getopt_long (argc, argv, "AVh", long_options, NULL)) != -1 )
+    while ( (opt = getopt_long (argc, argv, "O:AVh", long_options, NULL)) != -1 )
     {
         switch ( opt )
 	{
+	    case 'O':
+		cfg.has_opt_output_document = true;
+		strlcpy (cfg.filename, optarg, sizeof cfg.filename);
+		break;
 	    case 'A':
 		cfg.no_ack = true;
 		break;

@@ -12,6 +12,8 @@ The URI format is `irc://HOSTNAME[:PORT]/[#]CHANNEL[,[#]CHANNEL...]`. If the por
 
 The `-A`, `--no-acknowledge` flag may be used to suppress xget from returning file offsets as acknowledgements. Although it is DCC protocol to send these acknowledgements, many DCC senders don't require them&mdash;some will even abort the DCC transfer if too many acknowledgements are sent.
 
+The `-O`, `--output-document` flag may be used to create the file with a given name, instead of the name provided by the DCC sender. This flag accepts one argument: the new name and/or path of the file to be downloaded.
+
 ### Examples
 
 Request pack #34 from nick _super-duper-bot_ with `XDCC SEND` on the IRC network irc.sampel.net, after joining the IRC channel _#best-channel_.

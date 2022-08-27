@@ -45,6 +45,9 @@ struct xdccGetConfig
 	// True if -A/--no-acknowledge (i.e. whether to send DCC acknowledgements).
 	bool no_ack;
 
+	// True if -O/--output-document.
+	bool has_opt_output_document;
+
 	// Synchronization primitives to safely share this struct between threads.
 	pthread_mutex_t mutex;
 	pthread_cond_t cv;
