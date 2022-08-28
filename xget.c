@@ -148,6 +148,11 @@ void event_dcc_send_req (irc_session_t *session, const char *nick, const char *a
 	return;
     }
 
+    if ( madvise (maddr, size, MADV_SEQUENTIAL) < 0 )
+    {
+	warn ("madvise");
+    }
+
     pthread_mutex_lock (&cfg->mutex);
     cfg->fd = fd;
     cfg->filesize = size;
