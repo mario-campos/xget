@@ -154,7 +154,7 @@ void event_dcc_send_req (irc_session_t *session, const char *nick, const char *a
     pthread_mutex_unlock (&cfg->mutex);
     pthread_cond_signal (&cfg->cv);
 
-    irc_dcc_accept (session, dccid, maddr, callback_dcc_recv_file, callback_dcc_close, !cfg->no_ack);
+    irc_dcc_accept (session, dccid, maddr, callback_dcc_recv_file, callback_dcc_close, !cfg->has_opt_no_acknowledge);
 }
 
 void usage (int exit_status)
@@ -304,7 +304,7 @@ int main (int argc, char **argv)
 		cfg.filename = optarg;
 		break;
 	    case 'A':
-		cfg.no_ack = true;
+		cfg.has_opt_no_acknowledge = true;
 		break;
             case 'V': {
                 unsigned int major, minor;

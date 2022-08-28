@@ -41,10 +41,7 @@ struct xdccGetConfig
 	// True if the URI begins with 'ircs://'.
 	bool is_ircs;
 
-	// True if -A/--no-acknowledge (i.e. whether to send DCC acknowledgements).
-	bool no_ack;
-
-	// True if -O/--output-document.
+	bool has_opt_no_acknowledge;
 	bool has_opt_output_document;
 
 	// Synchronization primitives to safely share this struct between threads.

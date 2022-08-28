@@ -10,9 +10,9 @@ In its most basic form, xget accepts a number of arguments: an IRC URI, which de
 
 The URI format is `irc://HOSTNAME[:PORT]/[#]CHANNEL[,[#]CHANNEL...]`. If the port number is not specified, the port number TCP/6667 will be used. The URI may contain one or more IRC channels&mdash;optionally prefixed with an octothorpe (`#`)&mdash;each of which will be joined.
 
-The `-A`, `--no-acknowledge` flag may be used to suppress xget from returning file offsets as acknowledgements. Although it is DCC protocol to send these acknowledgements, many DCC senders don't require them&mdash;some will even abort the DCC transfer if too many acknowledgements are sent.
+The `-A`, `--no-acknowledge` option may be used to suppress xget from returning file offsets as acknowledgements. Although it is DCC protocol to send these acknowledgements, many DCC senders don't require them&mdash;some will even abort the DCC transfer if too many acknowledgements are sent.
 
-The `-O`, `--output-document` flag may be used to create the file with a given name, instead of the name provided by the DCC sender. This flag accepts one argument: the new name and/or path of the file to be downloaded.
+The `-O`, `--output-document` option may be used to create the file with a given name, instead of the name provided by the DCC sender. This option requires one argument: the new name and/or path of the file to be downloaded.
 
 ### Examples
 
