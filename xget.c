@@ -119,7 +119,7 @@ void event_dcc_send_req (irc_session_t *session, const char *nick, const char *a
 	// untrusted files outside the current working directory.
 	if ( strcmp (basename((char *)filename), filename) )
 	{
-	    warn ("DCC sender sent a file path as the name: '%s'", filename);
+	    warnx ("DCC sender sent a file path as the name: '%s'", filename);
 	    irc_cmd_quit (session, NULL);
 	    return;
 	}
