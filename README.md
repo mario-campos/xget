@@ -48,14 +48,6 @@ meson setup build
 ninja -C build
 ```
 
-### GNU/Linux
-
-You'll need the compile-time dependency _libbsd_ (or _libbsd-dev_). On Ubuntu and Debian, you can install this dependency with:
-
-```shell
-sudo apt install libbsd-dev
-```
-
 ---
 
 [![C/C++ CI](https://github.com/mario-campos/xdccget/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mario-campos/xdccget/actions/workflows/c-cpp.yml)

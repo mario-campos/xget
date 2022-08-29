@@ -248,7 +248,7 @@ void * thread_progress (void *arg)
 	    "                                                                                                     ");
 	}
 
-	strlcat (line_buffer, stat_buffer, sizeof line_buffer);
+	strncat (line_buffer, stat_buffer, sizeof line_buffer - strlen (line_buffer) - 1);
 	printf (ANSI_CURSOR_HIDE ANSI_TEXT_INVERT "\r%.*s" ANSI_TEXT_NORMAL "%s", percentage_width, line_buffer, line_buffer + percentage_width);
 	fflush (stdout);
     }
@@ -373,7 +373,7 @@ int main (int argc, char **argv)
     }
 
     cfg.botNick = argv[1];
-    cfg.pack = strtonum (argv[3], 1, UINT32_MAX, NULL);
+    cfg.pack = strtoul (argv[3], NULL, 10);
     if ( errno )
 	errx (EXIT_FAILURE, "invalid pack number: %s", argv[3]);
 

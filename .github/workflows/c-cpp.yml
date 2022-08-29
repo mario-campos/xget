@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install dependencies
-      run: sudo apt install libbsd-dev meson
+      run: sudo apt install meson
     - name: Checkout repository
       uses: actions/checkout@v3
     - name: build
