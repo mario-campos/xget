@@ -3,7 +3,7 @@ A minimal, secure, command-line tool for interfacing with XDCC senders.
 
 ## Usage
 ```
-usage: xget [-A|--no-acknowledge] <uri> <nick> send <pack>
+usage: xget [-A|--no-acknowledge] [-O|--output-document] <uri> <nick> send <pack>
 ```
 
 In its most basic form, xget accepts a number of arguments: an IRC URI, which denotes the hostname, scheme, port number, and IRC channels to join; the XDCC-sending nick name; `send`, the XDCC command; and the pack number to request.
