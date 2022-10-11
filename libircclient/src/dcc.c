@@ -14,7 +14,6 @@
 #include <inttypes.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
-#include <sys/socket.h>
 
 static irc_dcc_session_t * libirc_find_dcc_session (irc_session_t * session, irc_dcc_t dccid, int lock_list)
 {
@@ -578,19 +577,7 @@ int irc_dcc_read (irc_session_t * session, irc_dcc_t dccid, char * buffer, size_
 	if ( !dcc )
 		return -LIBIRC_ERR_INVAL;
 
-	size_t recv_limit;
-
-	// Unfortunately, we cannot simply pass `capacity` to recv(2), since very large values may result in EINVAL.
-	if ( capacity > dcc->sock_rcvbuf_size )
-	{
-		recv_limit = dcc->sock_rcvbuf_size;
-	}
-	else
-	{
-		recv_limit = capacity;
-	}
-
-	int length = recv (dcc->sock, buffer, recv_limit, 0);
+	int length = socket_recv (&dcc->sock, buffer, capacity);
 
 	if ( length < 0 )
 	{
