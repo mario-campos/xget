@@ -12,6 +12,11 @@ nav {
   padding: 5px;
 }
 
+nav.a {
+  color: lightgrey;
+  font-family: sans-serif;
+}
+
 h1 {
   color: lightgrey;
   margin: 10px;
@@ -22,20 +27,28 @@ h5 {
   color: lightgrey;
   padding: 10px;
   font-family: sans-serif;
+  font-style: italic;
 }
     </style>
   </head>
 
   <body>
     <header>
-      <nav><a href="/">Link Me</a></nav>
+      <nav>
+        <a href="https://github.com/mario-campos/xget/releases">Download</a>
+        <a href="https://github.com/mario-campos/xget">GitHub</a>
+      </nav>
       <h1>xget</h1>
       <h5>A minimal, secure, command-line tool for interfacing with XDCC senders.</h5>
     </header>
     
     <main>
       <section>
-        
+        <h2>Examples</h2>
+        <p>Request pack #34 from nick "super-duper-bot" with XDCC SEND on the IRC network irc.sampel.net, after joining the IRC channel #best-channel.</p>
+        <p><pre>xget irc://irc.sampel.net/#best-channel super-duper-bot send 34</pre></p>
+        <p>Request pack #34 from nick "super-duper-bot" with XDCC SEND on the IRC network irc.sampel.net, connected via port TCP/1337, after joining the IRC channel #best-channel.</p>
+        <p><pre>xget irc://irc.sampel.net:1337/#best-channel super-duper-bot send 34</pre></p>
       </section>
     </main>
   </body>
