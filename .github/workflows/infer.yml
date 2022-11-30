@@ -37,7 +37,7 @@ jobs:
           echo "PATH=$RUNNER_TEMP/infer-linux64-$INFER_VERSION/bin:$PATH" >> $GITHUB_ENV
           
       - name: Verify integrity of infer
-        run: echo "$INFER_DOWNLOAD_SHA256  $INFER_DOWNLOAD_ARCHIVE" | shasum -a 256 -c
+        run: echo "$INFER_DOWNLOAD_SHA256  infer-linux64-$INFER_VERSION.tar.xz" | shasum -a 256 -c
 
       - name: Build xget
         run: |
