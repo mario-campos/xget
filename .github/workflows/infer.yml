@@ -46,4 +46,7 @@ jobs:
           ninja -C build
 
       - name: Run infer
-        run: infer --compilation-database build/compile_commands.json
+        run: infer --compilation-database build/compile_commands.json --output-sarif ../results
+        
+      - name: Upload results to GitHub
+        uses: github/codeql-action/upload-sarif@v2
