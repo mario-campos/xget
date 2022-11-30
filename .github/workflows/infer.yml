@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install meson
-        run: apt install meson
+        run: sudo apt install meson
         
       - name: Install infer
         working-directory: ${{ runner.temp }}
