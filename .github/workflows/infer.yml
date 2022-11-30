@@ -17,17 +17,31 @@ on:
 
 jobs:
   run:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: brew install meson infer
+      - name: Install meson
+        run: apt install meson
+        
+      - name: Install infer
+        working-directory: ${{ runner.temp }}
+        env:
+          INFER_VERSION: v1.1.0
+          INFER_DOWNLOAD_SHA256: 5f5d453814422e93e2a70998d8946b09a2721628ff427f67ff0123dea87461d4
+        run: |
+          INFER_DOWNLOAD=infer-linux64-$INFER_VERSION
+          INFER_DOWNLOAD_ARCHIVE=${INFER_DOWNLOAD}.tar.xz
+          wget https://github.com/facebook/infer/releases/download/$INFER_VERSION/$INFER_DOWNLOAD_ARCHIVE
+          echo "$INFER_DOWNLOAD_SHA256  $INFER_DOWNLOAD_ARCHIVE" | shasum -a 256 -c
+          tar -xf $INFER_DOWNLOAD_ARCHIVE
+          echo "PATH=$RUNNER_TEMP/$INFER_DOWNLOAD:$PATH" >> $GITHUB_ENV
 
       - name: Build xget
         run: |
           meson setup build
           ninja -C build
 
-      - name: Run Infer
+      - name: Run infer
         run: infer --compilation-database build/compile_commands.json
