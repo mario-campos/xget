@@ -15,6 +15,10 @@ on:
     - '**.[ch]'
   workflow_dispatch:
 
+env:
+  INFER_VERSION: v1.1.0
+  INFER_DOWNLOAD_SHA256: 5f5d453814422e93e2a70998d8946b09a2721628ff427f67ff0123dea87461d4
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -27,16 +31,13 @@ jobs:
         
       - name: Install infer
         working-directory: ${{ runner.temp }}
-        env:
-          INFER_VERSION: v1.1.0
-          INFER_DOWNLOAD_SHA256: 5f5d453814422e93e2a70998d8946b09a2721628ff427f67ff0123dea87461d4
         run: |
-          INFER_DOWNLOAD=infer-linux64-$INFER_VERSION
-          INFER_DOWNLOAD_ARCHIVE=${INFER_DOWNLOAD}.tar.xz
-          wget https://github.com/facebook/infer/releases/download/$INFER_VERSION/$INFER_DOWNLOAD_ARCHIVE
-          echo "$INFER_DOWNLOAD_SHA256  $INFER_DOWNLOAD_ARCHIVE" | shasum -a 256 -c
-          tar -xf $INFER_DOWNLOAD_ARCHIVE
-          echo "PATH=$RUNNER_TEMP/$INFER_DOWNLOAD:$PATH" >> $GITHUB_ENV
+          wget --quiet https://github.com/facebook/infer/releases/download/$INFER_VERSION/infer-linux64-${INFER_VERSION}.tar.xz
+          tar -xf infer-linux64-$INFER_VERSION.tar.xz
+          echo "PATH=$RUNNER_TEMP/infer-linux64-$INFER_VERSION/bin:$PATH" >> $GITHUB_ENV
+          
+      - name: Verify integrity of infer
+        run: echo "$INFER_DOWNLOAD_SHA256  $INFER_DOWNLOAD_ARCHIVE" | shasum -a 256 -c
 
       - name: Build xget
         run: |
