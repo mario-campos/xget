@@ -15,6 +15,9 @@ on:
     - '**.[ch]'
   workflow_dispatch:
 
+permissions:
+  security-events: write
+
 env:
   INFER_VERSION: v1.1.0
   INFER_DOWNLOAD_SHA256: 5f5d453814422e93e2a70998d8946b09a2721628ff427f67ff0123dea87461d4
