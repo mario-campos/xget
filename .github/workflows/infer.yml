@@ -23,7 +23,24 @@ env:
   INFER_DOWNLOAD_SHA256: 5f5d453814422e93e2a70998d8946b09a2721628ff427f67ff0123dea87461d4
 
 jobs:
-  run:
+  build-infer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          repository: facebook/infer
+
+      - name: Install infer
+        run: sudo apt install opam
+
+      - name: Build infer
+        run: |
+          ./build-infer.sh clang
+          make
+          ls
+          
+  run-infer:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -31,17 +48,6 @@ jobs:
 
       - name: Install meson
         run: sudo apt install meson
-        
-      - name: Install infer
-        working-directory: ${{ runner.temp }}
-        run: |
-          wget --quiet https://github.com/facebook/infer/releases/download/$INFER_VERSION/infer-linux64-${INFER_VERSION}.tar.xz
-          tar -xf infer-linux64-$INFER_VERSION.tar.xz
-          echo "PATH=$RUNNER_TEMP/infer-linux64-$INFER_VERSION/bin:$PATH" >> $GITHUB_ENV
-          
-      - name: Verify integrity of infer
-        working-directory: ${{ runner.temp }}
-        run: echo "$INFER_DOWNLOAD_SHA256  infer-linux64-$INFER_VERSION.tar.xz" | shasum -a 256 -c
 
       - name: Build xget
         run: |
