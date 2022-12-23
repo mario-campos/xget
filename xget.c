@@ -397,8 +397,13 @@ int main (int argc, char **argv)
         errx (EXIT_FAILURE, "failed to establish TCP connection to %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
     }
 
+    int errnum;
     pthread_t display_thread;
-    pthread_create (&display_thread, NULL, thread_progress, &cfg);
+    if ( (errnum = pthread_create (&display_thread, NULL, thread_progress, &cfg)) )
+    {
+	irc_destroy_session (session);
+	errc (EXIT_FAILURE, errnum, "pthread_create: ");
+    }
 
     if ( irc_run (session) )
     {
@@ -411,5 +416,8 @@ int main (int argc, char **argv)
 
     irc_destroy_session (session);
 
-    pthread_join (display_thread, NULL);
+    if ( (errnum = pthread_join (display_thread, NULL)) )
+    {
+	errc (EXIT_FAILURE, errnum, "pthread_join: ");
+    }
 }
