@@ -195,7 +195,8 @@ void * thread_progress (void *arg)
 
     // Wait until the download size is known.
     pthread_mutex_lock (&cfg->mutex);
-    if ( !cfg->filesize ) pthread_cond_wait (&cfg->cv, &cfg->mutex);
+    // Program defensively against spurious wake-ups.
+    while ( !cfg->filesize ) pthread_cond_wait (&cfg->cv, &cfg->mutex);
     irc_dcc_size_t total_size = cfg->filesize;
     pthread_mutex_unlock (&cfg->mutex);
 
