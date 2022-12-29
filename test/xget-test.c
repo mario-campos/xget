@@ -11,31 +11,36 @@
 
 #define IRC_MSG_MAX_SIZE 512
 
+typedef struct {
+    int socket_fd;
+    struct addrinfo *ai;
+} irc_session_t;
+
 int main(int argc, char *argv[])
 {
     int errnum;
+    irc_session_t session;
 
-    struct addrinfo *res, *res2, hints = {
+    struct addrinfo *res2, hints = {
 	    .ai_family = AF_INET,
 	    .ai_socktype = SOCK_STREAM,
     };
-    if ((errnum = getaddrinfo("127.0.0.1", "6667", &hints, &res)))
+    if ((errnum = getaddrinfo("127.0.0.1", "6667", &hints, &session.ai)))
 	errx(EXIT_FAILURE, "getaddrinfo: %s", gai_strerror(errnum));
 
-    struct sockaddr_in *saddr = (struct sockaddr_in *) res->ai_addr;
+    struct sockaddr_in *saddr = (struct sockaddr_in *) session.ai->ai_addr;
 
-    int sockfd;
-    if ((sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1)
+    if ((session.socket_fd = socket(session.ai->ai_family, session.ai->ai_socktype, session.ai->ai_protocol)) == -1)
 	err(EXIT_FAILURE, "socket");
 
     // bind(2) may fail with "Address already in use." In that case, try to reuse the address if possible.
     int yes = 1;
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
+    setsockopt(session.socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
 
-    if (bind(sockfd, res->ai_addr, res->ai_addrlen))
+    if (bind(session.socket_fd, session.ai->ai_addr, session.ai->ai_addrlen))
 	err(EXIT_FAILURE, "bind");
 
-    if (listen(sockfd, 100))
+    if (listen(session.socket_fd, 100))
 	err(EXIT_FAILURE, "listen");
 
     // Set up DCC listening socket
@@ -84,7 +89,7 @@ int main(int argc, char *argv[])
     int xget_sockfd;
     struct sockaddr_storage conn_sa;
     socklen_t conn_sa_size = sizeof conn_sa;
-    if ((xget_sockfd = accept(sockfd, (struct sockaddr *) &conn_sa, &conn_sa_size)) == -1)
+    if ((xget_sockfd = accept(session.socket_fd, (struct sockaddr *) &conn_sa, &conn_sa_size)) == -1)
     {
 	kill(xget_pid, SIGINT);
 	wait(NULL);
@@ -180,11 +185,11 @@ int main(int argc, char *argv[])
     unlink("file.txt");
 
     freeaddrinfo(res2);
-    freeaddrinfo(res);
+    freeaddrinfo(session.ai);
     close(xget_dcc_sockfd);
     close(dcc_sockfd);
     close(xget_sockfd);
-    close(sockfd);
+    close(session.socket_fd);
 
     int xget_exit;
     wait(&xget_exit);
