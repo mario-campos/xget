@@ -16,6 +16,12 @@ typedef struct {
     struct addrinfo *ai;
 } irc_session_t;
 
+void irc_free(irc_session_t *session)
+{
+    freeaddrinfo(session->ai);
+    close(session->socket_fd);
+}
+
 int main(int argc, char *argv[])
 {
     int errnum;
@@ -185,11 +191,10 @@ int main(int argc, char *argv[])
     unlink("file.txt");
 
     freeaddrinfo(res2);
-    freeaddrinfo(session.ai);
     close(xget_dcc_sockfd);
     close(dcc_sockfd);
     close(xget_sockfd);
-    close(session.socket_fd);
+    irc_free(&session);
 
     int xget_exit;
     wait(&xget_exit);
