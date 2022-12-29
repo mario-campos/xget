@@ -8,4 +8,6 @@ compiler = meson.get_compiler('c')
 
 configure_file(output : 'config.h', configuration : config)
 executable('xget', ['xget.c', 'libircclient/src/libircclient.c'], dependencies : dependency('threads'))
-executable('xget-test', 'test/xget-test.c')
+
+xget_test = executable('xget-test', 'test/xget-test.c')
+test('default', xget_test)

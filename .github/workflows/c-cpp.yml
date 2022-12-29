@@ -28,6 +28,8 @@ jobs:
       run: |
         meson setup build
         ninja -C build
+    - name: test
+      run: meson test -C build
   
   macOS:
     runs-on: macos-latest
@@ -40,6 +42,8 @@ jobs:
       run: |
         meson setup build
         ninja -C build
+    - name: test
+      run: meson test -C build
   
   openbsd:
     runs-on: macos-12
@@ -56,6 +60,8 @@ jobs:
       run: |
         meson setup build xget
         ninja -C build
+    - name: test
+      run: meson test -C build
 
   freebsd:
     runs-on: macos-12
@@ -72,3 +78,5 @@ jobs:
       run: |
         meson setup build xget
         ninja -C build
+    - name: test
+      run: meson test -C build
