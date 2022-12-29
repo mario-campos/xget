@@ -22,6 +22,31 @@ void irc_free(irc_session_t *session)
     close(session->socket_fd);
 }
 
+void irc_serve(irc_session_t *session)
+{
+    struct addrinfo hints = {
+	.ai_family = AF_INET,
+	.ai_socktype = SOCK_STREAM,
+    };
+
+    int errnum;
+    if ((errnum = getaddrinfo("127.0.0.1", "6667", &hints, &session->ai)))
+	errx(EXIT_FAILURE, "getaddrinfo: %s", gai_strerror(errnum));
+
+    if ((session->socket_fd = socket(session->ai->ai_family, session->ai->ai_socktype, session->ai->ai_protocol)) == -1)
+	err(EXIT_FAILURE, "socket");
+
+    // bind(2) may fail with "Address already in use." In that case, try to reuse the address if possible.
+    int yes = 1;
+    setsockopt(session->socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
+
+    if (bind(session->socket_fd, session->ai->ai_addr, session->ai->ai_addrlen))
+	err(EXIT_FAILURE, "bind");
+
+    if (listen(session->socket_fd, 100))
+	err(EXIT_FAILURE, "listen");
+}
+
 int main(int argc, char *argv[])
 {
     int errnum;
@@ -31,23 +56,9 @@ int main(int argc, char *argv[])
 	    .ai_family = AF_INET,
 	    .ai_socktype = SOCK_STREAM,
     };
-    if ((errnum = getaddrinfo("127.0.0.1", "6667", &hints, &session.ai)))
-	errx(EXIT_FAILURE, "getaddrinfo: %s", gai_strerror(errnum));
+    irc_serve(&session);
 
     struct sockaddr_in *saddr = (struct sockaddr_in *) session.ai->ai_addr;
-
-    if ((session.socket_fd = socket(session.ai->ai_family, session.ai->ai_socktype, session.ai->ai_protocol)) == -1)
-	err(EXIT_FAILURE, "socket");
-
-    // bind(2) may fail with "Address already in use." In that case, try to reuse the address if possible.
-    int yes = 1;
-    setsockopt(session.socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
-
-    if (bind(session.socket_fd, session.ai->ai_addr, session.ai->ai_addrlen))
-	err(EXIT_FAILURE, "bind");
-
-    if (listen(session.socket_fd, 100))
-	err(EXIT_FAILURE, "listen");
 
     // Set up DCC listening socket
 
@@ -58,6 +69,7 @@ int main(int argc, char *argv[])
     if ((dcc_sockfd = socket(res2->ai_family, res2->ai_socktype, res2->ai_protocol)) == -1)
 	err(EXIT_FAILURE, "socket");
 
+    int yes = 1;
     setsockopt(dcc_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
 
     if (bind(dcc_sockfd, res2->ai_addr, res2->ai_addrlen))
