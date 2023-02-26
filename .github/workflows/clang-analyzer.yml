@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install dependencies
-      run: sudo apt-get install -qq meson clang-tidy
+      run: sudo apt-get install -qq libbsd-dev meson clang-tidy
     
     - name: Download clang-tidy-sarif
       run: |

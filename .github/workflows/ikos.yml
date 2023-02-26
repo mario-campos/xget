@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/mario-campos/ikos-dockerfile:3.0-5
     steps:
+    - name: Install dependencies
+      run: apt-get install -qq libbsd-dev
+      
     - name: Checkout repository
       uses: actions/checkout@v3
       
