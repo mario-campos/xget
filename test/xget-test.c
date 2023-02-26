@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <strings.h>
+#include <string.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <arpa/inet.h>
 #include <sys/fcntl.h>
+#include <sys/wait.h>
 
 #define IRC_MSG_MAX_SIZE 512
 
