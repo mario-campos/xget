@@ -24,11 +24,11 @@ jobs:
       run: sudo apt install libbsd-dev meson
     - name: Checkout repository
       uses: actions/checkout@v3
-    - name: build
+    - name: Build
       run: |
         meson setup build
         ninja -C build
-    - name: test
+    - name: Test
       run: meson test -C build
     - name: Upload Meson log as an Artifact
       uses: actions/upload-artifact@v3
@@ -43,11 +43,11 @@ jobs:
       run: brew install meson
     - name: Checkout repository
       uses: actions/checkout@v3
-    - name: build
+    - name: Build
       run: |
         meson setup build
         ninja -C build
-    - name: test
+    - name: Test
       run: meson test -C build
   
   openbsd:
@@ -61,11 +61,11 @@ jobs:
       run: pkg_add meson
     - name: Checkout repository
       run: git clone --depth 1 https://github.com/mario-campos/xget.git
-    - name: build
+    - name: Build
       run: |
         meson setup build xget
         ninja -C build
-    - name: test
+    - name: Test
       run: meson test -C build
 
   freebsd:
@@ -79,9 +79,9 @@ jobs:
       run: pkg install -y pkgconf openssl meson
     - name: Checkout repository
       run: git clone --depth 1 https://github.com/mario-campos/xget.git
-    - name: build
+    - name: Build
       run: |
         meson setup build xget
         ninja -C build
-    - name: test
+    - name: Test
       run: meson test -C build
