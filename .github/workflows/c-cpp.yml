@@ -30,6 +30,11 @@ jobs:
         ninja -C build
     - name: test
       run: meson test -C build
+    - name: Upload Meson log as an Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: meson-logs
+        path: build/meson-logs
   
   macOS:
     runs-on: macos-latest
