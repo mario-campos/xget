@@ -14,5 +14,5 @@ endif
 configure_file(output : 'config.h', configuration : config)
 executable('xget', ['xget.c', 'libircclient/src/libircclient.c'], dependencies : dependencies)
 
-xget_test = executable('xget-test', 'test/xget-test.c')
+xget_test = executable('xget-test', 'test/xget-test.c', dependencies: dependencies)
 test('default', xget_test)
