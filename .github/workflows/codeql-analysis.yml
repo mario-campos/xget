@@ -5,13 +5,13 @@ on:
     branches: master
     paths:
     - .github/workflows/codeql-analysis.yml
-    - meson.build
+    - Makefile
     - '**.[ch]'
   pull_request:
     branches: master
     paths:
     - .github/workflows/codeql-analysis.yml
-    - meson.build
+    - Makefile
     - '**.[ch]'
   schedule:
     - cron: '44 18 * * 3'
@@ -22,7 +22,7 @@ permissions:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     strategy:
       fail-fast: false
@@ -30,9 +30,6 @@ jobs:
         language: [ 'cpp' ]
 
     steps:
-    - name: Install dependencies
-      run: sudo apt install libbsd-dev meson
-
     - name: Checkout repository
       uses: actions/checkout@v3
 
@@ -42,10 +39,8 @@ jobs:
         languages: ${{ matrix.language }}
         queries: security-and-quality
 
-    - name: Build
-      run: |
-        meson setup build
-        ninja -C build
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2

@@ -5,13 +5,13 @@ on:
     branches: master
     paths:
     - .github/workflows/clang-analyzer.yml
-    - meson.build
+    - Makefile
     - '**.[ch]'
   pull_request:
     branches: master
     paths:
     - .github/workflows/clang-analyzer.yml
-    - meson.build
+    - Makefile
     - '**.[ch]'
   workflow_dispatch:
 
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install dependencies
-      run: sudo apt-get install -qq libbsd-dev meson clang-tidy
+      run: sudo apt-get install -qq libbsd-dev clang-tidy
     
     - name: Download clang-tidy-sarif
       run: |
@@ -34,9 +34,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Build
-      run: |
-        meson setup build
-        ninja -C build
+      run: make
 
     - name: Run clang-tidy
       run: |

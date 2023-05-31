@@ -29,6 +29,8 @@ xget
 *.i*86
 *.x86_64
 *.hex
+xget
+xget-test
 
 # Debug files
 *.dSYM/

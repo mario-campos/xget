@@ -5,13 +5,13 @@ on:
     branches: master
     paths:
     - .github/workflows/c-cpp.yml
-    - meson.build
+    - Makefile
     - '**.[ch]'
   pull_request:
     branches: master
     paths:
     - .github/workflows/c-cpp.yml
-    - meson.build
+    - Makefile
     - '**.[ch]'
 
 permissions: {}
@@ -21,34 +21,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install dependencies
-      run: sudo apt install libbsd-dev meson
+      run: sudo apt install libbsd-dev
     - name: Checkout repository
       uses: actions/checkout@v3
     - name: Build
-      run: |
-        meson setup build
-        ninja -C build
+      run: make
     - name: Test
-      run: meson test -C build
-    - name: Upload Meson log as an Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: meson-logs
-        path: build/meson-logs
+      run: make check
   
   macOS:
     runs-on: macos-latest
     steps:
-    - name: Install dependencies
-      run: brew install meson
     - name: Checkout repository
       uses: actions/checkout@v3
     - name: Build
-      run: |
-        meson setup build
-        ninja -C build
+      run: make
     - name: Test
-      run: meson test -C build
+      run: make check
   
   openbsd:
     runs-on: macos-12
@@ -57,16 +46,12 @@ jobs:
       uses: mario-campos/emulate@v1
       with:
         operating-system: openbsd-latest
-    - name: Install dependencies
-      run: pkg_add meson
     - name: Checkout repository
       run: git clone --depth 1 https://github.com/mario-campos/xget.git
     - name: Build
-      run: |
-        meson setup build xget
-        ninja -C build
+      run: make
     - name: Test
-      run: meson test -C build
+      run: make check
 
   freebsd:
     runs-on: macos-12
@@ -76,12 +61,10 @@ jobs:
       with:
         operating-system: freebsd-latest
     - name: Install dependencies
-      run: pkg install -y pkgconf openssl meson
+      run: pkg install -y pkgconf openssl
     - name: Checkout repository
       run: git clone --depth 1 https://github.com/mario-campos/xget.git
     - name: Build
-      run: |
-        meson setup build xget
-        ninja -C build
+      run: make
     - name: Test
-      run: meson test -C build
+      run: make check

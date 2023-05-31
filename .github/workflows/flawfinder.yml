@@ -5,13 +5,13 @@ on:
     branches: master
     paths:
     - .github/workflows/flawfinder.yml
-    - meson.build
+    - Makefile
     - '**.[ch]'
   pull_request:
     branches: master
     paths:
     - .github/workflows/flawfinder.yml
-    - meson.build
+    - Makefile
     - '**.[ch]'
   workflow_dispatch:
 
