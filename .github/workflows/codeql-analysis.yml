@@ -22,7 +22,7 @@ permissions:
 jobs:
   analyze:
     name: Analyze
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false

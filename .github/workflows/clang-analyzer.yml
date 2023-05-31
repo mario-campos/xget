@@ -23,8 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install dependencies
-      run: sudo apt-get install -qq libbsd-dev clang-tidy
-    
+      run: sudo apt-get install -qq clang-tidy
+
     - name: Download clang-tidy-sarif
       run: |
         curl -sSL https://github.com/psastras/sarif-rs/releases/download/clang-tidy-sarif-latest/clang-tidy-sarif-x86_64-unknown-linux-gnu -o "$RUNNER_TEMP/clang-tidy-sarif"
@@ -42,7 +42,7 @@ jobs:
         | "$RUNNER_TEMP/clang-tidy-sarif" \
         | jq ".runs[].results[].locations[].physicalLocation.artifactLocation.uri |= sub(\"$GITHUB_WORKSPACE/\"; \"\")" \
         > clang-results.sarif
-  
+
     - name: Upload SARIF results
       uses: github/codeql-action/upload-sarif@v2
       with:

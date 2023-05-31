@@ -12,20 +12,15 @@
 #include <errno.h>
 #include <getopt.h>
 #include <pthread.h>
-#include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <libgen.h>
 
 #include "libircclient/include/libircclient.h"
+#include "log.c/src/log.h"
 #include "xget.h"
 
 #define IRC_DCC_SIZE_T_FORMAT PRIu64
-
-#define ANSI_TEXT_INVERT "\x1b[7m"
-#define ANSI_TEXT_NORMAL "\x1b[m"
-#define ANSI_CURSOR_SHOW "\x1b[?25h"
-#define ANSI_CURSOR_HIDE "\x1b[?25l"
 
 /*
  * Match Groups:
@@ -65,8 +60,23 @@ void event_connect (irc_session_t *session, const char *event, const char *origi
     struct xdccGetConfig *state = irc_get_ctx (session);
     for ( uint32_t i = 0; i < state->numChannels; i++ )
     {
+	log_info("Joining IRC channel '%s'", state->channelsToJoin[i]);
         irc_cmd_join (session, state->channelsToJoin[i], 0);
     }
+}
+
+void event_kick (irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
+{
+    assert (session);
+
+    log_warn("%s: KICK '%s' from '%s'", origin, params[1], params[0]);
+}
+
+void event_notice (irc_session_t *session, const char *event, const char *origin, const char **params, unsigned int count)
+{
+    assert (session);
+
+    log_info("%s: NOTICE: %s", origin, params[0], params[1]);
 }
 
 void callback_dcc_recv_file (irc_session_t *session, irc_dcc_t id, int status, void *addr)
@@ -75,6 +85,8 @@ void callback_dcc_recv_file (irc_session_t *session, irc_dcc_t id, int status, v
 
     int nread;
     struct xdccGetConfig *cfg = irc_get_ctx (session);
+    char *buffer = addr + cfg->currsize;
+    size_t capacity = cfg->filesize - cfg->currsize;
 
     if ( status )
     {
@@ -83,11 +95,13 @@ void callback_dcc_recv_file (irc_session_t *session, irc_dcc_t id, int status, v
         return;
     }
 
-    if ( (nread = irc_dcc_read (session, id, (char *)addr + cfg->currsize, cfg->filesize - cfg->currsize)) < 0 )
+    if ( (nread = irc_dcc_read (session, id, buffer, capacity)) < 0 )
     {
 	warnx ("irc_dcc_read: socket read error");
 	return;
     }
+
+    log_trace ("irc_dcc_read(session=%p, dccid=%d, buffer=%p, capacity=%d) = %d", session, id, buffer, capacity, nread);
 
     pthread_mutex_lock (&cfg->mutex);
     cfg->currsize += nread;
@@ -111,6 +125,8 @@ void event_dcc_send_req (irc_session_t *session, const char *nick, const char *a
 {
     assert (session);
     struct xdccGetConfig *cfg = irc_get_ctx (session);
+
+    log_info("%s: DCC SEND '%s' (%d bytes)", nick, filename, size);
 
     if ( !cfg->has_opt_output_document )
     {
@@ -166,123 +182,6 @@ void usage (int exit_status)
 {
     fputs ("usage: xget [-A|--no-acknowledge] [-O|--output-document] <uri> <nick> send <pack>\n", stderr);
     exit (exit_status);
-}
-
-char * unit (size_t size)
-{
-    if ( size < 1024 )
-        return "B";
-    if ( size < 1024 * 1024 )
-        return "KiB";
-    if ( size < 1024 * 1024 * 1024 )
-        return "MiB";
-    return "GiB";
-}
-
-void * thread_progress (void *arg)
-{
-    struct xdccGetConfig *cfg = arg;
-
-    size_t stat_len;
-    char line_buffer[1024], stat_buffer[60];
-
-    // Get a timestamp to calculate the Time To Download (TTD) and average throughput.
-    time_t start_time = time (NULL);
-
-    // Get terminal's dimensions (rows, columns).
-    struct winsize ws;
-    ioctl (STDOUT_FILENO, TIOCGWINSZ, &ws);
-
-    // Wait until the download size is known.
-    pthread_mutex_lock (&cfg->mutex);
-    // Program defensively against spurious wake-ups.
-    while ( !cfg->filesize ) pthread_cond_wait (&cfg->cv, &cfg->mutex);
-    irc_dcc_size_t total_size = cfg->filesize;
-    pthread_mutex_unlock (&cfg->mutex);
-
-    size_t name_len = strlen (cfg->filename);
-
-    double humanscaled_total_size = total_size;
-    while ( humanscaled_total_size > 1024 ) humanscaled_total_size /= 1024;
-
-    irc_dcc_size_t this_size = 0;
-    while ( this_size != total_size )
-    {
-	sleep (1);
-
-	pthread_mutex_lock (&cfg->mutex);
-	irc_dcc_size_t size_delta = cfg->currsize - this_size;
-	this_size = cfg->currsize;
-	pthread_mutex_unlock (&cfg->mutex);
-
-	int progress_percentage = (this_size * 100) / total_size;
-
-	// Translate the progress percentage relative to the terminal's width (in columns).
-	// This percentage will be used for displaying the "progress bar" across the line.
-	int percentage_width = (progress_percentage * ws.ws_col) / 100;
-
-	double humanscaled_this_size = this_size;
-	while ( humanscaled_this_size > 1024 ) humanscaled_this_size /= 1024;
-
-	double humanscaled_size_delta = size_delta;
-	while ( humanscaled_size_delta > 1024 ) humanscaled_size_delta /= 1024;
-
-	int eta = (total_size - this_size) / size_delta;
-	int eta_hours = eta / 3600;
-	int eta_minutes = (eta - eta_hours * 3600) / 60;
-	int eta_seconds = (eta - eta_hours * 3600) % 60;
-
-	stat_len = snprintf (stat_buffer, sizeof stat_buffer, "%d%%   %.1f %s / %.1f %s   %.1f %s/s   %02d:%02d:%02d",
-			    progress_percentage, humanscaled_this_size, unit (this_size), humanscaled_total_size,
-			    unit (total_size), humanscaled_size_delta, unit (size_delta), eta_hours,
-			    eta_minutes, eta_seconds);
-
-	if ( name_len + stat_len + 1 > ws.ws_col )
-	{
-            int limit = ws.ws_col - stat_len - 4;
-	    snprintf (line_buffer, sizeof line_buffer, "%.*s... ", limit, cfg->filename);
-        }
-	else
-	{
-            int limit = ws.ws_col - stat_len - name_len;
-            snprintf (line_buffer, sizeof line_buffer, "%s%.*s", cfg->filename, limit,
-	    "                                                                                                     ");
-	}
-
-	strlcat (line_buffer, stat_buffer, sizeof line_buffer);
-	printf (ANSI_CURSOR_HIDE ANSI_TEXT_INVERT "\r%.*s" ANSI_TEXT_NORMAL "%s", percentage_width, line_buffer, line_buffer + percentage_width);
-	fflush (stdout);
-    }
-
-    time_t ttd = time (NULL) - start_time;
-    int ttd_hours = ttd / 3600;
-    int ttd_minutes = (ttd - ttd_hours * 3600) / 60;
-    int ttd_seconds = (ttd - ttd_hours * 3600) % 60;
-
-    size_t avg_throughput = total_size / ttd;
-    double humanscaled_avg_throughput = avg_throughput;
-    while ( humanscaled_avg_throughput > 1024 ) humanscaled_avg_throughput /= 1024;
-
-    stat_len = snprintf (stat_buffer, sizeof stat_buffer, "100%%   %.1f %s   %.1f %s/s   %02d:%02d:%02d",
-			humanscaled_total_size, unit (total_size), humanscaled_avg_throughput, unit (avg_throughput),
-			ttd_hours, ttd_minutes, ttd_seconds);
-
-    if ( name_len + stat_len + 1 > ws.ws_col )
-    {
-	int limit = ws.ws_col - stat_len - 4;
-	snprintf (line_buffer, sizeof line_buffer, "%.*s... ", limit, cfg->filename);
-    }
-    else
-    {
-	int limit = ws.ws_col - stat_len - name_len;
-	snprintf (line_buffer, sizeof line_buffer, "%s%.*s", cfg->filename, limit,
-	"                                                                                                     ");
-    }
-
-    printf (ANSI_TEXT_NORMAL "\r%s%s\n" ANSI_CURSOR_SHOW, line_buffer, stat_buffer);
-    fflush (stdout);
-
-    return NULL;
 }
 
 int main (int argc, char **argv)
@@ -382,6 +281,8 @@ int main (int argc, char **argv)
     callbacks.event_connect = event_connect;
     callbacks.event_join = event_join;
     callbacks.event_dcc_send_req = event_dcc_send_req;
+    callbacks.event_kick = event_kick;
+    callbacks.event_notice = event_notice;
 
     irc_session_t *session = irc_create_session (&callbacks);
     if ( !session ) errx (EXIT_FAILURE, "failed to create IRC session object");
@@ -397,13 +298,7 @@ int main (int argc, char **argv)
         errx (EXIT_FAILURE, "failed to establish TCP connection to %s:%u: %s", cfg.host, cfg.port, irc_strerror(irc_errno(session)));
     }
 
-    int errnum;
-    pthread_t display_thread;
-    if ( (errnum = pthread_create (&display_thread, NULL, thread_progress, &cfg)) )
-    {
-	irc_destroy_session (session);
-	errc (EXIT_FAILURE, errnum, "pthread_create: ");
-    }
+    log_info("Connected to IRC server %s at port %d", cfg.host, cfg.port);
 
     if ( irc_run (session) )
     {
@@ -415,9 +310,4 @@ int main (int argc, char **argv)
     }
 
     irc_destroy_session (session);
-
-    if ( (errnum = pthread_join (display_thread, NULL)) )
-    {
-	errc (EXIT_FAILURE, errnum, "pthread_join: ");
-    }
 }
